@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HydroCFD - Test Page</title>
+    <title>HydroCFD - My Website</title>
     <style>
         body { 
             font-family: Arial, sans-serif; 
@@ -18,8 +18,8 @@
     </style>
 </head>
 <body>
-    <h1>Welcome to HydroCFD's GitHub Page</h1>
-    <p>This is a test page for GitHub Pages deployment.</p>
-    <p>Check out my projects on <a href="https://github.com/HydroCFD" target="_blank">GitHub</a>.</p>
+    <h1>Welcome to HydroCFD's Website</h1>
+    <p>I am a researcher in fluid mechanics and machine learning.</p>
+    <p>Check out my work on <a href="https://github.com/HydroCFD" target="_blank">GitHub</a>.</p>
 </body>
 </html>
