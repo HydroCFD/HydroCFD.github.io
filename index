@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HydroCFD - Test Page</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            margin: 50px;
+            background-color: #f4f4f4;
+        }
+        h1 { color: #0077cc; }
+        p { color: #333; font-size: 18px; }
+        a { text-decoration: none; color: #0077cc; font-weight: bold; }
+        a:hover { color: #005599; }
+    </style>
+</head>
+<body>
+    <h1>Welcome to HydroCFD's GitHub Page</h1>
+    <p>This is a test page for GitHub Pages deployment.</p>
+    <p>Check out my projects on <a href="https://github.com/HydroCFD" target="_blank">GitHub</a>.</p>
+</body>
+</html>
