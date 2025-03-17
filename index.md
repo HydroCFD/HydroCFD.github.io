@@ -4,7 +4,7 @@ layout: homepage
 
 ## About Me
 
-I am a Ph.D. student at ...
+I am a Ph.D. student at the University of Ottawa, specializing in fluid mechanics, computational fluid dynamics (CFD), and machine learning. My research focuses on turbulent jet flows, desalination discharge, and physics-informed machine learning applications.
 
 ## Research Interests
 
