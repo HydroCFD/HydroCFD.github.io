@@ -25,9 +25,9 @@ author:
   avatar: "profile.png"
   name: "Danial Goodarzi"
   pronouns: # example: "she/her"
-  bio: "Short biography for the left-hand sidebar"
-  location: "Ottawa"
-  employer: "University of Ottawa"
+  bio: "I am a Ph.D. student at the University of Ottawa, specializing in fluid mechanics, computational fluid dynamics (CFD), and machine learning. My research focuses on turbulent jet flows, desalination discharge, and physics-informed machine learning applications."
+  location: "Ottawa, Canada"
+  employer: "Department of Civil Engineering, University of Ottawa"
   uri: # URL
   email: "dgood006@uottawa.ca"
 
