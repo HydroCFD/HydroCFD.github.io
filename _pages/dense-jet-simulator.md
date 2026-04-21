@@ -30,7 +30,7 @@ author_profile: false
   </div>
 
   <div class="jet-canvas-wrap">
-    <canvas id="jet-canvas" width="1000" height="560" aria-label="Dense jet animation"></canvas>
+    <canvas id="jet-canvas" width="1400" height="800" aria-label="Dense jet animation"></canvas>
     <div class="jet-metrics" id="jet-metrics"></div>
   </div>
 </div>
@@ -96,7 +96,7 @@ author_profile: false
     display: block;
     width: 100%;
     height: auto;
-    aspect-ratio: 25 / 14;
+    aspect-ratio: 7 / 4;
     background: linear-gradient(to bottom, #f1f6fb, #dbe8f6);
   }
 
@@ -115,7 +115,7 @@ author_profile: false
 
   @media (min-width: 960px) {
     .jet-app {
-      grid-template-columns: minmax(260px, 320px) 1fr;
+      grid-template-columns: minmax(280px, 360px) 1fr;
       align-items: start;
     }
   }
@@ -145,9 +145,7 @@ author_profile: false
     const resetButton = document.getElementById("reset");
 
     let running = true;
-    let particles = [];
     let lastTime = performance.now();
-    let emissionAccumulator = 0;
 
     const state = {
       angleDeg: Number(controls.angle.value),
@@ -156,6 +154,20 @@ author_profile: false
       crossflow: Number(controls.crossflow.value),
       scale: 120
     };
+
+    const sim = {
+      w: 280,
+      h: 160
+    };
+    const cellW = canvas.width / sim.w;
+    const cellH = canvas.height / sim.h;
+    let density = new Float32Array(sim.w * sim.h);
+    let nextDensity = new Float32Array(sim.w * sim.h);
+    const imgData = ctx.createImageData(sim.w, sim.h);
+    const offscreen = document.createElement("canvas");
+    offscreen.width = sim.w;
+    offscreen.height = sim.h;
+    const offCtx = offscreen.getContext("2d");
 
     function syncLabels() {
       values.angle.textContent = state.angleDeg.toFixed(0);
@@ -181,25 +193,17 @@ author_profile: false
       return { x: canvas.width * 0.08, y: canvas.height * 0.82 };
     }
 
-    function emitParticle() {
+    function nozzleGridPosition() {
       const n = nozzlePosition();
-      const theta = (state.angleDeg * Math.PI) / 180;
-      const spread = (Math.random() - 0.5) * 0.08;
-      const speed = state.speed * (0.9 + Math.random() * 0.22);
-      particles.push({
-        x: n.x,
-        y: n.y,
-        vx: speed * Math.cos(theta + spread),
-        vy: -speed * Math.sin(theta + spread),
-        age: 0,
-        concentration: 1.0,
-        radius: 2.2 + Math.random() * 1.3
-      });
+      return {
+        x: Math.max(1, Math.min(sim.w - 2, Math.floor(n.x / cellW))),
+        y: Math.max(1, Math.min(sim.h - 2, Math.floor(n.y / cellH)))
+      };
     }
 
     function resetFlow() {
-      particles = [];
-      emissionAccumulator = 0;
+      density.fill(0);
+      nextDensity.fill(0);
     }
 
     function drawGrid() {
@@ -218,6 +222,65 @@ author_profile: false
         ctx.lineTo(canvas.width, y);
         ctx.stroke();
       }
+      ctx.restore();
+    }
+
+    function drawAxes() {
+      const origin = nozzlePosition();
+      const xMax = canvas.width - 26;
+      const yTop = 20;
+      const axisPxPerM = 110;
+
+      ctx.save();
+      ctx.strokeStyle = "rgba(20, 34, 52, 0.9)";
+      ctx.fillStyle = "rgba(20, 34, 52, 0.9)";
+      ctx.lineWidth = 1.7;
+      ctx.font = "13px sans-serif";
+
+      // X-axis
+      ctx.beginPath();
+      ctx.moveTo(origin.x, origin.y);
+      ctx.lineTo(xMax, origin.y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(xMax, origin.y);
+      ctx.lineTo(xMax - 10, origin.y - 5);
+      ctx.lineTo(xMax - 10, origin.y + 5);
+      ctx.closePath();
+      ctx.fill();
+
+      // Y-axis
+      ctx.beginPath();
+      ctx.moveTo(origin.x, origin.y);
+      ctx.lineTo(origin.x, yTop);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(origin.x, yTop);
+      ctx.lineTo(origin.x - 5, yTop + 10);
+      ctx.lineTo(origin.x + 5, yTop + 10);
+      ctx.closePath();
+      ctx.fill();
+
+      // X ticks and labels
+      for (let x = origin.x + axisPxPerM, t = 1; x <= xMax - 12; x += axisPxPerM, t++) {
+        ctx.beginPath();
+        ctx.moveTo(x, origin.y - 5);
+        ctx.lineTo(x, origin.y + 5);
+        ctx.stroke();
+        ctx.fillText(String(t), x - 3, origin.y + 20);
+      }
+
+      // Y ticks and labels (positive upward)
+      for (let y = origin.y - axisPxPerM, t = 1; y >= yTop + 14; y -= axisPxPerM, t++) {
+        ctx.beginPath();
+        ctx.moveTo(origin.x - 5, y);
+        ctx.lineTo(origin.x + 5, y);
+        ctx.stroke();
+        ctx.fillText(String(t), origin.x + 10, y + 4);
+      }
+
+      ctx.fillText("x (m)", xMax - 44, origin.y - 10);
+      ctx.fillText("y (m)", origin.x + 10, yTop + 16);
       ctx.restore();
     }
 
@@ -261,36 +324,128 @@ author_profile: false
       ctx.restore();
     }
 
-    function drawParticles() {
-      for (const p of particles) {
-        const alpha = Math.max(0.03, Math.min(0.65, p.concentration * 0.8));
-        const r = 22;
-        const g = 93 + Math.floor(p.concentration * 110);
-        const b = 158 + Math.floor(p.concentration * 68);
-        ctx.fillStyle = "rgba(" + r + "," + g + "," + b + "," + alpha.toFixed(3) + ")";
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fill();
+    function velocityAt(x, y) {
+      const n = nozzlePosition();
+      const dx = x - n.x;
+      const dy = y - n.y;
+      const theta = (state.angleDeg * Math.PI) / 180;
+      const jx = Math.cos(theta);
+      const jy = -Math.sin(theta);
+      const projection = (dx * jx + dy * jy);
+      const plumeSpread = 24 + 0.23 * Math.max(0, projection);
+      const lateral = Math.abs(-dx * jy + dy * jx);
+      const core = Math.exp(-(lateral * lateral) / (2 * plumeSpread * plumeSpread));
+      const decay = Math.exp(-Math.max(0, projection) / 260);
+      const jetMag = state.speed * core * decay * (projection >= -15 ? 1 : 0);
+      const vx = state.crossflow + jetMag * jx;
+      const vy = jetMag * jy + state.buoyancy * 0.7;
+      const shear = 0.05 * Math.sin((y / canvas.height) * Math.PI * 2);
+      return { vx: vx + shear, vy: vy };
+    }
+
+    function bilinearSample(field, x, y) {
+      const x0 = Math.floor(x);
+      const y0 = Math.floor(y);
+      const x1 = x0 + 1;
+      const y1 = y0 + 1;
+      const tx = x - x0;
+      const ty = y - y0;
+      if (x0 < 0 || y0 < 0 || x1 >= sim.w || y1 >= sim.h) {
+        return 0;
+      }
+      const i00 = y0 * sim.w + x0;
+      const i10 = y0 * sim.w + x1;
+      const i01 = y1 * sim.w + x0;
+      const i11 = y1 * sim.w + x1;
+      return (
+        field[i00] * (1 - tx) * (1 - ty) +
+        field[i10] * tx * (1 - ty) +
+        field[i01] * (1 - tx) * ty +
+        field[i11] * tx * ty
+      );
+    }
+
+    function injectSource(dt) {
+      const ng = nozzleGridPosition();
+      const theta = (state.angleDeg * Math.PI) / 180;
+      const jx = Math.cos(theta);
+      const jy = -Math.sin(theta);
+      const strength = (0.8 + 0.7 * state.speed) * dt * 5.2;
+      for (let oy = -5; oy <= 5; oy++) {
+        for (let ox = -5; ox <= 5; ox++) {
+          const gx = ng.x + ox;
+          const gy = ng.y + oy;
+          if (gx < 1 || gy < 1 || gx >= sim.w - 1 || gy >= sim.h - 1) {
+            continue;
+          }
+          const along = ox * jx + oy * jy;
+          const across = Math.abs(-ox * jy + oy * jx);
+          if (along < -2 || across > 4.5) {
+            continue;
+          }
+          const i = gy * sim.w + gx;
+          const added = strength * Math.exp(-(across * across) / 9) * Math.exp(-Math.max(0, along) / 5);
+          density[i] = Math.min(1.0, density[i] + added);
+        }
       }
     }
 
-    function updateParticles(dt) {
-      const mixingRate = 0.32;
-      const radialGrowth = 0.85;
-      const scale = state.scale;
+    function advectDiffuse(dt) {
+      const diff = 0.17 + state.crossflow * 0.08;
+      const sink = 0.03 + state.buoyancy * 0.12;
 
-      for (const p of particles) {
-        p.x += (p.vx + state.crossflow) * dt * scale;
-        p.y += p.vy * dt * scale + 0.5 * state.buoyancy * dt * dt * scale;
-        p.vy += state.buoyancy * dt;
-        p.age += dt;
-        p.radius += radialGrowth * dt;
-        p.concentration *= (1 - mixingRate * dt);
+      for (let y = 1; y < sim.h - 1; y++) {
+        for (let x = 1; x < sim.w - 1; x++) {
+          const px = (x + 0.5) * cellW;
+          const py = (y + 0.5) * cellH;
+          const v = velocityAt(px, py);
+          const backX = x - (v.vx * dt * state.scale) / cellW;
+          const backY = y - (v.vy * dt * state.scale) / cellH;
+          const adv = bilinearSample(density, backX, backY);
+          const i = y * sim.w + x;
+          const lap =
+            density[i - 1] + density[i + 1] +
+            density[i - sim.w] + density[i + sim.w] -
+            4 * density[i];
+          let val = adv + diff * dt * lap;
+          val *= (1 - sink * dt);
+          nextDensity[i] = Math.max(0, Math.min(1, val));
+        }
       }
 
-      particles = particles.filter(function (p) {
-        return p.x > -20 && p.x < canvas.width + 20 && p.y > -20 && p.y < canvas.height + 20 && p.concentration > 0.04;
-      });
+      const tmp = density;
+      density = nextDensity;
+      nextDensity = tmp;
+    }
+
+    function renderDensity() {
+      const px = imgData.data;
+      for (let i = 0; i < density.length; i++) {
+        const d = Math.max(0, Math.min(1, density[i]));
+        const base = i * 4;
+        const r = 10 + Math.floor(40 * d);
+        const g = 76 + Math.floor(110 * d);
+        const b = 140 + Math.floor(95 * d);
+        const a = Math.floor(255 * Math.min(1, d * 1.6));
+        px[base] = r;
+        px[base + 1] = g;
+        px[base + 2] = b;
+        px[base + 3] = a;
+      }
+      offCtx.putImageData(imgData, 0, 0);
+      ctx.save();
+      ctx.imageSmoothingEnabled = true;
+      ctx.globalAlpha = 0.88;
+      ctx.drawImage(offscreen, 0, 0, canvas.width, canvas.height);
+      ctx.restore();
+    }
+
+    function plumeMass() {
+      let sum = 0;
+      for (let i = 0; i < density.length; i++) {
+        sum += density[i];
+      }
+      return sum / density.length;
     }
 
     function plumeHeightEstimate() {
@@ -306,7 +461,7 @@ author_profile: false
       const peakRise = plumeHeightEstimate();
       const travelTime = state.speed > 0 ? (2 * Math.max(0.01, state.speed * Math.sin((state.angleDeg * Math.PI) / 180)) / Math.max(0.01, state.buoyancy)) : 0;
       metricsEl.innerHTML =
-        "Particles: " + particles.length +
+        "Mean concentration: " + plumeMass().toFixed(3) +
         "<br>Estimated rise: " + peakRise.toFixed(2) + " m" +
         "<br>Rise time: " + Math.max(0, travelTime).toFixed(2) + " s";
     }
@@ -316,18 +471,15 @@ author_profile: false
       lastTime = now;
 
       if (running) {
-        emissionAccumulator += 48 * dt;
-        while (emissionAccumulator >= 1) {
-          emitParticle();
-          emissionAccumulator -= 1;
-        }
-        updateParticles(dt);
+        injectSource(dt);
+        advectDiffuse(dt);
       }
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       drawGrid();
+      drawAxes();
       drawCenterline();
-      drawParticles();
+      renderDensity();
       drawNozzle();
       updateMetrics();
       requestAnimationFrame(frame);
