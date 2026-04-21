@@ -124,7 +124,13 @@ author_profile: false
 <script>
   (function () {
     const canvas = document.getElementById("jet-canvas");
+    if (!canvas) {
+      return;
+    }
     const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      return;
+    }
 
     const controls = {
       angle: document.getElementById("angle"),
@@ -155,10 +161,7 @@ author_profile: false
       scale: 120
     };
 
-    const sim = {
-      w: 280,
-      h: 160
-    };
+    const sim = { w: 220, h: 126 };
     const cellW = canvas.width / sim.w;
     const cellH = canvas.height / sim.h;
     let density = new Float32Array(sim.w * sim.h);
@@ -168,6 +171,10 @@ author_profile: false
     offscreen.width = sim.w;
     offscreen.height = sim.h;
     const offCtx = offscreen.getContext("2d");
+    if (!offCtx) {
+      metricsEl.textContent = "Canvas rendering is unavailable in this browser.";
+      return;
+    }
 
     function syncLabels() {
       values.angle.textContent = state.angleDeg.toFixed(0);
@@ -324,13 +331,10 @@ author_profile: false
       ctx.restore();
     }
 
-    function velocityAt(x, y) {
+    function velocityAt(x, y, jx, jy) {
       const n = nozzlePosition();
       const dx = x - n.x;
       const dy = y - n.y;
-      const theta = (state.angleDeg * Math.PI) / 180;
-      const jx = Math.cos(theta);
-      const jy = -Math.sin(theta);
       const projection = (dx * jx + dy * jy);
       const plumeSpread = 24 + 0.23 * Math.max(0, projection);
       const lateral = Math.abs(-dx * jy + dy * jx);
@@ -393,12 +397,15 @@ author_profile: false
     function advectDiffuse(dt) {
       const diff = 0.17 + state.crossflow * 0.08;
       const sink = 0.03 + state.buoyancy * 0.12;
+      const theta = (state.angleDeg * Math.PI) / 180;
+      const jx = Math.cos(theta);
+      const jy = -Math.sin(theta);
 
       for (let y = 1; y < sim.h - 1; y++) {
         for (let x = 1; x < sim.w - 1; x++) {
           const px = (x + 0.5) * cellW;
           const py = (y + 0.5) * cellH;
-          const v = velocityAt(px, py);
+          const v = velocityAt(px, py, jx, jy);
           const backX = x - (v.vx * dt * state.scale) / cellW;
           const backY = y - (v.vy * dt * state.scale) / cellH;
           const adv = bilinearSample(density, backX, backY);
