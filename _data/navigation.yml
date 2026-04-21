@@ -25,6 +25,9 @@ main:
     
   - title: "CV"
     url: /cv/
+
+  - title: "Dense Jet App"
+    url: /dense-jet-simulator/
     
   # - title: "CV"
   #   url: /cv-json/
