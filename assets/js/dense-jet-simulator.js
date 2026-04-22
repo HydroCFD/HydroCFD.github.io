@@ -30,7 +30,7 @@
     const runButton = document.getElementById("toggle-run");
     const resetButton = document.getElementById("reset");
 
-    if (!controls.angle || !controls.speed || !controls.buoyancy || !controls.crossflow || !values.angle || !values.speed || !values.buoyancy || !values.crossflow || !metricsEl || !runButton || !resetButton) {
+    if (!controls.angle || !controls.speed || !controls.buoyancy || !controls.crossflow || !values.angle || !values.speed || !values.buoyancy || !values.crossflow || !runButton || !resetButton) {
       return;
     }
 
@@ -56,12 +56,16 @@
     offscreen.height = sim.h;
     const offCtx = offscreen.getContext("2d");
     if (!offCtx) {
-      metricsEl.textContent = "Canvas rendering is unavailable in this browser.";
+      if (metricsEl) {
+        metricsEl.textContent = "Canvas rendering is unavailable in this browser.";
+      }
       return;
     }
 
     function setError(message) {
-      metricsEl.innerHTML = "Simulator error<br>" + message;
+      if (metricsEl) {
+        metricsEl.innerHTML = "Simulator error<br>" + message;
+      }
     }
 
     function syncLabels() {
@@ -349,6 +353,9 @@
     }
 
     function updateMetrics() {
+      if (!metricsEl) {
+        return;
+      }
       const peakRise = plumeHeightEstimate();
       const riseTime = state.speed > 0
         ? (2 * Math.max(0.01, state.speed * Math.sin((state.angleDeg * Math.PI) / 180)) / Math.max(0.01, state.buoyancy))
