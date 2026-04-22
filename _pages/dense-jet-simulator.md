@@ -38,7 +38,7 @@ author_profile: false
 <style>
   .jet-app {
     display: grid;
-    gap: 1rem;
+    gap: 1.25rem;
   }
 
   .jet-controls {
@@ -90,32 +90,25 @@ author_profile: false
     border-radius: 6px;
     overflow: hidden;
     background: #ffffff;
+    min-height: 420px;
   }
 
   #jet-canvas {
     display: block;
     width: 100%;
-    height: auto;
-    aspect-ratio: 7 / 4;
+    height: 100%;
+    min-height: 420px;
+    aspect-ratio: 8 / 5;
     background: linear-gradient(to bottom, #f1f6fb, #dbe8f6);
   }
 
   .jet-metrics {
-    position: absolute;
-    right: 0.75rem;
-    top: 0.75rem;
-    font-size: 0.84rem;
-    line-height: 1.4;
-    color: #142033;
-    background: rgba(255, 255, 255, 0.88);
-    border: 1px solid rgba(34, 52, 79, 0.25);
-    border-radius: 6px;
-    padding: 0.45rem 0.6rem;
+    display: none;
   }
 
   @media (min-width: 960px) {
     .jet-app {
-      grid-template-columns: minmax(280px, 360px) 1fr;
+      grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
       align-items: start;
     }
   }
