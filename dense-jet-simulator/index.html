@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dense Jet Simulator — Danial Goodarzi</title>
+<meta name="description" content="Interactive browser-based simulator of a negatively buoyant dense jet in ambient crossflow.">
+<link rel="icon" href="../favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<style>
+  .jet-app { display: grid; gap: 1.25rem; }
+  .jet-controls {
+    display: grid; gap: 0.75rem; padding: 0.9rem;
+    border: 1px solid #d2d9e6; border-radius: 8px; background: #f8fafc;
+  }
+  .jet-control { display: grid; gap: 0.3rem; }
+  .jet-control label { margin: 0; color: #243042; font-weight: 600; font-size: 0.95rem; }
+  .jet-control input[type="range"] { width: 100%; accent-color: var(--accent); }
+  .jet-actions { grid-template-columns: repeat(2, minmax(110px, 160px)); }
+  .jet-actions button {
+    border: 1px solid var(--accent); background: var(--accent); color: #ffffff;
+    padding: 0.45rem 0.7rem; border-radius: 6px; font-weight: 600; cursor: pointer;
+    font-family: var(--sans);
+  }
+  .jet-actions button:hover { background: #0b4661; }
+  .jet-canvas-wrap {
+    position: relative; border: 1px solid #c6cedd; border-radius: 8px;
+    overflow: hidden; background: #ffffff; min-height: 420px;
+  }
+  #jet-canvas {
+    display: block; width: 100%; height: 100%; min-height: 420px;
+    aspect-ratio: 8 / 5;
+    background: linear-gradient(to bottom, #f1f6fb, #dbe8f6);
+  }
+  .jet-metrics { display: none; }
+  @media (min-width: 960px) {
+    .jet-app { grid-template-columns: minmax(220px, 280px) minmax(0, 1fr); align-items: start; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a class="site-name" href="../index.html">Danial Goodarzi</a>
+    <nav class="site-nav">
+      <a href="../index.html#research">Research</a>
+      <a href="../publications.html">Publications</a>
+      <a href="../index.html#software">Software</a>
+      <a href="index.html" class="active">Simulator</a>
+      <a href="../index.html#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="page-title">
+    <div class="container">
+      <h1>Dense Jet Simulator</h1>
+      <p class="sub">
+        An interactive demonstration of a negatively buoyant jet discharged into an ambient
+        crossflow. Adjust the release angle, jet speed, negative buoyancy, and crossflow speed to
+        explore how the plume trajectory and spreading respond.
+      </p>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="container">
+      <div class="jet-app" id="jet-app">
+        <div class="jet-controls" role="group" aria-label="Dense jet controls">
+          <div class="jet-control">
+            <label for="angle">Release Angle: <span id="angle-value">60</span> deg</label>
+            <input id="angle" type="range" min="5" max="85" step="1" value="60" />
+          </div>
+          <div class="jet-control">
+            <label for="speed">Jet Speed (m/s): <span id="speed-value">2.0</span></label>
+            <input id="speed" type="range" min="0.5" max="4.0" step="0.1" value="2.0" />
+          </div>
+          <div class="jet-control">
+            <label for="buoyancy">Negative Buoyancy g' (m/s^2): <span id="buoyancy-value">0.25</span></label>
+            <input id="buoyancy" type="range" min="0.05" max="0.60" step="0.01" value="0.25" />
+          </div>
+          <div class="jet-control">
+            <label for="crossflow">Ambient Crossflow (m/s): <span id="crossflow-value">0.35</span></label>
+            <input id="crossflow" type="range" min="0.00" max="1.20" step="0.01" value="0.35" />
+          </div>
+          <div class="jet-control jet-actions">
+            <button id="toggle-run" type="button">Pause</button>
+            <button id="reset" type="button">Reset</button>
+          </div>
+        </div>
+
+        <div class="jet-canvas-wrap">
+          <canvas id="jet-canvas" width="1400" height="800" aria-label="Dense jet animation"></canvas>
+          <div class="jet-metrics" id="jet-metrics"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <span>© 2026 Danial Goodarzi</span>
+    <span><a href="https://github.com/HydroCFD/HydroCFD.github.io">Site source on GitHub</a></span>
+  </div>
+</footer>
+
+<script src="../js/dense-jet-simulator.js"></script>
+</body>
+</html>
