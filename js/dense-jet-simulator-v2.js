@@ -1,7 +1,7 @@
 /* ============================================================
    Dense Jet Simulator v2
    Illustrative integral-model demonstration of an inclined
-   negatively buoyant (dense) jet. NOT validated science —
+   negatively buoyant (dense) jet. NOT validated science;
    a qualitative teaching visualization only.
    ------------------------------------------------------------
    Physics sketch (Lagrangian integral model, steady centerline):
@@ -174,12 +174,12 @@
     metricEls.frd.textContent = Frd.toFixed(1);
     metricEls.rise.textContent = riseAbove.toFixed(2) + " m";
     metricEls.risend.textContent = (riseAbove / Math.max(1e-6, state.D * Frd)).toFixed(2);
-    metricEls.xreturn.textContent = isNaN(model.xReturn) ? "—" : model.xReturn.toFixed(2) + " m";
+    metricEls.xreturn.textContent = isNaN(model.xReturn) ? "-" : model.xReturn.toFixed(2) + " m";
     metricEls.dilution.textContent = model.impactDil.toFixed(0) + " : 1";
 
     let msg = "";
     if (model.endMode === "surface") {
-      msg = "⚠ Plume reaches the free surface — increase depth, reduce Fr, or lower the port.";
+      msg = "⚠ Plume reaches the free surface. Increase depth, reduce Fr, or lower the port.";
     } else if (model.endMode === "domain") {
       msg = "Plume advected out of the viewing window before reaching the bed.";
     }

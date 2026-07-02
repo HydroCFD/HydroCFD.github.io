@@ -1,5 +1,5 @@
 /* ============================================================
-   Microplastic Journey — schematic river-to-lake fate simulator
+   Microplastic Journey: schematic river-to-lake fate simulator
    Illustrative, qualitative visualization only. NOT based on
    real scientific data; not validated; for outreach/teaching.
    ------------------------------------------------------------
@@ -317,7 +317,7 @@
     if (storm > 0) {
       ctx.fillStyle = "rgba(162,85,31,0.9)";
       ctx.font = "700 17px 'Source Sans 3', sans-serif";
-      ctx.fillText("⛈ STORM EVENT — elevated flow, mixing & resuspension", W * 0.28, 30);
+      ctx.fillText("⛈ STORM EVENT: elevated flow, mixing & resuspension", W * 0.28, 30);
     }
   }
 

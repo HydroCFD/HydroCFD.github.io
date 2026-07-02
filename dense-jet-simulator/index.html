@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dense Jet Simulator — Danial Goodarzi</title>
+<title>Dense Jet Simulator | Danial Goodarzi</title>
 <meta name="description" content="Interactive integral-model demonstration of an inclined negatively buoyant dense jet with crossflow, stratification, and bed density-current spreading.">
 <link rel="icon" href="../favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -32,7 +32,7 @@
     <div class="container">
       <h1>Dense Jet Simulator</h1>
       <p class="sub">
-        An interactive demonstration of an inclined negatively buoyant (dense) jet — the flow
+        An interactive demonstration of an inclined negatively buoyant (dense) jet, the flow
         configuration typical of desalination brine outfalls. The centerline is computed with a
         simplified Lagrangian integral model (shear and crossflow-forced entrainment, buoyancy-flux
         evolution, optional linear stratification), and particles ride the solution to show
@@ -137,11 +137,11 @@
             <canvas id="jet-canvas" width="1400" height="800" aria-label="Dense jet animation"></canvas>
           </div>
           <div class="metrics-panel">
-            <div class="metric"><div class="m-label">Densimetric Froude Frd</div><div class="m-value" id="m-frd">—</div></div>
-            <div class="metric"><div class="m-label">Terminal Rise zₜ</div><div class="m-value" id="m-rise">—</div></div>
-            <div class="metric"><div class="m-label">zₜ / (D·Frd)</div><div class="m-value" id="m-risend">—</div></div>
-            <div class="metric"><div class="m-label">Return Distance xᵣ</div><div class="m-value" id="m-xreturn">—</div></div>
-            <div class="metric"><div class="m-label">Impact Dilution</div><div class="m-value" id="m-dilution">—</div></div>
+            <div class="metric"><div class="m-label">Densimetric Froude Frd</div><div class="m-value" id="m-frd">-</div></div>
+            <div class="metric"><div class="m-label">Terminal Rise zₜ</div><div class="m-value" id="m-rise">-</div></div>
+            <div class="metric"><div class="m-label">zₜ / (D·Frd)</div><div class="m-value" id="m-risend">-</div></div>
+            <div class="metric"><div class="m-label">Return Distance xᵣ</div><div class="m-value" id="m-xreturn">-</div></div>
+            <div class="metric"><div class="m-label">Impact Dilution</div><div class="m-value" id="m-dilution">-</div></div>
           </div>
           <div class="sim-status" id="sim-status"></div>
         </div>
@@ -152,7 +152,7 @@
         watch the terminal rise and return point move; add crossflow to bend the plume downstream;
         switch on stratification to suppress the rise height; lower the water depth until the
         plume interacts with the free surface. The metrics panel reports the densimetric Froude
-        number and the normalized rise height zₜ/(D·Frd) — the standard nondimensional groups used
+        number and the normalized rise height zₜ/(D·Frd), the standard nondimensional groups used
         in the dense-jet literature.
       </p>
     </div>
