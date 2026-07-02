@@ -4,42 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dense Jet Simulator — Danial Goodarzi</title>
-<meta name="description" content="Interactive browser-based simulator of a negatively buoyant dense jet in ambient crossflow.">
+<meta name="description" content="Interactive integral-model demonstration of an inclined negatively buoyant dense jet with crossflow, stratification, and bed density-current spreading.">
 <link rel="icon" href="../favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/style.css">
-<style>
-  .jet-app { display: grid; gap: 1.25rem; }
-  .jet-controls {
-    display: grid; gap: 0.75rem; padding: 0.9rem;
-    border: 1px solid #d2d9e6; border-radius: 8px; background: #f8fafc;
-  }
-  .jet-control { display: grid; gap: 0.3rem; }
-  .jet-control label { margin: 0; color: #243042; font-weight: 600; font-size: 0.95rem; }
-  .jet-control input[type="range"] { width: 100%; accent-color: var(--accent); }
-  .jet-actions { grid-template-columns: repeat(2, minmax(110px, 160px)); }
-  .jet-actions button {
-    border: 1px solid var(--accent); background: var(--accent); color: #ffffff;
-    padding: 0.45rem 0.7rem; border-radius: 6px; font-weight: 600; cursor: pointer;
-    font-family: var(--sans);
-  }
-  .jet-actions button:hover { background: #0b4661; }
-  .jet-canvas-wrap {
-    position: relative; border: 1px solid #c6cedd; border-radius: 8px;
-    overflow: hidden; background: #ffffff; min-height: 420px;
-  }
-  #jet-canvas {
-    display: block; width: 100%; height: 100%; min-height: 420px;
-    aspect-ratio: 8 / 5;
-    background: linear-gradient(to bottom, #f1f6fb, #dbe8f6);
-  }
-  .jet-metrics { display: none; }
-  @media (min-width: 960px) {
-    .jet-app { grid-template-columns: minmax(220px, 280px) minmax(0, 1fr); align-items: start; }
-  }
-</style>
 </head>
 <body>
 
@@ -50,7 +20,8 @@
       <a href="../index.html#research">Research</a>
       <a href="../publications.html">Publications</a>
       <a href="../index.html#software">Software</a>
-      <a href="index.html" class="active">Simulator</a>
+      <a href="index.html" class="active">Dense Jet</a>
+      <a href="../microplastic-simulator/index.html">Microplastics</a>
       <a href="../index.html#contact">Contact</a>
     </nav>
   </div>
@@ -61,44 +32,129 @@
     <div class="container">
       <h1>Dense Jet Simulator</h1>
       <p class="sub">
-        An interactive demonstration of a negatively buoyant jet discharged into an ambient
-        crossflow. Adjust the release angle, jet speed, negative buoyancy, and crossflow speed to
-        explore how the plume trajectory and spreading respond.
+        An interactive demonstration of an inclined negatively buoyant (dense) jet — the flow
+        configuration typical of desalination brine outfalls. The centerline is computed with a
+        simplified Lagrangian integral model (shear and crossflow-forced entrainment, buoyancy-flux
+        evolution, optional linear stratification), and particles ride the solution to show
+        the rising jet, the terminal rise, the descending limb, and the bottom density current
+        that spreads after bed impact.
       </p>
+      <div class="disclaimer">
+        <strong>⚠ Illustrative demonstration only.</strong> This animation is a simplified,
+        qualitative visualization intended for teaching and outreach. It is <strong>not based on
+        real scientific data</strong>, has not been validated against experiments, and must not be
+        used for research, design, or regulatory purposes.
+        The <a href="../dense-jet-simulator-classic/index.html">original (classic) version</a> of
+        this simulator is archived here.
+      </div>
     </div>
   </div>
 
   <section class="section">
     <div class="container">
-      <div class="jet-app" id="jet-app">
-        <div class="jet-controls" role="group" aria-label="Dense jet controls">
-          <div class="jet-control">
-            <label for="angle">Release Angle: <span id="angle-value">60</span> deg</label>
-            <input id="angle" type="range" min="5" max="85" step="1" value="60" />
+      <div class="sim-app">
+        <div class="sim-controls" role="group" aria-label="Dense jet controls">
+
+          <div class="control-group">
+            <h4>Discharge</h4>
+            <div class="sim-control">
+              <label for="diameter">Port Diameter D: <span id="diameter-value">0.06</span> m</label>
+              <input id="diameter" type="range" min="0.02" max="0.20" step="0.01" value="0.06" />
+            </div>
+            <div class="sim-control">
+              <label for="portheight">Port Height above Bed: <span id="portheight-value">0.30</span> m</label>
+              <input id="portheight" type="range" min="0.0" max="1.0" step="0.05" value="0.3" />
+            </div>
+            <div class="sim-control">
+              <label for="angle">Release Angle: <span id="angle-value">60</span>°</label>
+              <input id="angle" type="range" min="15" max="85" step="1" value="60" />
+            </div>
+            <div class="sim-control">
+              <label for="speed">Exit Velocity U₀: <span id="speed-value">2.0</span> m/s</label>
+              <input id="speed" type="range" min="0.5" max="4.0" step="0.1" value="2.0" />
+            </div>
+            <div class="sim-control">
+              <label for="buoyancy">Reduced Gravity g′₀: <span id="buoyancy-value">0.25</span> m/s²</label>
+              <input id="buoyancy" type="range" min="0.05" max="0.60" step="0.01" value="0.25" />
+            </div>
           </div>
-          <div class="jet-control">
-            <label for="speed">Jet Speed (m/s): <span id="speed-value">2.0</span></label>
-            <input id="speed" type="range" min="0.5" max="4.0" step="0.1" value="2.0" />
+
+          <div class="control-group">
+            <h4>Ambient</h4>
+            <div class="sim-control">
+              <label for="crossflow">Crossflow Uₐ: <span id="crossflow-value">0.15</span> m/s</label>
+              <input id="crossflow" type="range" min="0.00" max="1.20" step="0.01" value="0.15" />
+            </div>
+            <div class="sim-control">
+              <label for="strat">Stratification N: <span id="strat-value">0.00</span> s⁻¹</label>
+              <input id="strat" type="range" min="0.00" max="0.40" step="0.01" value="0" />
+            </div>
+            <div class="sim-control">
+              <label for="depth">Water Depth H: <span id="depth-value">2.5</span> m</label>
+              <input id="depth" type="range" min="1.0" max="4.0" step="0.1" value="2.5" />
+            </div>
           </div>
-          <div class="jet-control">
-            <label for="buoyancy">Negative Buoyancy g' (m/s^2): <span id="buoyancy-value">0.25</span></label>
-            <input id="buoyancy" type="range" min="0.05" max="0.60" step="0.01" value="0.25" />
+
+          <div class="control-group">
+            <h4>Visualization</h4>
+            <div class="sim-control">
+              <label for="turb">Turbulent Scatter: <span id="turb-value">1.0</span></label>
+              <input id="turb" type="range" min="0.0" max="2.5" step="0.1" value="1.0" />
+            </div>
+            <div class="sim-control">
+              <label for="rate">Particle Rate: <span id="rate-value">26</span> /frame</label>
+              <input id="rate" type="range" min="4" max="60" step="1" value="26" />
+            </div>
+            <div class="sim-control">
+              <label for="simspeed">Animation Speed: <span id="simspeed-value">1.0</span>×</label>
+              <input id="simspeed" type="range" min="0.25" max="3.0" step="0.25" value="1.0" />
+            </div>
+            <label class="sim-check"><input id="show-centerline" type="checkbox" checked /> Centerline trajectory</label>
+            <label class="sim-check"><input id="show-envelope" type="checkbox" /> Plume width envelope (±b)</label>
+            <label class="sim-check"><input id="show-markers" type="checkbox" checked /> Rise / impact markers</label>
           </div>
-          <div class="jet-control">
-            <label for="crossflow">Ambient Crossflow (m/s): <span id="crossflow-value">0.35</span></label>
-            <input id="crossflow" type="range" min="0.00" max="1.20" step="0.01" value="0.35" />
+
+          <div class="control-group">
+            <h4>Presets</h4>
+            <div class="chip-row">
+              <button type="button" data-preset="30">30° incline</button>
+              <button type="button" data-preset="45">45° incline</button>
+              <button type="button" data-preset="60">60° incline</button>
+              <button type="button" data-preset="crossflow">Strong crossflow</button>
+              <button type="button" data-preset="stratified">Stratified ambient</button>
+              <button type="button" data-preset="defaults">Reset defaults</button>
+            </div>
           </div>
-          <div class="jet-control jet-actions">
+
+          <div class="sim-actions">
             <button id="toggle-run" type="button">Pause</button>
-            <button id="reset" type="button">Reset</button>
+            <button id="reset" type="button" class="secondary">Clear Particles</button>
           </div>
         </div>
 
-        <div class="jet-canvas-wrap">
-          <canvas id="jet-canvas" width="1400" height="800" aria-label="Dense jet animation"></canvas>
-          <div class="jet-metrics" id="jet-metrics"></div>
+        <div>
+          <div class="sim-canvas-wrap">
+            <canvas id="jet-canvas" width="1400" height="800" aria-label="Dense jet animation"></canvas>
+          </div>
+          <div class="metrics-panel">
+            <div class="metric"><div class="m-label">Densimetric Froude Frd</div><div class="m-value" id="m-frd">—</div></div>
+            <div class="metric"><div class="m-label">Terminal Rise zₜ</div><div class="m-value" id="m-rise">—</div></div>
+            <div class="metric"><div class="m-label">zₜ / (D·Frd)</div><div class="m-value" id="m-risend">—</div></div>
+            <div class="metric"><div class="m-label">Return Distance xᵣ</div><div class="m-value" id="m-xreturn">—</div></div>
+            <div class="metric"><div class="m-label">Impact Dilution</div><div class="m-value" id="m-dilution">—</div></div>
+          </div>
+          <div class="sim-status" id="sim-status"></div>
         </div>
       </div>
+
+      <p style="margin-top:26px; font-size:0.92rem; color:var(--ink-faint);">
+        <em>What to try:</em> compare the classic 30°, 45°, and 60° inclined-discharge presets and
+        watch the terminal rise and return point move; add crossflow to bend the plume downstream;
+        switch on stratification to suppress the rise height; lower the water depth until the
+        plume interacts with the free surface. The metrics panel reports the densimetric Froude
+        number and the normalized rise height zₜ/(D·Frd) — the standard nondimensional groups used
+        in the dense-jet literature.
+      </p>
     </div>
   </section>
 </main>
@@ -110,6 +166,6 @@
   </div>
 </footer>
 
-<script src="../js/dense-jet-simulator.js"></script>
+<script src="../js/dense-jet-simulator-v2.js"></script>
 </body>
 </html>
