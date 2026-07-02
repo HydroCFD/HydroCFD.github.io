@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Microplastic Journey — Danial Goodarzi</title>
+<meta name="description" content="Schematic interactive visualization of how microplastic particles travel through a river and lake: advection, mixing, biofouling, vegetation trapping, settling, and resuspension.">
+<link rel="icon" href="../favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <a class="site-name" href="../index.html">Danial Goodarzi</a>
+    <nav class="site-nav">
+      <a href="../index.html#research">Research</a>
+      <a href="../publications.html">Publications</a>
+      <a href="../index.html#software">Software</a>
+      <a href="../dense-jet-simulator/index.html">Dense Jet</a>
+      <a href="index.html" class="active">Microplastics</a>
+      <a href="../index.html#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="page-title">
+    <div class="container">
+      <h1>Microplastic Journey</h1>
+      <p class="sub">
+        A schematic, side-view visualization of how microplastic particles travel through a river
+        and into a lake. Particles are advected by the flow, mixed by turbulence, trapped by
+        aquatic vegetation, and — depending on their polymer density, size, and biofouling —
+        float at the surface, stay suspended, or settle to the bed, where river shear can
+        resuspend them. A live <em>fate budget</em> tracks where every released particle ends up.
+      </p>
+      <div class="disclaimer">
+        <strong>⚠ Illustrative demonstration only.</strong> This animation is a simplified,
+        conceptual visualization intended for teaching and outreach. It is <strong>not based on
+        real scientific data</strong>, has not been validated against experiments or field
+        observations, and must not be used for research, design, or regulatory purposes.
+      </div>
+    </div>
+  </div>
+
+  <section class="section">
+    <div class="container">
+      <div class="sim-app">
+        <div class="sim-controls" role="group" aria-label="Microplastic simulation controls">
+
+          <div class="control-group">
+            <h4>Particles</h4>
+            <div class="sim-control">
+              <label for="polymer">Polymer Type</label>
+              <select id="polymer">
+                <option value="MIX" selected>Mixed polymers</option>
+                <option value="PE">Polyethylene — buoyant (ρ≈0.95)</option>
+                <option value="PP">Polypropylene — buoyant (ρ≈0.90)</option>
+                <option value="PS">Polystyrene — near-neutral (ρ≈1.05)</option>
+                <option value="PET">PET — dense (ρ≈1.38)</option>
+                <option value="PVC">PVC — dense (ρ≈1.40)</option>
+              </select>
+            </div>
+            <div class="sim-control">
+              <label for="size">Particle Size: <span id="size-value">1.5</span> mm</label>
+              <input id="size" type="range" min="0.2" max="5.0" step="0.1" value="1.5" />
+            </div>
+            <div class="sim-control">
+              <label for="fouling">Biofouling Rate: <span id="fouling-value">1.0</span></label>
+              <input id="fouling" type="range" min="0" max="5" step="0.5" value="1.0" />
+            </div>
+            <div class="sim-control">
+              <label for="release-depth">Release Depth</label>
+              <select id="release-depth">
+                <option value="surface" selected>Near surface</option>
+                <option value="mid">Mid-depth</option>
+                <option value="bed">Near bed</option>
+              </select>
+            </div>
+            <div class="sim-control">
+              <label for="mp-rate">Release Rate: <span id="mp-rate-value">14</span> /s</label>
+              <input id="mp-rate" type="range" min="2" max="40" step="1" value="14" />
+            </div>
+          </div>
+
+          <div class="control-group">
+            <h4>Environment</h4>
+            <div class="sim-control">
+              <label for="flow">River Flow: <span id="flow-value">1.0</span>×</label>
+              <input id="flow" type="range" min="0.2" max="2.5" step="0.1" value="1.0" />
+            </div>
+            <div class="sim-control">
+              <label for="mp-turb">Turbulent Mixing: <span id="mp-turb-value">1.0</span></label>
+              <input id="mp-turb" type="range" min="0" max="2.5" step="0.1" value="1.0" />
+            </div>
+            <div class="sim-control">
+              <label for="vegdens">Vegetation Density: <span id="vegdens-value">0.5</span></label>
+              <input id="vegdens" type="range" min="0" max="1" step="0.1" value="0.5" />
+            </div>
+            <label class="sim-check"><input id="mp-show-labels" type="checkbox" checked /> Show process labels</label>
+          </div>
+
+          <div class="sim-actions">
+            <button id="mp-toggle-run" type="button">Pause</button>
+            <button id="mp-reset" type="button" class="secondary">Reset</button>
+            <button id="mp-storm" type="button" class="storm">⛈ Trigger Storm Event</button>
+          </div>
+
+          <p style="font-size:0.82rem; color:var(--ink-faint); margin:0;">
+            Tip: click anywhere in the water to release a burst of particles at that point.
+          </p>
+        </div>
+
+        <div>
+          <div class="sim-canvas-wrap">
+            <canvas id="mp-canvas" width="1400" height="760" aria-label="Microplastic transport animation"></canvas>
+          </div>
+
+          <div class="sim-legend">
+            <span><i style="background:#2f86c9"></i> PE (buoyant)</span>
+            <span><i style="background:#18a58a"></i> PP (buoyant)</span>
+            <span><i style="background:#e08a1e"></i> PS (near-neutral)</span>
+            <span><i style="background:#c94f42"></i> PET (dense)</span>
+            <span><i style="background:#8455b8"></i> PVC (dense)</span>
+            <span><i style="background:#fff; border:2px solid #48703a; box-sizing:border-box"></i> green ring = biofouled</span>
+          </div>
+
+          <div class="fate-bars" aria-label="Particle fate budget">
+            <div class="fate-row">
+              <span class="f-label">Drifting in water</span>
+              <div class="f-track"><div class="f-fill" id="f-drift" style="background:#0e5a7a"></div></div>
+              <span class="f-count" id="c-drift">0</span>
+            </div>
+            <div class="fate-row">
+              <span class="f-label">Trapped in vegetation</span>
+              <div class="f-track"><div class="f-fill" id="f-veg" style="background:#2e7d49"></div></div>
+              <span class="f-count" id="c-veg">0</span>
+            </div>
+            <div class="fate-row">
+              <span class="f-label">Settled — river bed</span>
+              <div class="f-track"><div class="f-fill" id="f-river" style="background:#a2551f"></div></div>
+              <span class="f-count" id="c-river">0</span>
+            </div>
+            <div class="fate-row">
+              <span class="f-label">Settled — lake bed</span>
+              <div class="f-track"><div class="f-fill" id="f-lake" style="background:#6d4c2c"></div></div>
+              <span class="f-count" id="c-lake">0</span>
+            </div>
+            <div class="fate-row">
+              <span class="f-label">Exported downstream</span>
+              <div class="f-track"><div class="f-fill" id="f-out" style="background:#6b7280"></div></div>
+              <span class="f-count" id="c-out">0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p style="margin-top:26px; font-size:0.92rem; color:var(--ink-faint);">
+        <em>What to try:</em> release pure polyethylene and watch it raft along the surface until
+        biofouling makes it heavy enough to sink; switch to PVC and see it settle quickly in the
+        river reach; increase vegetation density and compare how much material the canopy traps;
+        trigger a storm event to flush trapped and settled particles back into suspension and
+        watch the fate budget redistribute; then let the lake do what lakes do — act as a
+        long-term sink for whatever arrives.
+      </p>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <span>© 2026 Danial Goodarzi</span>
+    <span><a href="https://github.com/HydroCFD/HydroCFD.github.io">Site source on GitHub</a></span>
+  </div>
+</footer>
+
+<script src="../js/microplastic-simulator.js"></script>
+</body>
+</html>

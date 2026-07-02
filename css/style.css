@@ -312,6 +312,93 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .page-title h1 { font-size: clamp(1.8rem, 4vw, 2.3rem); }
 .page-title .sub { color: var(--ink-soft); margin-top: 8px; }
 
+/* ---------- simulator apps ---------- */
+.disclaimer {
+  border: 1px solid #ecd9a5;
+  border-left: 4px solid #d3a72c;
+  background: #fdf7e6;
+  color: #6f5514;
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-size: 0.92rem;
+  margin: 18px 0 6px;
+}
+.disclaimer strong { color: #5c4200; }
+
+.sim-app { display: grid; gap: 1.25rem; margin-top: 10px; }
+@media (min-width: 1000px) {
+  .sim-app { grid-template-columns: minmax(250px, 300px) minmax(0, 1fr); align-items: start; }
+}
+.sim-controls {
+  display: grid; gap: 0.9rem; padding: 1rem;
+  border: 1px solid #d2d9e6; border-radius: 8px; background: #f8fafc;
+  max-height: 760px; overflow-y: auto;
+}
+.control-group { display: grid; gap: 0.55rem; }
+.control-group > h4 {
+  font-family: var(--sans);
+  font-size: 0.78rem; font-weight: 700; letter-spacing: 1.4px;
+  text-transform: uppercase; color: var(--accent);
+  border-bottom: 1px solid #dfe6ef; padding-bottom: 4px;
+}
+.sim-control { display: grid; gap: 0.2rem; }
+.sim-control label { margin: 0; color: #243042; font-weight: 600; font-size: 0.88rem; }
+.sim-control input[type="range"] { width: 100%; accent-color: var(--accent); }
+.sim-control select {
+  font-family: var(--sans); font-size: 0.9rem; padding: 5px 8px;
+  border: 1px solid #c6cedd; border-radius: 6px; background: #fff; color: var(--ink);
+}
+.sim-check { display: flex; align-items: center; gap: 8px; font-size: 0.88rem; font-weight: 600; color: #243042; }
+.sim-check input { accent-color: var(--accent); width: 15px; height: 15px; }
+.chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip-row button {
+  border: 1px solid var(--accent-line); background: #fff; color: var(--accent);
+  padding: 4px 11px; border-radius: 999px; font-family: var(--sans);
+  font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: background 0.2s;
+}
+.chip-row button:hover { background: var(--accent-soft); }
+.sim-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.sim-actions button {
+  border: 1px solid var(--accent); background: var(--accent); color: #fff;
+  padding: 0.45rem 0.6rem; border-radius: 6px; font-weight: 600; cursor: pointer;
+  font-family: var(--sans); font-size: 0.9rem;
+}
+.sim-actions button:hover { background: #0b4661; }
+.sim-actions button.secondary { background: #fff; color: var(--accent); }
+.sim-actions button.secondary:hover { background: var(--accent-soft); }
+.sim-actions button.storm { background: #a2551f; border-color: #a2551f; grid-column: 1 / -1; }
+.sim-actions button.storm:hover { background: #86451a; }
+
+.sim-canvas-wrap {
+  position: relative; border: 1px solid #c6cedd; border-radius: 8px;
+  overflow: hidden; background: #ffffff;
+}
+.sim-canvas-wrap canvas { display: block; width: 100%; height: auto; }
+
+.metrics-panel {
+  margin-top: 14px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px;
+}
+.metric {
+  border: 1px solid var(--rule); border-radius: 8px; background: #fff;
+  padding: 10px 14px;
+}
+.metric .m-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--ink-faint); }
+.metric .m-value { font-family: var(--serif); font-size: 1.15rem; font-weight: 600; color: var(--accent); margin-top: 2px; }
+.metric .m-value small { font-size: 0.78rem; color: var(--ink-faint); font-weight: 400; }
+.sim-status { margin-top: 10px; font-size: 0.9rem; font-weight: 600; color: #a2551f; min-height: 1.4em; }
+
+.fate-bars { margin-top: 14px; display: grid; gap: 7px; }
+.fate-row { display: grid; grid-template-columns: 168px 1fr 52px; gap: 10px; align-items: center; font-size: 0.86rem; }
+.fate-row .f-label { font-weight: 600; color: var(--ink-soft); text-align: right; }
+.fate-row .f-track { height: 13px; background: #eef1f5; border-radius: 999px; overflow: hidden; }
+.fate-row .f-fill { height: 100%; width: 0%; border-radius: 999px; transition: width 0.35s ease; }
+.fate-row .f-count { font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+.sim-legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; font-size: 0.85rem; color: var(--ink-soft); }
+.sim-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sim-legend i { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
