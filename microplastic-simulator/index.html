@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Microplastic Journey — Danial Goodarzi</title>
+<title>Microplastic Journey | Danial Goodarzi</title>
 <meta name="description" content="Schematic interactive visualization of how microplastic particles travel through a river and lake: advection, mixing, biofouling, vegetation trapping, settling, and resuspension.">
 <link rel="icon" href="../favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,8 +33,8 @@
       <h1>Microplastic Journey</h1>
       <p class="sub">
         A schematic, side-view visualization of how microplastic particles travel through a river
-        and into a lake. Particles are advected by the flow, mixed by turbulence, trapped by
-        aquatic vegetation, and — depending on their polymer density, size, and biofouling —
+        and into a lake. Particles are advected by the flow, mixed by turbulence, and trapped by
+        aquatic vegetation. Depending on their polymer density, size, and biofouling, they
         float at the surface, stay suspended, or settle to the bed, where river shear can
         resuspend them. A live <em>fate budget</em> tracks where every released particle ends up.
       </p>
@@ -58,11 +58,11 @@
               <label for="polymer">Polymer Type</label>
               <select id="polymer">
                 <option value="MIX" selected>Mixed polymers</option>
-                <option value="PE">Polyethylene — buoyant (ρ≈0.95)</option>
-                <option value="PP">Polypropylene — buoyant (ρ≈0.90)</option>
-                <option value="PS">Polystyrene — near-neutral (ρ≈1.05)</option>
-                <option value="PET">PET — dense (ρ≈1.38)</option>
-                <option value="PVC">PVC — dense (ρ≈1.40)</option>
+                <option value="PE">Polyethylene (buoyant, ρ≈0.95)</option>
+                <option value="PP">Polypropylene (buoyant, ρ≈0.90)</option>
+                <option value="PS">Polystyrene (near-neutral, ρ≈1.05)</option>
+                <option value="PET">PET (dense, ρ≈1.38)</option>
+                <option value="PVC">PVC (dense, ρ≈1.40)</option>
               </select>
             </div>
             <div class="sim-control">
@@ -141,12 +141,12 @@
               <span class="f-count" id="c-veg">0</span>
             </div>
             <div class="fate-row">
-              <span class="f-label">Settled — river bed</span>
+              <span class="f-label">Settled (river bed)</span>
               <div class="f-track"><div class="f-fill" id="f-river" style="background:#a2551f"></div></div>
               <span class="f-count" id="c-river">0</span>
             </div>
             <div class="fate-row">
-              <span class="f-label">Settled — lake bed</span>
+              <span class="f-label">Settled (lake bed)</span>
               <div class="f-track"><div class="f-fill" id="f-lake" style="background:#6d4c2c"></div></div>
               <span class="f-count" id="c-lake">0</span>
             </div>
@@ -164,7 +164,7 @@
         biofouling makes it heavy enough to sink; switch to PVC and see it settle quickly in the
         river reach; increase vegetation density and compare how much material the canopy traps;
         trigger a storm event to flush trapped and settled particles back into suspension and
-        watch the fate budget redistribute; then let the lake do what lakes do — act as a
+        watch the fate budget redistribute; then let the lake do what lakes do: act as a
         long-term sink for whatever arrives.
       </p>
     </div>
