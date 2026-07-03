@@ -95,7 +95,7 @@
   }
 
   /* ---------- integral centerline model ---------- */
-  const ALPHA_S = 0.057;   // shear entrainment coefficient
+  const ALPHA_S = 0.045;   // shear entrainment coefficient (tuned for demo)
   const ALPHA_N = 0.5;     // forced (crossflow) entrainment coefficient
   const DS = 0.008;        // arc-length step (m)
   const MAX_STEPS = 6000;
@@ -187,13 +187,33 @@
   }
 
   /* ---------- particles ---------- */
-  const MAX_P = 3200;
+  const MAX_P = 6500;
   let particles = [];
+
+  /* soft radial sprite so overlapping particles blend into a
+     continuous, fluid-looking plume */
+  const sprite = document.createElement("canvas");
+  sprite.width = 64; sprite.height = 64;
+  (function () {
+    const sctx = sprite.getContext("2d");
+    const g = sctx.createRadialGradient(32, 32, 0, 32, 32, 32);
+    g.addColorStop(0, "rgba(13, 70, 105, 0.55)");
+    g.addColorStop(0.45, "rgba(13, 70, 105, 0.28)");
+    g.addColorStop(1, "rgba(13, 70, 105, 0)");
+    sctx.fillStyle = g;
+    sctx.fillRect(0, 0, 64, 64);
+  })();
 
   function spawnParticles(dt) {
     const n = Math.round(state.rate * state.simspeed);
     for (let i = 0; i < n; i++) {
-      if (particles.length >= MAX_P) particles.shift();
+      if (particles.length >= MAX_P) {
+        // protect the developed plume: retire the oldest settled
+        // (non-jet) particle; if all are still in the jet, skip spawning
+        const idx = particles.findIndex(function (q) { return q.mode !== "jet"; });
+        if (idx < 0) break;
+        particles.splice(idx, 1);
+      }
       particles.push({
         mode: "jet",
         s: Math.random() * state.U0 * dt,
@@ -217,9 +237,9 @@
       if (p.mode === "jet") {
         const st = stationAt(p.s);
         p.s += Math.max(0.04, st.u) * dt;
-        p.xi += gaussian() * state.turb * 1.6 * Math.sqrt(dt);
-        if (p.xi > 2.2) p.xi = 2.2;
-        if (p.xi < -2.2) p.xi = -2.2;
+        p.xi += gaussian() * state.turb * 0.55 * Math.sqrt(dt);
+        if (p.xi > 1.4) p.xi = 1.4;
+        if (p.xi < -1.4) p.xi = -1.4;
         p.dil = st.S;
         if (p.s >= sEnd) {
           const last = stations[stations.length - 1];
@@ -246,7 +266,8 @@
         p.ub *= (1 - 0.25 * dt);
         p.x += (p.ub + (p.ub >= 0 ? 0.3 : 0.05) * state.Ua) * dt;
         p.y = Math.max(0.005, p.y + gaussian() * 0.01 * Math.sqrt(dt));
-        if (p.y > 0.1 + 0.02 * p.age) p.y = 0.1 + 0.02 * p.age;
+        const hMax = Math.min(0.35, 0.08 + 0.008 * p.age);   // thin bottom layer
+        if (p.y > hMax) p.y = hMax;
         p.dil += 2.2 * dt * (1 + Math.abs(p.ub));
       } else if (p.mode === "surface") {
         p.x += p.ub * dt;
@@ -261,7 +282,8 @@
     particles = particles.filter(function (p) {
       const st = p.mode === "jet" ? stationAt(p.s) : null;
       const px = st ? st.x : p.x;
-      return px > -0.5 && px < domainW + 0.5 && p.age < 60 && p.dil < 400;
+      const maxAge = p.mode === "jet" ? 55 : 35;
+      return px > -0.5 && px < domainW + 0.5 && p.age < maxAge && p.dil < 400;
     });
   }
 
@@ -421,14 +443,21 @@
     for (const p of particles) {
       const pos = particlePos(p);
       const c = toPx(pos.x, pos.y);
-      if (c.x < margin.left || c.x > canvas.width - margin.right) continue;
+      if (c.x < margin.left - 30 || c.x > canvas.width - margin.right + 30) continue;
       const conc = 1 / Math.max(1, p.dil);           // 1 at source -> 0 far away
-      const a = Math.min(0.65, 0.08 + conc * 0.9);
-      const r = 1.3 + 2.2 * Math.min(1, conc * 3);
-      ctx.fillStyle = "rgba(14, 74, 110," + a + ")";
-      ctx.beginPath();
-      ctx.arc(c.x, c.y, r, 0, Math.PI * 2);
-      ctx.fill();
+
+      // sprite radius follows the local physical plume scale
+      let rM;
+      if (p.mode === "jet") {
+        rM = stationAt(p.s).b * 0.55;
+      } else if (p.mode === "bed") {
+        rM = 0.04 + 0.010 * p.age;                   // thin spreading bottom current
+      } else {
+        rM = 0.04 + 0.008 * p.age;
+      }
+      const r = Math.max(4, Math.min(42, rM * pxPerM));
+      ctx.globalAlpha = Math.max(0.06, Math.min(0.5, 0.10 + conc * 0.7));
+      ctx.drawImage(sprite, c.x - r, c.y - r, r * 2, r * 2);
     }
     ctx.restore();
   }
@@ -477,9 +506,9 @@
       if (pr === "defaults") {
         inputs.diameter.value = 0.06; inputs.portheight.value = 0.3;
         inputs.angle.value = 60; inputs.speed.value = 2.0;
-        inputs.buoyancy.value = 0.25; inputs.crossflow.value = 0.15;
+        inputs.buoyancy.value = 0.25; inputs.crossflow.value = 0;
         inputs.strat.value = 0; inputs.depth.value = 2.5;
-        inputs.turb.value = 1.0; inputs.rate.value = 26; inputs.simspeed.value = 1.0;
+        inputs.turb.value = 1.0; inputs.rate.value = 3; inputs.simspeed.value = 1.0;
       }
       onChange();
       particles = [];
