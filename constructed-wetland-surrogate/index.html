@@ -33,23 +33,13 @@
       <h1>Rapid hydraulic prediction for constructed wetlands</h1>
       <p class="project-intro">
         A physics-informed surrogate model for screening the hydraulic performance of
-        free-water-surface constructed wetlands and waste stabilization ponds. It predicts
-        residence-time behaviour and 28 hydraulic-efficiency measures in a fraction of a
-        millisecond, making large design studies practical without running CFD for every candidate.
+        free-water-surface constructed wetlands and waste stabilization ponds. The framework
+        connects wetland geometry, GPU-based flow simulation, tracer transport, and machine
+        learning to predict residence-time behaviour and hydraulic-efficiency measures.
       </p>
       <div class="project-actions">
         <a class="button" href="#model">Explore the model</a>
-        <a class="button secondary" href="#results">View results</a>
       </div>
-    </div>
-  </section>
-
-  <section class="project-stats" aria-label="Project results">
-    <div class="container stats-grid">
-      <div class="stat"><strong>359</strong><span>high-fidelity CFD cases</span></div>
-      <div class="stat"><strong>28</strong><span>hydraulic indices predicted</span></div>
-      <div class="stat"><strong>0.03 ms</strong><span>per surrogate evaluation</span></div>
-      <div class="stat"><strong>3.0%</strong><span>median breakthrough-curve error</span></div>
     </div>
   </section>
 
@@ -65,45 +55,60 @@
           and vegetation.
         </p>
         <p>
-          CFD can resolve these processes, but a transient flow simulation followed by a tracer
-          study may take minutes or hours for one layout. That cost limits design exploration.
-          This project uses a GPU solver to generate reliable training data, then learns a much
-          faster mapping from design variables to hydraulic performance.
+          CFD resolves these processes by computing the wetland flow field and then tracking a
+          conservative tracer from inlet to outlet. This project uses a GPU solver to generate
+          training data and a surrogate model to map design variables to hydraulic performance.
         </p>
       </div>
     </div>
   </section>
 
-  <section class="section project-tint" id="model">
+  <section class="section project-tint" id="layouts">
+    <div class="container project-copy">
+      <h2>Representative model geometries</h2>
+      <p class="lead">
+        The model describes open basins, layouts with transverse baffles, and wetlands with a
+        centred vegetation patch. Inlets are shown in red, outlets in blue, solid baffles in
+        black, and vegetation in green.
+      </p>
+      <div class="schematic-gallery">
+        <figure class="schematic-card reveal">
+          <img src="../images/constructed-wetland-surrogate/layout-open-basin.png" alt="Plan-view schematic of an open basin with inlet and outlet" loading="lazy">
+          <figcaption>Open basin</figcaption>
+        </figure>
+        <figure class="schematic-card reveal">
+          <img src="../images/constructed-wetland-surrogate/layout-baffled-basin.png" alt="Plan-view schematic of a basin with alternating transverse baffles" loading="lazy">
+          <figcaption>Baffled basin</figcaption>
+        </figure>
+        <figure class="schematic-card reveal">
+          <img src="../images/constructed-wetland-surrogate/layout-vegetated-wetland.png" alt="Plan-view schematic of a wetland with a centred vegetation patch" loading="lazy">
+          <figcaption>Vegetated wetland</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="model">
     <div class="container project-copy">
       <h2>From wetland design to prediction</h2>
       <div class="pipeline" aria-label="Model workflow">
         <div class="pipeline-step">
-          <span>01</span>
           <h3>Describe the layout</h3>
-          <p>Nine dimensionless inputs define pond shape, inlet and outlet locations, baffles, and a centred floating vegetation patch.</p>
+          <p>Dimensionless inputs define pond shape, inlet and outlet locations, baffles, and a centred floating vegetation patch.</p>
         </div>
         <div class="pipeline-step">
-          <span>02</span>
           <h3>Generate CFD data</h3>
-          <p>A two-dimensional shallow-water and <em>k</em>-&epsilon; turbulence solver computes the flow, followed by conservative tracer transport.</p>
+          <p>A depth-averaged shallow-water and <em>k</em>-&epsilon; turbulence solver computes the flow, followed by conservative tracer transport.</p>
         </div>
         <div class="pipeline-step">
-          <span>03</span>
           <h3>Train the surrogate</h3>
           <p>Gradient-boosted trees predict scalar indices, while a physics-constrained neural model predicts the full residence-time distribution.</p>
         </div>
         <div class="pipeline-step">
-          <span>04</span>
           <h3>Screen new designs</h3>
-          <p>New layouts are evaluated almost instantly, enabling sensitivity studies, large parameter sweeps, and future design optimization.</p>
+          <p>The trained model evaluates new layouts for sensitivity studies, parameter sweeps, and future design optimization.</p>
         </div>
       </div>
-
-      <figure class="project-figure wide-figure reveal">
-        <img src="../images/constructed-wetland-surrogate/gpu-flow-field.png" alt="Computed pond velocity streamlines and turbulent eddy viscosity from the GPU flow solver" loading="lazy">
-        <figcaption>The high-fidelity generator resolves the depth-averaged velocity field, recirculation zones, and turbulent mixing before running the tracer analysis.</figcaption>
-      </figure>
     </div>
   </section>
 
@@ -118,7 +123,7 @@
       <div class="feature-grid">
         <article class="feature-card">
           <h3>Hydrodynamics</h3>
-          <p>Two-dimensional depth-averaged shallow-water equations with a depth-averaged <em>k</em>-&epsilon; turbulence closure.</p>
+          <p>Depth-averaged shallow-water equations with a depth-averaged <em>k</em>-&epsilon; turbulence closure.</p>
         </article>
         <article class="feature-card">
           <h3>Tracer and RTD</h3>
@@ -126,17 +131,13 @@
         </article>
         <article class="feature-card">
           <h3>Automatic metrics</h3>
-          <p>Each case returns 28 measures, including effective volume, short-circuiting, baffling factor, dispersion, and residence-time statistics.</p>
+          <p>Each case returns standard measures including effective volume, short-circuiting, baffling factor, dispersion, and residence-time statistics.</p>
         </article>
         <article class="feature-card">
           <h3>Verification</h3>
           <p>The numerical framework is tested against analytical and closed-form benchmarks for flow, turbulence, conservation, and ideal-reactor behaviour.</p>
         </article>
       </div>
-      <p class="performance-note">
-        In benchmark tests, the GPU implementation was about 1.8&times; faster than the independent
-        C++/OpenMP implementation for one basin and about 16&times; faster when geometries were batched.
-      </p>
     </div>
   </section>
 
@@ -147,56 +148,19 @@
         <div>
           <h3>Hydraulic-efficiency indices</h3>
           <p>
-            The scalar model predicts 28 established indices used to characterize wetland and
-            pond hydraulics. Across all indices, the median five-fold cross-validated
-            coefficient of determination is <strong><em>R</em><sup>2</sup> = 0.79</strong>.
-            Median residence time is predicted especially well, with
-            <strong><em>R</em><sup>2</sup> = 0.94</strong>.
+            The scalar model predicts established indices used to characterize wetland and pond
+            hydraulics, including residence-time statistics, effective volume, short-circuiting,
+            baffling, and dispersion measures.
           </p>
         </div>
         <div>
           <h3>Full breakthrough response</h3>
           <p>
-            A three-branch inverse-Gaussian reactor mixture predicts the full residence-time
-            distribution. Its cumulative breakthrough curve has a median out-of-fold relative
-            error of <strong>3.0%</strong>. By construction, every prediction is non-negative,
-            mass-conserving, monotone in cumulative form, and causal.
+            A physics-constrained inverse-Gaussian reactor mixture predicts the full residence-time
+            distribution. The formulation keeps each prediction non-negative, mass-conserving,
+            monotone in cumulative form, and causal.
           </p>
         </div>
-      </div>
-
-      <figure class="project-figure reveal">
-        <img src="../images/constructed-wetland-surrogate/surrogate-validation.png" alt="Parity plots comparing surrogate predictions with CFD results for six hydraulic efficiency indices" loading="lazy">
-        <figcaption>Five-fold out-of-fold validation. Central and integral measures are more predictable than indices dominated by the late-time tail.</figcaption>
-      </figure>
-
-      <figure class="project-figure reveal">
-        <img src="../images/constructed-wetland-surrogate/rtd-predictions.png" alt="Predicted and CFD residence-time distributions for high, intermediate, and low efficiency pond layouts" loading="lazy">
-        <figcaption>Representative held-out residence-time predictions for high-, intermediate-, and low-efficiency layouts. The learned branches distinguish fast short-circuiting, main-flow, and slow recirculation pathways.</figcaption>
-      </figure>
-    </div>
-  </section>
-
-  <section class="section" id="results">
-    <div class="container project-copy">
-      <h2>Speed for design exploration</h2>
-      <div class="result-layout">
-        <div>
-          <p class="lead">
-            Once trained, the surrogate evaluates one design in approximately 0.03 milliseconds,
-            compared with a median of about 1,450 seconds for the two-stage CFD workflow. That is
-            roughly a 50-million-fold reduction in evaluation time.
-          </p>
-          <p>
-            The speed changes the engineering workflow: CFD remains the high-fidelity reference,
-            while the surrogate can screen tens of thousands of possible layouts, identify the
-            most promising candidates, and reserve expensive simulations for final verification.
-          </p>
-        </div>
-        <figure class="project-figure compact-figure reveal">
-          <img src="../images/constructed-wetland-surrogate/speed-comparison.png" alt="Log-scale comparison of CFD and surrogate wall-clock time per case" loading="lazy">
-          <figcaption>Measured per-case evaluation cost on a logarithmic scale.</figcaption>
-        </figure>
       </div>
     </div>
   </section>

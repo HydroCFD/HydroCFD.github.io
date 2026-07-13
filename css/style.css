@@ -510,6 +510,38 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
 .project-cta h2 { display: block; margin: 4px 0; font-size: 1.35rem; }
 .project-cta h2::after { display: none; }
 .project-cta p:last-child { color: var(--ink-soft); font-size: 0.95rem; }
+.schematic-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  width: 100%;
+  margin-top: 26px;
+}
+.schematic-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: #fff;
+}
+.schematic-card img {
+  display: block;
+  width: 100%;
+  height: 230px;
+  object-fit: contain;
+  padding: 10px;
+  background: #fff;
+}
+.schematic-card figcaption {
+  padding: 10px 14px;
+  border-top: 1px solid var(--rule);
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-align: center;
+}
 
 @media (max-width: 760px) {
   .project-hero { padding: 62px 0 54px; }
@@ -521,6 +553,8 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
   .pipeline-step { min-height: 0; }
   .pipeline-step::after { display: none; }
   .project-cta { align-items: flex-start; flex-direction: column; }
+  .schematic-gallery { grid-template-columns: 1fr; }
+  .schematic-card img { height: auto; max-height: 360px; }
 }
 @media (max-width: 480px) {
   .pipeline { grid-template-columns: 1fr; }
