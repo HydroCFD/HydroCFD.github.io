@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /ariake-instrument/
 
 Sitemap: https://hydrocfd.github.io/sitemap.xml

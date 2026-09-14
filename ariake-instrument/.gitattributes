@@ -1,0 +1,6 @@
+# The two data files are one enormous base64 line each. Never let git rewrite
+# their line endings, and never try to diff them.
+data/bundle_b64.js  -text -diff
+data/sources_b64.js -text -diff
+test/expected.js    -text -diff
+* text=auto

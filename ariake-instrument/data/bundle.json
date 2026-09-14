@@ -1,0 +1,817 @@
+{
+ "built": "2026-09-10 17:20",
+ "source": "tensors_full.npz, 1636 scenarios",
+ "n_train": 1304,
+ "n_val": 329,
+ "modes": 15,
+ "modes_family_evidence": 8,
+ "shrinkage": 0.25,
+ "cv": 0.5,
+ "eps": 1e-06,
+ "n_wet": 6893,
+ "n_months": 12,
+ "ncell": 16384,
+ "nx": 128,
+ "month_idx": [
+  3,
+  10,
+  17,
+  24,
+  31,
+  38,
+  45,
+  52,
+  59,
+  66,
+  73,
+  80
+ ],
+ "months": [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December"
+ ],
+ "snapshot_of_month": [
+  3,
+  10,
+  17,
+  24,
+  31,
+  38,
+  45,
+  52,
+  59,
+  66,
+  73,
+  80
+ ],
+ "n_snapshots": 84,
+ "families": [
+  "bio",
+  "frg",
+  "fate"
+ ],
+ "family_labels": [
+  "Biofouling",
+  "Fragmentation",
+  "Fate"
+ ],
+ "param_names": [
+  "A",
+  "mu",
+  "m",
+  "R20",
+  "rhobf",
+  "kd",
+  "k0",
+  "pf",
+  "df",
+  "dmin",
+  "Kh",
+  "Kz",
+  "hdry",
+  "kw",
+  "d",
+  "rhop"
+ ],
+ "param_log": [
+  true,
+  true,
+  true,
+  true,
+  false,
+  true,
+  true,
+  false,
+  false,
+  true,
+  true,
+  true,
+  false,
+  true,
+  true,
+  false
+ ],
+ "param_slots": {
+  "bio": [
+   0,
+   1,
+   2,
+   3,
+   4,
+   5,
+   14,
+   15
+  ],
+  "frg": [
+   6,
+   7,
+   8,
+   9,
+   14,
+   15
+  ],
+  "fate": [
+   12,
+   13,
+   14,
+   15
+  ]
+ },
+ "param_meta": {
+  "A": {
+   "label": "Ambient algal concentration",
+   "unit": "cells/m3",
+   "log": true
+  },
+  "mu": {
+   "label": "Maximum growth rate",
+   "unit": "1/d",
+   "log": true
+  },
+  "m": {
+   "label": "Grazing mortality",
+   "unit": "1/d",
+   "log": true
+  },
+  "R20": {
+   "label": "Respiration at 20 C",
+   "unit": "1/d",
+   "log": true
+  },
+  "rhobf": {
+   "label": "Biofilm density",
+   "unit": "kg/m3",
+   "log": false
+  },
+  "kd": {
+   "label": "Light attenuation",
+   "unit": "1/m",
+   "log": true
+  },
+  "k0": {
+   "label": "Background fragmentation rate",
+   "unit": "1/s",
+   "log": true
+  },
+  "pf": {
+   "label": "Fragmentation probability",
+   "unit": "-",
+   "log": false
+  },
+  "df": {
+   "label": "Fractal dimension",
+   "unit": "-",
+   "log": false
+  },
+  "dmin": {
+   "label": "Cascade floor",
+   "unit": "m",
+   "log": true
+  },
+  "hdry": {
+   "label": "Beaching threshold",
+   "unit": "m",
+   "log": false
+  },
+  "kw": {
+   "label": "Washout rate",
+   "unit": "1/s",
+   "log": true
+  },
+  "d": {
+   "label": "Particle diameter",
+   "unit": "m",
+   "log": true
+  },
+  "rhop": {
+   "label": "Particle density",
+   "unit": "kg/m3",
+   "log": false
+  }
+ },
+ "plan_months": [
+  3,
+  9
+ ],
+ "plan_stations": [
+  2588,
+  3970,
+  4156,
+  4346,
+  5042,
+  5967
+ ],
+ "wet_frac": 0.7,
+ "exclude_boundary_km": 5.0,
+ "n_shore": 5,
+ "classifiers": [
+  "family",
+  "regime"
+ ],
+ "classifier_meta": {
+  "steps": 12000,
+  "months": [
+   3,
+   10,
+   17,
+   24,
+   31,
+   38,
+   45,
+   52,
+   59,
+   66,
+   73,
+   80
+  ],
+  "n_train": 1304,
+  "n_val": 329,
+  "family": {
+   "classes": [
+    "bio",
+    "frg",
+    "fate"
+   ],
+   "by_months": {
+    "Apr+Oct": {
+     "acc": 0.7012158054711246,
+     "frac_p90": 0.31352583586626137,
+     "reliability_p90": 0.9544352884149298
+    },
+    "Mar+Sep": {
+     "acc": 0.7091185410334346,
+     "frac_p90": 0.28085106382978725,
+     "reliability_p90": 0.9637445887445888
+    },
+    "Jan+Jul": {
+     "acc": 0.6908814589665654,
+     "frac_p90": 0.18814589665653494,
+     "reliability_p90": 0.9264943457189014
+    },
+    "Jun+Dec": {
+     "acc": 0.7130699088145896,
+     "frac_p90": 0.32279635258358663,
+     "reliability_p90": 0.9500941619585688
+    }
+   }
+  },
+  "regime": {
+   "classes": [
+    "sinking",
+    "fragmenting",
+    "buoyant"
+   ],
+   "by_months": {
+    "Apr+Oct": {
+     "acc": 0.7124620060790273,
+     "frac_p90": 0.3268996960486322,
+     "reliability_p90": 0.9576940957694096
+    },
+    "Mar+Sep": {
+     "acc": 0.7062310030395137,
+     "frac_p90": 0.26276595744680853,
+     "reliability_p90": 0.9728166570271833
+    },
+    "Jan+Jul": {
+     "acc": 0.706838905775076,
+     "frac_p90": 0.17142857142857143,
+     "reliability_p90": 0.925531914893617
+    },
+    "Jun+Dec": {
+     "acc": 0.7238601823708206,
+     "frac_p90": 0.3331306990881459,
+     "reliability_p90": 0.9593978102189781
+    }
+   }
+  }
+ },
+ "classifier_labels": {
+  "family": [
+   "Biofouling",
+   "Fragmentation",
+   "Fate"
+  ],
+  "regime": [
+   "Sinking",
+   "Fragmenting",
+   "Buoyant"
+  ]
+ },
+ "grid": {
+  "x0": 602990.3700676429,
+  "dx": 390.11523515523015,
+  "y0": 3619072.524354938,
+  "dy": 465.54882905609526
+ },
+ "demo": {
+  "fate": {
+   "case": "pr_ensc07",
+   "family": "fate"
+  },
+  "frg": {
+   "case": "pr_frg11",
+   "family": "frg"
+  },
+  "bio": {
+   "case": "pr_bio10",
+   "family": "bio"
+  },
+  "bio_easy": {
+   "case": "ml_0573_bio",
+   "family": "bio_easy"
+  },
+  "frg_easy": {
+   "case": "ml_0967_frg",
+   "family": "frg_easy"
+  },
+  "fate_hard": {
+   "case": "ml_1460_fat",
+   "family": "fate_hard"
+  }
+ },
+ "demo_extra": {
+  "bio_easy": {
+   "case": "ml_0573_bio",
+   "index": 709,
+   "skill": 0.816,
+   "family": "bio"
+  },
+  "frg_easy": {
+   "case": "ml_0967_frg",
+   "index": 1103,
+   "skill": 0.778,
+   "family": "frg"
+  },
+  "fate_hard": {
+   "case": "ml_1460_fat",
+   "index": 1596,
+   "skill": 0.912,
+   "family": "fate"
+  }
+ },
+ "arrays": {
+  "phi": {
+   "dtype": "float32",
+   "shape": [
+    82716,
+    15
+   ],
+   "offset": 0,
+   "bytes": 4962960
+  },
+  "xbar": {
+   "dtype": "float32",
+   "shape": [
+    82716
+   ],
+   "offset": 4962960,
+   "bytes": 330864
+  },
+  "repr_cell": {
+   "dtype": "float32",
+   "shape": [
+    82716
+   ],
+   "offset": 5293824,
+   "bytes": 330864
+  },
+  "fam_mu": {
+   "dtype": "float32",
+   "shape": [
+    3,
+    15
+   ],
+   "offset": 5624688,
+   "bytes": 180
+  },
+  "fam_cov": {
+   "dtype": "float32",
+   "shape": [
+    3,
+    15,
+    15
+   ],
+   "offset": 5624872,
+   "bytes": 2700
+  },
+  "coef": {
+   "dtype": "float32",
+   "shape": [
+    1304,
+    15
+   ],
+   "offset": 5627576,
+   "bytes": 78240
+  },
+  "params": {
+   "dtype": "float32",
+   "shape": [
+    1304,
+    16
+   ],
+   "offset": 5705816,
+   "bytes": 83456
+  },
+  "fam_of_scenario": {
+   "dtype": "uint8",
+   "shape": [
+    1304
+   ],
+   "offset": 5789272,
+   "bytes": 1304
+  },
+  "grid_index": {
+   "dtype": "int32",
+   "shape": [
+    6893
+   ],
+   "offset": 5790576,
+   "bytes": 27572
+  },
+  "x_m": {
+   "dtype": "float32",
+   "shape": [
+    6893
+   ],
+   "offset": 5818152,
+   "bytes": 27572
+  },
+  "y_m": {
+   "dtype": "float32",
+   "shape": [
+    6893
+   ],
+   "offset": 5845728,
+   "bytes": 27572
+  },
+  "lon": {
+   "dtype": "float32",
+   "shape": [
+    6893
+   ],
+   "offset": 5873304,
+   "bytes": 27572
+  },
+  "lat": {
+   "dtype": "float32",
+   "shape": [
+    6893
+   ],
+   "offset": 5900880,
+   "bytes": 27572
+  },
+  "candidate": {
+   "dtype": "uint8",
+   "shape": [
+    12,
+    6893
+   ],
+   "offset": 5928456,
+   "bytes": 82716
+  },
+  "plan_stations": {
+   "dtype": "int32",
+   "shape": [
+    6
+   ],
+   "offset": 6011176,
+   "bytes": 24
+  },
+  "xy_mean": {
+   "dtype": "float32",
+   "shape": [
+    2
+   ],
+   "offset": 6011200,
+   "bytes": 8
+  },
+  "shore0": {
+   "dtype": "float32",
+   "shape": [
+    2072,
+    2
+   ],
+   "offset": 6011208,
+   "bytes": 16576
+  },
+  "shore_open0": {
+   "dtype": "uint8",
+   "shape": [
+    2072
+   ],
+   "offset": 6027784,
+   "bytes": 2072
+  },
+  "shore1": {
+   "dtype": "float32",
+   "shape": [
+    172,
+    2
+   ],
+   "offset": 6029856,
+   "bytes": 1376
+  },
+  "shore_open1": {
+   "dtype": "uint8",
+   "shape": [
+    172
+   ],
+   "offset": 6031232,
+   "bytes": 172
+  },
+  "shore2": {
+   "dtype": "float32",
+   "shape": [
+    50,
+    2
+   ],
+   "offset": 6031408,
+   "bytes": 400
+  },
+  "shore_open2": {
+   "dtype": "uint8",
+   "shape": [
+    50
+   ],
+   "offset": 6031808,
+   "bytes": 50
+  },
+  "shore3": {
+   "dtype": "float32",
+   "shape": [
+    54,
+    2
+   ],
+   "offset": 6031864,
+   "bytes": 432
+  },
+  "shore_open3": {
+   "dtype": "uint8",
+   "shape": [
+    54
+   ],
+   "offset": 6032296,
+   "bytes": 54
+  },
+  "shore4": {
+   "dtype": "float32",
+   "shape": [
+    68,
+    2
+   ],
+   "offset": 6032352,
+   "bytes": 544
+  },
+  "shore_open4": {
+   "dtype": "uint8",
+   "shape": [
+    68
+   ],
+   "offset": 6032896,
+   "bytes": 68
+  },
+  "net_family_phi_0_weight": {
+   "dtype": "float32",
+   "shape": [
+    64,
+    4
+   ],
+   "offset": 6032968,
+   "bytes": 1024
+  },
+  "net_family_phi_0_bias": {
+   "dtype": "float32",
+   "shape": [
+    64
+   ],
+   "offset": 6033992,
+   "bytes": 256
+  },
+  "net_family_phi_2_weight": {
+   "dtype": "float32",
+   "shape": [
+    128,
+    64
+   ],
+   "offset": 6034248,
+   "bytes": 32768
+  },
+  "net_family_phi_2_bias": {
+   "dtype": "float32",
+   "shape": [
+    128
+   ],
+   "offset": 6067016,
+   "bytes": 512
+  },
+  "net_family_rho_0_weight": {
+   "dtype": "float32",
+   "shape": [
+    96,
+    256
+   ],
+   "offset": 6067528,
+   "bytes": 98304
+  },
+  "net_family_rho_0_bias": {
+   "dtype": "float32",
+   "shape": [
+    96
+   ],
+   "offset": 6165832,
+   "bytes": 384
+  },
+  "net_family_rho_2_weight": {
+   "dtype": "float32",
+   "shape": [
+    3,
+    96
+   ],
+   "offset": 6166216,
+   "bytes": 1152
+  },
+  "net_family_rho_2_bias": {
+   "dtype": "float32",
+   "shape": [
+    3
+   ],
+   "offset": 6167368,
+   "bytes": 12
+  },
+  "net_regime_phi_0_weight": {
+   "dtype": "float32",
+   "shape": [
+    64,
+    4
+   ],
+   "offset": 6167384,
+   "bytes": 1024
+  },
+  "net_regime_phi_0_bias": {
+   "dtype": "float32",
+   "shape": [
+    64
+   ],
+   "offset": 6168408,
+   "bytes": 256
+  },
+  "net_regime_phi_2_weight": {
+   "dtype": "float32",
+   "shape": [
+    128,
+    64
+   ],
+   "offset": 6168664,
+   "bytes": 32768
+  },
+  "net_regime_phi_2_bias": {
+   "dtype": "float32",
+   "shape": [
+    128
+   ],
+   "offset": 6201432,
+   "bytes": 512
+  },
+  "net_regime_rho_0_weight": {
+   "dtype": "float32",
+   "shape": [
+    96,
+    256
+   ],
+   "offset": 6201944,
+   "bytes": 98304
+  },
+  "net_regime_rho_0_bias": {
+   "dtype": "float32",
+   "shape": [
+    96
+   ],
+   "offset": 6300248,
+   "bytes": 384
+  },
+  "net_regime_rho_2_weight": {
+   "dtype": "float32",
+   "shape": [
+    3,
+    96
+   ],
+   "offset": 6300632,
+   "bytes": 1152
+  },
+  "net_regime_rho_2_bias": {
+   "dtype": "float32",
+   "shape": [
+    3
+   ],
+   "offset": 6301784,
+   "bytes": 12
+  },
+  "demo_fate_truth": {
+   "dtype": "float32",
+   "shape": [
+    82716
+   ],
+   "offset": 6301800,
+   "bytes": 330864
+  },
+  "demo_fate_nonempty": {
+   "dtype": "uint8",
+   "shape": [
+    12
+   ],
+   "offset": 6632664,
+   "bytes": 12
+  },
+  "demo_frg_truth": {
+   "dtype": "float32",
+   "shape": [
+    82716
+   ],
+   "offset": 6632680,
+   "bytes": 330864
+  },
+  "demo_frg_nonempty": {
+   "dtype": "uint8",
+   "shape": [
+    12
+   ],
+   "offset": 6963544,
+   "bytes": 12
+  },
+  "demo_bio_truth": {
+   "dtype": "float32",
+   "shape": [
+    82716
+   ],
+   "offset": 6963560,
+   "bytes": 330864
+  },
+  "demo_bio_nonempty": {
+   "dtype": "uint8",
+   "shape": [
+    12
+   ],
+   "offset": 7294424,
+   "bytes": 12
+  },
+  "demo_bio_easy_truth": {
+   "dtype": "float32",
+   "shape": [
+    82716
+   ],
+   "offset": 7294440,
+   "bytes": 330864
+  },
+  "demo_bio_easy_nonempty": {
+   "dtype": "uint8",
+   "shape": [
+    12
+   ],
+   "offset": 7625304,
+   "bytes": 12
+  },
+  "demo_frg_easy_truth": {
+   "dtype": "float32",
+   "shape": [
+    82716
+   ],
+   "offset": 7625320,
+   "bytes": 330864
+  },
+  "demo_frg_easy_nonempty": {
+   "dtype": "uint8",
+   "shape": [
+    12
+   ],
+   "offset": 7956184,
+   "bytes": 12
+  },
+  "demo_fate_hard_truth": {
+   "dtype": "float32",
+   "shape": [
+    82716
+   ],
+   "offset": 7956200,
+   "bytes": 330864
+  },
+  "demo_fate_hard_nonempty": {
+   "dtype": "uint8",
+   "shape": [
+    12
+   ],
+   "offset": 8287064,
+   "bytes": 12
+  }
+ },
+ "total_bytes": 8287076
+}

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<meta name="googlebot" content="noindex, nofollow">
+<title>Ariake microplastic survey instrument</title>
+<link rel="stylesheet" href="app.css?v=20260913a">
+
+<style>
+  .preview-bar {
+    background: #fdf3e3; border-bottom: 1px solid #e3d3ae; color: #6b4e14;
+    font: 13px/1.5 system-ui, -apple-system, sans-serif;
+    padding: 9px 16px; text-align: center;
+  }
+  .preview-bar b { color: #4a350a; }
+  @media print { .preview-bar { display: none; } }
+</style>
+</head>
+<body>
+
+<div class="preview-bar">
+  <b>Unpublished preview.</b> This page accompanies two manuscripts that are
+  not yet in print, and is shared for comment only. Please do not
+  redistribute the link or the results.
+</div>
+
+<header>
+  <div class="wrap">
+    <div class="hrow">
+      <div>
+        <h1>Ariake Sea microplastic survey instrument</h1>
+        <p class="sub">Place a few stations, enter what you measured, and read
+          the whole bay: the suspended field with its uncertainty, the
+          governing process, its parameters, and where to sample next.</p>
+      </div>
+      <button id="helpToggle" class="ghost help-btn"
+        title="Show a short explanation beside every control and every result">
+        Show help</button>
+    </div>
+    <p class="caveat">Trained on <span id="trainCount">-</span> simulated years
+      of the bay. It has never been tested against a real Ariake sample.
+      Bundle built <span id="built">-</span>.</p>
+  </div>
+</header>
+
+<main class="wrap">
+
+<div class="help intro">
+  <h4>How this works, in four sentences</h4>
+  <p>Every year the bay could plausibly have is a mix of fifteen basic
+    patterns, learned from the simulated campaign. Your readings do not have
+    to determine thousands of cell values, only those fifteen numbers, which
+    is why a handful of samples is enough. The calculation is done three
+    times, once for each process, and how well each version explains your
+    readings becomes the probability that this process is governing. The same
+    formula that gives the best estimate also gives the spread around it,
+    which is the uncertainty map.</p>
+</div>
+
+<section class="grid">
+  <div class="card mapcard">
+    <div class="toolbar">
+      <label title="The month of your first sampling trip">Visit 1
+        <select id="month1"></select></label>
+      <label title="The month of your second trip. Two visits identify
+fragmentation far better than one.">Visit 2 <select id="month2"></select></label>
+      <label class="chk" title="Show the average field of the campaign as a
+backdrop, so you can see the bay before measuring anything">
+        <input type="checkbox" id="showBg"> campaign average</label>
+      <label class="chk" title="Overlay the six stations the paper derived as
+the optimal survey">
+        <input type="checkbox" id="showPlan"> the paper's plan</label>
+      <label class="chk" title="Colour every candidate cell by how much one
+reading there would reduce the uncertainty of the whole field">
+        <input type="checkbox" id="showGain"> where a station would help</label>
+      <label class="chk" title="Draw the fourteen release points of the model">
+        <input type="checkbox" id="showSources"> release points</label>
+      <label class="chk" title="Colour every cell by how strongly one single
+source dominates the plastic there">
+        <input type="checkbox" id="showAttrib"> how attributable</label>
+    </div>
+    <div class="canvasbox"><canvas id="map"></canvas></div>
+    <canvas id="cbIn" class="cbar"></canvas>
+    <p class="hint">Click the water to place a station. Amber marks the next
+      station the instrument would choose.</p>
+    <div class="help">
+      <p><b>The map.</b> Blue is a low concentration, red is a high one. The
+        dashed part of the coastline is the open sea boundary of the model,
+        the solid part is land. Clicking anywhere on the water adds a station
+        and a row in the table beside it. Click the small cross in a row to
+        remove one.</p>
+      <p><b>Where a station would help.</b> Tick it and every candidate cell
+        is coloured by how much a single reading there would reduce the
+        uncertainty of the whole field. Before you enter anything it shows the
+        best places to plan a cruise. After you press "Read the bay" it
+        updates to show where the next station should go, given what you
+        already know.</p>
+      <p><b>Hover anywhere</b> on any map to read the value and the
+        uncertainty at that point.</p>
+      <p><b>Release points and attribution.</b> The model releases plastic at
+        fourteen points around the bay. Tick "release points" to see them.
+        Tick "how attributable" and every cell is coloured by how strongly a
+        single one of them dominates the plastic there: red where the origin
+        is nearly certain, blue where several rivers mix. Hovering names the
+        largest source, says how often it leads across the weighted
+        scenarios, and gives the age of that plastic. This layer comes from a
+        separate study of source attribution, built on 610 simulations of the
+        same bay, and loads the first time you ask for it.</p>
+      <p><b>Age, and whether two sources can be told apart.</b> The source
+        study tracks how long each particle has been in the water. That is
+        what makes attribution work: plastic from a distant river arrives
+        older than plastic from a nearby one. Two sources can only be
+        separated when their transit times to your station differ, and the
+        campaign measured the limit at about one day. The station panel
+        reports the age and says whether your top two sources clear it.</p>
+      <p><b>The backdrop.</b> With "campaign average" ticked you see the
+        typical field for the month chosen below the reconstructed map, before
+        any of your readings are used. It is what the instrument believes
+        before you tell it anything.</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Your survey</h2>
+    <div class="controls">
+      <label title="Leave this on the first setting unless you already work in
+normalized log units">Readings are
+        <select id="unit">
+          <option value="raw">a concentration, any unit</option>
+          <option value="norm">log10 of the normalized field</option>
+        </select>
+      </label>
+      <label id="limitRow" title="The smallest concentration your method can
+report. Only needed if you tick a reading as below the limit.">
+        Detection limit (optional)
+        <input type="text" id="limit" placeholder="e.g. 0.05"></label>
+      <label title="How uncertain a single reading is, as a coefficient of
+variation. 0.5 means a typical reading is out by about half its value.">
+        Assumed measurement error
+        <input type="range" id="cv" min="0.1" max="2" step="0.05" value="0.5">
+        <span id="cvLabel">0.50</span></label>
+    </div>
+    <p class="hint" id="unitHint">Type the suspended microplastic
+      concentration you measured at each station, in whatever unit your
+      laboratory reported, for example pieces per cubic metre. The unit
+      itself does not matter, only that every station uses the same one. The
+      instrument reads the pattern across your stations, and solves for the
+      scale as an unknown.</p>
+    <div class="help">
+      <p><b>The measurement error slider.</b> It tells the instrument how much
+        to trust each reading. Move it right and the reconstruction leans more
+        on the campaign and less on you, and the uncertainty widens. The
+        paper's tests show the map barely changes between 0.25 and 2, but the
+        honesty of the uncertainty does, so set it near the truth for your
+        method.</p>
+      <p><b>Below the limit.</b> A station where nothing was found is still
+        informative. Tick the small box beside that reading and give the
+        detection limit above. The reading then enters as "somewhere below
+        this line" rather than as a number.</p>
+    </div>
+    <table class="stations">
+      <thead><tr><th>#</th><th>Lon</th><th>Lat</th><th>Visit 1</th>
+        <th>Visit 2</th><th></th></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="buttons">
+      <button id="run" class="primary">Read the bay</button>
+      <button id="usePlan" class="ghost"
+        title="Place the six stations the paper derived">Use the paper's six
+        stations</button>
+      <button id="clear" class="ghost">Clear</button>
+    </div>
+    <div class="buttons second">
+      <button id="saveSurvey" class="ghost"
+        title="Save the stations, readings and settings to a file">Save
+        survey</button>
+      <button id="loadSurvey" class="ghost"
+        title="Reopen a survey saved earlier">Load survey</button>
+      <button id="exportField" class="ghost"
+        title="The reconstructed map and its uncertainty as a spreadsheet">
+        Export the map</button>
+      <button id="printPage" class="ghost"
+        title="A one page summary, or save as PDF from the print dialogue">
+        Print summary</button>
+      <input type="file" id="loadFile" accept=".json,application/json"
+        style="display:none">
+    </div>
+
+    <div class="gallery">
+      <label class="glabel">Worked example
+        <select id="exampleSel"></select></label>
+      <button id="loadExample" class="ghost">Load it</button>
+      <p class="hint" id="exampleDesc"></p>
+    </div>
+    <div class="help">
+      <p><b>Saving and exporting.</b> "Save survey" writes your stations,
+        readings and settings to a small file you can reopen later or send to
+        a colleague. "Export the map" writes the reconstructed concentration
+        and its uncertainty for every cell of the shown month as a
+        spreadsheet, with the units and the settings recorded at the top.
+        "Print summary" produces a one page record, and the print dialogue of
+        any browser can save it as a PDF.</p>
+      <p><b>The worked examples</b> are real scenarios from the campaign that
+        the instrument was never built from, so the truth is known and a third
+        map appears with the correlation printed. Each one demonstrates a
+        different finding of the paper. Load one, then change the months, the
+        error slider or the stations and press "Read the bay" again to see
+        what happens.</p>
+    </div>
+    <p id="warn" class="warn" style="display:none"></p>
+  </div>
+</section>
+
+<section id="results" style="display:none">
+  <h2 class="rhead">What the readings imply</h2>
+
+  <div class="grid3">
+    <div class="card">
+      <h3>Reconstructed field</h3>
+      <div class="canvasbox"><canvas id="mapRec"></canvas></div>
+      <canvas id="cbRec" class="cbar"></canvas>
+      <label class="dsel" title="Any month of the year can be shown, not only
+the ones you sampled">Showing <select id="displayMonth"></select></label>
+      <div class="help">
+        <p>The suspended concentration across the whole bay, implied by your
+          readings. If you entered a real unit, this map is in that same unit.
+          Every month of the year can be shown, because the fifteen patterns
+          describe the year jointly. Months you did not sample simply carry
+          more uncertainty.</p>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Uncertainty</h3>
+      <div class="canvasbox"><canvas id="mapSd"></canvas></div>
+      <canvas id="cbSd" class="cbar"></canvas>
+      <p class="hint" id="sdNote">Where this is bright, the map beside it is a
+        guess.</p>
+      <div class="help">
+        <p>A factor, not a concentration. A value of four means the true
+          concentration in that cell is likely to lie between a quarter and
+          four times what the map beside it shows. It is small near your
+          stations and large where the three process priors disagree.</p>
+      </div>
+    </div>
+    <div class="card" id="truthCard" style="display:none">
+      <h3>The truth</h3>
+      <div class="canvasbox"><canvas id="mapTruth"></canvas></div>
+      <canvas id="cbTruth" class="cbar"></canvas>
+      <p class="hint" id="truthNote"></p>
+      <div class="help">
+        <p>Only shown for a worked example. This is the field the simulation
+          actually produced, which the instrument never saw. Compare it with
+          the reconstruction beside it, and check that the errors sit where
+          the uncertainty map says they should.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h2>Which process is governing</h2>
+      <div id="process"></div>
+      <p class="note" id="clsNote"></p>
+      <div class="help">
+        <p><b>Three answers to the same question, by different routes.</b> The
+          first two come from trained networks, one naming which process was
+          switched on and one naming what the particles are actually doing.
+          The third is the closed form evidence of the three priors, computed
+          from the same update that draws the map.</p>
+        <p><b>The refusal matters.</b> Below nine in ten the instrument does
+          not name a process. That rule is from the paper, where the answers
+          it does commit to are right in ninety three to ninety eight per cent
+          of cases. Silence here is a result, not a failure.</p>
+      </div>
+    </div>
+    <div class="card" id="params"></div>
+  </div>
+
+  <div class="card" id="sourceCard" style="display:none"></div>
+
+  <div class="card" id="exampleCard" style="display:none"></div>
+
+  <div class="card" id="advice"></div>
+</section>
+
+<section class="card maths">
+  <h2>The mathematics, in short</h2>
+  <p class="lead">Everything on this page comes from the seven lines below.
+    They are the equations of the paper, written compactly. Bold letters are
+    vectors and matrices.</p>
+
+  <div class="eqrow">
+    <div class="eqlab">The field</div>
+    <div class="eqbody">
+      <div class="eq"><b>x</b> = <span class="ovl"><b>x</b></span> +
+        <b>&Phi;a</b></div>
+      <p class="where">The suspended field over every wet cell and all twelve
+        months is the campaign mean <span class="ovl"><b>x</b></span> plus a
+        mix of the 15 patterns <b>&Phi;</b>. The unknown is <b>a</b>, fifteen
+        numbers, not 6,893 cell values. This is why a handful of readings is
+        enough.</p>
+    </div>
+  </div>
+
+  <div class="eqrow">
+    <div class="eqlab">A survey</div>
+    <div class="eqbody">
+      <div class="eq"><b>y</b> = <span class="ovl"><b>x</b></span><sub>H</sub>
+        + <b>Ha</b> + <b>&epsilon;</b>,&nbsp;&nbsp;
+        <b>&epsilon;</b> ~ <i>N</i>(<b>0</b>, <b>R</b>)</div>
+      <p class="where"><b>H</b> holds the rows of <b>&Phi;</b> at the cells and
+        months you sampled. <b>R</b> is the reading error you set with the
+        slider, plus the part of the field the fifteen patterns cannot
+        describe.</p>
+    </div>
+  </div>
+
+  <div class="eqrow">
+    <div class="eqlab">The update,<br>once per process</div>
+    <div class="eqbody">
+      <div class="eq"><b>a</b><sub>f</sub> = <b>&mu;</b><sub>f</sub> +
+        <b>K</b><sub>f</sub><b>r</b><sub>f</sub>,&nbsp;&nbsp;
+        <b>C</b><sub>f</sub> = <b>&Sigma;</b><sub>f</sub> &minus;
+        <b>K</b><sub>f</sub><b>H&Sigma;</b><sub>f</sub></div>
+      <div class="eq sub"><b>K</b><sub>f</sub> =
+        <b>&Sigma;</b><sub>f</sub><b>H</b><sup>T</sup><b>S</b><sub>f</sub><sup>&minus;1</sup>,&nbsp;&nbsp;
+        <b>S</b><sub>f</sub> = <b>H&Sigma;</b><sub>f</sub><b>H</b><sup>T</sup>
+        + <b>R</b>,&nbsp;&nbsp;
+        <b>r</b><sub>f</sub> = <b>y</b> &minus;
+        <span class="ovl"><b>x</b></span><sub>H</sub> &minus;
+        <b>H&mu;</b><sub>f</sub></div>
+      <p class="where">The standard Gaussian update, run three times: once
+        with the biofouling prior, once with fragmentation, once with fate.
+        <b>&mu;</b><sub>f</sub> and <b>&Sigma;</b><sub>f</sub> are that
+        process's prior over the fifteen numbers, learned from the
+        campaign.</p>
+    </div>
+  </div>
+
+  <div class="eqrow">
+    <div class="eqlab">Which process</div>
+    <div class="eqbody">
+      <div class="eq"><i>w</i><sub>f</sub> &prop;
+        <i>N</i>(<b>y</b>;&nbsp;<span class="ovl"><b>x</b></span><sub>H</sub> +
+        <b>H&mu;</b><sub>f</sub>,&nbsp;<b>S</b><sub>f</sub>)</div>
+      <p class="where">How well each of the three versions explains your
+        readings, normalised over the three. These are the bars in the process
+        panel. Below nine in ten the page names no process.</p>
+    </div>
+  </div>
+
+  <div class="eqrow">
+    <div class="eqlab">The map</div>
+    <div class="eqbody">
+      <div class="eq"><b>m</b> = &sum;<sub>f</sub> <i>w</i><sub>f</sub>
+        <b>m</b><sub>f</sub>,&nbsp;&nbsp; <b>m</b><sub>f</sub> =
+        <span class="ovl"><b>x</b></span> +
+        <b>&Phi;a</b><sub>f</sub></div>
+      <p class="where">The three answers averaged by their own evidence. This
+        is the reconstructed field.</p>
+    </div>
+  </div>
+
+  <div class="eqrow">
+    <div class="eqlab">The uncertainty</div>
+    <div class="eqbody">
+      <div class="eq"><b>v</b> = &sum;<sub>f</sub> <i>w</i><sub>f</sub>
+        [ diag(<b>&Phi;C</b><sub>f</sub><b>&Phi;</b><sup>T</sup>) +
+        (<b>m</b><sub>f</sub> &minus; <b>m</b>)<sup>2</sup> ] +
+        <b>&rho;</b></div>
+      <p class="where">Two sources added together: how unsure each process is
+        about its own answer, and how much the three processes disagree with
+        each other. <b>&rho;</b> is the per-cell error of the fifteen-pattern
+        representation. The second map shows 10<sup>&radic;<b>v</b></sup>, the
+        factor either way.</p>
+    </div>
+  </div>
+
+  <div class="eqrow">
+    <div class="eqlab">Where to sample next</div>
+    <div class="eqbody">
+      <div class="eq"><i>s</i>* = arg max<sub>s</sub>
+        (<b>h</b><sub>s</sub><sup>T</sup><b>SWS h</b><sub>s</sub>) /
+        (<b>h</b><sub>s</sub><sup>T</sup><b>S h</b><sub>s</sub> +
+        &sigma;<sub>e</sub><sup>2</sup>),&nbsp;&nbsp;
+        <b>W</b> = <b>&Phi;</b><sup>T</sup><b>&Phi;</b></div>
+      <p class="where">The cell whose reading would most reduce the total
+        uncertainty of the whole field, not the cell that is most uncertain by
+        itself. This is the amber marker, and the rule that produced the
+        printed plan.</p>
+    </div>
+  </div>
+
+  <div class="eqrow">
+    <div class="eqlab">Two extensions</div>
+    <div class="eqbody">
+      <div class="eq"><b>H</b> &rarr; [<b>H</b>&nbsp;<b>1</b>],&nbsp;&nbsp;
+        <b>a</b> &rarr; (<b>a</b>, <i>o</i>)</div>
+      <div class="eq sub"><i>y</i><sub>i</sub> &rarr;
+        <i>E</i>[&thinsp;<i>y</i><sub>i</sub> |
+        <i>y</i><sub>i</sub> &lt; <i>L</i>&thinsp;]</div>
+      <p class="where">The first carries an unknown common scale <i>o</i> as
+        one more unknown, which is why any unit can be entered. The second
+        replaces a reading that only says "below the limit <i>L</i>" by the
+        mean of what the model expects under that bound.</p>
+    </div>
+  </div>
+
+  <p class="note">In the paper these are Equations 1 to 5, with the two
+    extensions in the section on baselines and further tests. The page solves
+    them exactly, in about fifteen milliseconds, with no approximation beyond
+    the fifteen patterns themselves.</p>
+</section>
+
+<footer>
+  <p>The method is the one published in “A simulation-trained Bayesian
+    instrument for microplastic surveys”. The field, its uncertainty, the
+    evidence weights and the next-station advice use the paper's own
+    equations. The parameter ranges use a simpler route than the paper's
+    neural posteriors and are labelled where they appear.</p>
+  <p>D. Goodarzi and A. Mohammadian, Department of Civil Engineering,
+    University of Ottawa.</p>
+</footer>
+
+</main>
+
+<script>window.ASSET_V = "20260913a";</script>
+<script src="data/bundle_b64.js?v=20260913a"></script>
+<script src="js/linalg.js?v=20260913a"></script>
+<script src="js/bundle.js?v=20260913a"></script>
+<script src="js/instrument.js?v=20260913a"></script>
+<script src="js/sources.js?v=20260913a"></script>
+<script src="js/map.js?v=20260913a"></script>
+<script src="js/ui.js?v=20260913a"></script>
+</body>
+</html>
