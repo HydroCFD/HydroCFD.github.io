@@ -8,7 +8,7 @@ Authors: Danial Goodarzi, Abdolmajid Mohammadian, Abolghasem Pilechi and Atsuhik
 
 ## Content sources
 
-The page is based on `paper2/paper_1_model/ariake1.tex` and figures in `paper2/figures/paper_1_model`, supplied by the author on 9 October 2026. Animations are the three supplied `meander_*.mp4` files in that figure directory's `anim` folder. Image previews are WebP versions of the supplied figures; the six original plot PDFs remain downloadable.
+The page is based on `paper2/paper_1_model/ariake1.tex` and figures in `paper2/figures/paper_1_model`, supplied by the author on 9 October 2026. Animations are the three supplied `meander_*.mp4` files in that figure directory's `anim` folder. Image previews are WebP versions of the supplied figures. The eight plot panels were removed from the page at the author’s request; their assets are retained in the repository.
 
 The meandering river is synthetic. The manuscript's Ariake Sea results subsection and active abstract are empty in this revision; numerical Ariake fate claims present only in commented text were therefore excluded. No DOI, journal, publication status or public solver repository is inferred. The linked `microplastic_modeling` repository describes a separate project, not the source code for this solver.
 
