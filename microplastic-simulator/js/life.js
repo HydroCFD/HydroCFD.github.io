@@ -9,7 +9,6 @@ export function initLife(canvas) {
   const small = isSmall();
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setClearColor(0x000000, 0);
-  renderer.localClippingEnabled = true;
   const scene = new THREE.Scene();
   scene.fog = new THREE.Fog(0xf7f3eb, 11, 26);
   const camera = new THREE.PerspectiveCamera(small ? 44 : 36, 1, 0.1, 80);
@@ -82,19 +81,15 @@ export function initLife(canvas) {
     }
   }
   shellGeo.setAttribute('color', new THREE.BufferAttribute(FCOL, 4));
-  // one octant of the layer is cut away so the plastic sphere shows inside it;
-  // the three cutting planes are fixed in the world and follow the particle centre
-  const cut = [new THREE.Plane(), new THREE.Plane(), new THREE.Plane()];
-  const cutDirs = [new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 1)];
-  const clip = { clippingPlanes: cut, clipIntersection: true };
+  // the layer is slightly translucent, so the plastic sphere shows faintly inside it
   const shellMat = new THREE.MeshPhysicalMaterial({
-    vertexColors: true, transparent: true, depthWrite: false, side: THREE.DoubleSide,
-    roughness: 0.5, clearcoat: 0.4, clearcoatRoughness: 0.35, ...clip
+    vertexColors: true, transparent: true, depthWrite: false,
+    roughness: 0.5, clearcoat: 0.4, clearcoatRoughness: 0.35
   });
   const shell = new THREE.Mesh(shellGeo, shellMat);
   shell.renderOrder = 1;
   particle.add(shell);
-  const shellLineMat = new THREE.MeshBasicMaterial({ color: 0x141414, side: THREE.BackSide, transparent: true, opacity: 0, ...clip });
+  const shellLineMat = new THREE.MeshBasicMaterial({ color: 0x141414, side: THREE.BackSide, transparent: true, opacity: 0 });
   const shellLine = new THREE.Mesh(shellGeo, shellLineMat);
   shellLine.scale.setScalar(1.025);
   shell.add(shellLine);
@@ -119,7 +114,7 @@ export function initLife(canvas) {
       SP.array[3 * i] = base[3 * i] + radial[3 * i] * h;
       SP.array[3 * i + 1] = base[3 * i + 1] + radial[3 * i + 1] * h;
       SP.array[3 * i + 2] = base[3 * i + 2] + radial[3 * i + 2] * h;
-      FCOL[4 * i + 3] = cv > 0.02 ? 0.5 + 0.48 * cv : 0;
+      FCOL[4 * i + 3] = cv > 0.02 ? 0.48 + 0.34 * cv : 0;
     }
     SP.needsUpdate = true;
     shellLineMat.opacity = merge;
@@ -144,7 +139,7 @@ export function initLife(canvas) {
   // diatoms: small golden-brown cells lying flat on the film
   const ND = small ? 110 : 180;
   const diatoms = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 10, 6),
-    new THREE.MeshStandardMaterial({ color: 0x8a6420, roughness: 0.45, ...clip }), ND);
+    new THREE.MeshStandardMaterial({ color: 0x8a6420, roughness: 0.45 }), ND);
   particle.add(diatoms);
   const dVert = [], dRot = [], dLen = [];
   {
@@ -180,14 +175,14 @@ export function initLife(canvas) {
   const filGeo = new THREE.BufferGeometry();
   filGeo.setAttribute('position', new THREE.BufferAttribute(filPos, 3).setUsage(THREE.DynamicDrawUsage));
   filGeo.setAttribute('color', new THREE.BufferAttribute(filCol, 3));
-  const filaments = new THREE.LineSegments(filGeo, new THREE.LineBasicMaterial({ vertexColors: true, ...clip }));
+  const filaments = new THREE.LineSegments(filGeo, new THREE.LineBasicMaterial({ vertexColors: true }));
   filaments.frustumCulled = false;
   particle.add(filaments);
 
   // algal cells that drift in and land where the colonies will start
   const NA = small ? 60 : 90;
   const algae = new THREE.InstancedMesh(new THREE.SphereGeometry(0.035, 10, 8),
-    new THREE.MeshStandardMaterial({ color: 0x4f5f20, roughness: 0.6, ...clip }), NA);
+    new THREE.MeshStandardMaterial({ color: 0x4f5f20, roughness: 0.6 }), NA);
   particle.add(algae);
   const aVert = [], aStart = [], aTh = [];
   for (let k = 0; k < NA; k++) {
@@ -344,7 +339,6 @@ export function initLife(canvas) {
       (0.3 * Math.sin(t * 0.47 + 1) + 0.14 * Math.sin(t * 1.71)) * amp,
       0.2 * Math.sin(t * 0.37) * amp);
     particle.rotation.set(Math.sin(t * 0.3) * 0.45 + 0.3, t * 0.22, Math.sin(t * 0.21) * 0.25);
-    for (let k = 0; k < 3; k++) cut[k].set(cutDirs[k].clone().negate(), cutDirs[k].dot(particle.position));
     core.visible = shell.visible = algae.visible = diatoms.visible = filaments.visible = !broken;
     if (!broken) { growFilm(b); growExtras(b, t); }
 
