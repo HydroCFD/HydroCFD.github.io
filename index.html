@@ -7,6 +7,7 @@
 <meta name="description" content="Danial Goodarzi is a computational fluid dynamics (CFD) modeler and scientist, hydraulic modeler, and flood scientist specializing in environmental fluid mechanics and microplastic transport.">
 <meta name="author" content="Danial Goodarzi">
 <meta name="keywords" content="Danial Goodarzi, CFD modeler, CFD scientist, computational fluid dynamics, hydraulic modeler, flood scientist, flood modeling, environmental fluid mechanics, computational hydraulics, microplastic transport">
+<meta name="theme-color" content="#f2ede3">
 <link rel="canonical" href="https://hydrocfd.github.io/">
 <meta property="og:type" content="profile">
 <meta property="og:title" content="Danial Goodarzi | CFD Scientist &amp; Hydraulic Modeler">
@@ -54,16 +55,18 @@
 <link rel="icon" href="favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 
-<header class="site-header">
-  <div class="reading-progress" aria-hidden="true"></div>
-  <div class="container">
-    <a class="site-name" href="index.html">Danial Goodarzi</a>
-    <nav class="site-nav">
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="brand" href="index.html">Danial Goodarzi</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-links">Menu</button>
+    <nav id="site-links" aria-label="Main navigation">
       <a href="#research">Research</a>
       <a href="publications.html">Publications</a>
       <a href="#software">Software</a>
@@ -73,65 +76,62 @@
       <a href="#contact">Contact</a>
     </nav>
   </div>
+  <div class="nav-progress" aria-hidden="true"></div>
 </header>
 
-<main>
+<main id="main">
 
   <!-- ============ hero ============ -->
-  <section class="hero">
-    <div class="hero-flow" aria-hidden="true">
-      <svg viewBox="0 0 1200 420" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
-        <g class="streamlines">
-          <path pathLength="1" d="M-80 84 C150 18 270 164 500 92 S850 12 1280 112"/>
-          <path pathLength="1" d="M-60 142 C175 76 320 218 548 148 S910 70 1270 168"/>
-          <path pathLength="1" d="M-40 210 C190 142 350 282 590 214 S940 140 1260 226"/>
-          <path pathLength="1" d="M-60 282 C170 212 338 346 580 284 S930 214 1280 302"/>
-          <path pathLength="1" d="M-100 352 C140 282 312 416 560 354 S920 284 1300 370"/>
-        </g>
-        <g class="flow-particles">
-          <circle cx="182" cy="87" r="3"/>
-          <circle cx="425" cy="119" r="2.5"/>
-          <circle cx="720" cy="176" r="3.5"/>
-          <circle cx="936" cy="261" r="2.5"/>
-          <circle cx="1080" cy="326" r="3"/>
-        </g>
-      </svg>
-    </div>
-    <div class="container">
-      <div class="hero-grid">
+  <section class="hero home-hero" id="top">
+    <canvas class="hero-gl" id="hero-gl" aria-hidden="true"></canvas>
+    <div class="hero-veil" aria-hidden="true"></div>
+    <div class="hero-content">
+      <div class="id-row">
         <img class="portrait" src="images/profile.png" alt="Portrait of Danial Goodarzi">
         <div>
-          <p class="hero-kicker">Environmental Flow Researcher</p>
-          <h1>Danial Goodarzi, Ph.D.</h1>
-          <p class="role">Postdoctoral Researcher · <em>University of Ottawa</em></p>
+          <p class="overline">Environmental flow researcher</p>
+          <h1>Danial Goodarzi, <em>Ph.D.</em></h1>
+          <p class="role">Postdoctoral Researcher, <em>University of Ottawa</em></p>
           <p class="fields">CFD Modeler &amp; Scientist · Hydraulic Modeler · Flood Scientist</p>
-          <div class="profile-links">
-            <a href="mailto:dgood006@uottawa.ca">Email</a>
-            <a href="https://scholar.google.com/citations?user=inKDJywAAAAJ&amp;hl=en">Google Scholar</a>
-            <a href="https://orcid.org/0000-0002-1621-5052">ORCID</a>
-            <a href="https://www.researchgate.net/profile/Danial-Goodarzi">ResearchGate</a>
-            <a href="https://github.com/HydroCFD">GitHub</a>
-            <a href="https://www.linkedin.com/in/danial-goodarzi-59243a99">LinkedIn</a>
-          </div>
         </div>
       </div>
-      <svg class="wave-rule" viewBox="0 0 880 30" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path d="M0,15 C55,4 110,26 165,15 C220,4 275,26 330,15 C385,4 440,26 495,15 C550,4 605,26 660,15 C715,4 770,26 825,15 C860,8 870,18 880,15"/>
-      </svg>
+      <div class="profile-links">
+        <a href="mailto:dgood006@uottawa.ca">Email</a>
+        <a href="https://scholar.google.com/citations?user=inKDJywAAAAJ&amp;hl=en">Google Scholar</a>
+        <a href="https://orcid.org/0000-0002-1621-5052">ORCID</a>
+        <a href="https://www.researchgate.net/profile/Danial-Goodarzi">ResearchGate</a>
+        <a href="https://github.com/HydroCFD">GitHub</a>
+        <a href="https://www.linkedin.com/in/danial-goodarzi-59243a99">LinkedIn</a>
+      </div>
+      <div class="actions">
+        <a class="btn" href="#research">Research areas <span aria-hidden="true">→</span></a>
+        <a class="textlink" href="#software">Software and tools</a>
+      </div>
     </div>
+    <figure class="hero-key" aria-hidden="true">
+      <span class="key-dot ink"></span> floating
+      <span class="key-dot red"></span> sinking
+      <span class="key-dot bed"></span> on the bed
+    </figure>
+    <p class="hero-caption"><span>Fig. 1</span> Microplastics drifting through a meandering river, drawn live.</p>
+    <button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">Pause motion</button>
   </section>
 
   <!-- ============ about ============ -->
-  <section class="section" id="about">
-    <div class="container">
-      <p class="lead reveal">
+  <section class="sec" id="about">
+    <div class="wrap">
+      <header class="sec-head reveal">
+        <span class="numeral">I</span>
+        <div><h2>About</h2></div>
+      </header>
+      <p class="lead-text reveal">
         I am a <strong>computational fluid dynamics (CFD) modeler and scientist, hydraulic modeler,
         and flood scientist</strong>, as well as a Postdoctoral Researcher in the Department of Civil
         Engineering at the University of Ottawa working with Prof. Majid Mohammadian. My research
         combines computational modeling, laboratory experiments, and data-driven methods to study
         environmental flows, flood processes, and pollutant transport through aquatic environments.
       </p>
-      <p class="lead reveal">
+      <p class="lead-text reveal">
         My current focus is the <strong>transport and fate of microplastics in water systems</strong>:
         how particle properties such as size, density, shape, and buoyancy interact with turbulence,
         shear, and aquatic vegetation to control where microplastics travel and where they
@@ -139,7 +139,7 @@
       </p>
 
       <div class="highlight reveal">
-        <span class="tag">Current Research</span>
+        <span class="tag">Current research</span>
         <h3>GPU-Accelerated Eulerian–Lagrangian Modeling of Microplastic Transport</h3>
         <p>
           A computational framework coupling vegetation-aware RANS hydrodynamics (OpenFOAM) with a
@@ -148,244 +148,203 @@
           Manuscript in preparation with Prof. Majid Mohammadian.
         </p>
         <div class="links">
-          <a href="https://github.com/HydroCFD/microplastic_modeling">Code Repository →</a>
-          <a href="https://hydrocfd.github.io/microplastic_modeling/">Project Page →</a>
+          <a href="https://github.com/HydroCFD/microplastic_modeling">Code repository →</a>
+          <a href="https://hydrocfd.github.io/microplastic_modeling/">Project page →</a>
         </div>
       </div>
     </div>
   </section>
 
   <!-- ============ research ============ -->
-  <section class="section" id="research">
-    <div class="container">
-      <h2>Research Areas</h2>
-      <div class="areas">
-        <div class="area featured reveal">
+  <section class="sec tint" id="research">
+    <div class="wrap">
+      <header class="sec-head reveal">
+        <span class="numeral">II</span>
+        <div><h2>Research Areas</h2></div>
+      </header>
+      <ul class="entries reveal">
+        <li>
+          <span class="n">1</span>
           <h3>Microplastic Transport &amp; Dispersion</h3>
-          <p>
-            Force-based Lagrangian modeling of microplastic particles in turbulent open-channel
+          <p>Force-based Lagrangian modeling of microplastic particles in turbulent open-channel
             flows, including drag, buoyancy, added mass, lift, and stochastic turbulent dispersion,
-            with emphasis on vegetation effects, breakthrough curves, and environmental-scale prediction.
-          </p>
-        </div>
-        <div class="area reveal">
+            with emphasis on vegetation effects, breakthrough curves, and environmental-scale prediction.</p>
+        </li>
+        <li>
+          <span class="n">2</span>
           <h3>Environmental Hydraulics of Water &amp; Wastewater Systems</h3>
-          <p>
-            Hydraulic efficiency and pollutant transport in waste stabilization ponds, retention
+          <p>Hydraulic efficiency and pollutant transport in waste stabilization ponds, retention
             ponds, sedimentation basins, and chlorine contact tanks, including thermal and wind
-            effects on treatment performance.
-          </p>
-        </div>
-        <div class="area reveal">
+            effects on treatment performance.</p>
+        </li>
+        <li>
+          <span class="n">3</span>
           <h3>Buoyant Jets &amp; Desalination Discharges</h3>
-          <p>
-            Numerical and experimental study of dense and buoyant jets: desalination brine
+          <p>Numerical and experimental study of dense and buoyant jets: desalination brine
             outfalls, mixing under crossflow and stratification, LIF measurements, and
-            multifidelity Bayesian prediction of dilution.
-          </p>
-        </div>
-        <div class="area reveal">
+            multifidelity Bayesian prediction of dilution.</p>
+        </li>
+        <li>
+          <span class="n">4</span>
           <h3>Turbulence &amp; Data-Driven Modeling</h3>
-          <p>
-            Large eddy simulation of turbidity currents and treatment units, and machine-learning
+          <p>Large eddy simulation of turbidity currents and treatment units, and machine-learning
             surrogates for environmental prediction, bridging high-fidelity simulation and
-            practical engineering models.
-          </p>
-        </div>
-      </div>
+            practical engineering models.</p>
+        </li>
+      </ul>
     </div>
   </section>
 
   <!-- ============ selected publications ============ -->
-  <section class="section" id="publications">
-    <div class="container">
-      <h2>Selected Publications</h2>
-
-      <div class="pub reveal">
-        <div class="title">Numerical modelling of hydraulic efficiency and pollution transport in waste stabilization ponds</div>
-        <div class="authors"><b>D. Goodarzi</b>, A. Mohammadian, J. Pearson, S. Abolfathi</div>
-        <div class="venue">Ecological Engineering, 2022</div>
-      </div>
-
-      <div class="pub reveal">
-        <div class="title">Large eddy simulation of turbidity currents in a narrow channel with different obstacle configurations</div>
-        <div class="authors"><b>D. Goodarzi</b>, K. Sookhak Lari, E. Khavasi, S. Abolfathi</div>
-        <div class="venue">Scientific Reports, 2020</div>
-      </div>
-
-      <div class="pub reveal">
-        <div class="title">Modelling solute transport in water disinfection systems: effects of temperature gradient on the hydraulic and disinfection efficiency of serpentine chlorine contact tanks</div>
-        <div class="authors"><b>D. Goodarzi</b>, S. Abolfathi, S. Borzooei</div>
-        <div class="venue">Journal of Water Process Engineering, 2020</div>
-      </div>
-
-      <div class="pub reveal">
-        <div class="title">The effects of permeable baffles on hydraulic and treatment performance in retention ponds</div>
-        <div class="authors">M. Guo, <b>D. Goodarzi</b>, J. Pearson, A. Mohammadian, S. Abolfathi</div>
-        <div class="venue">Journal of Water Process Engineering, 2025</div>
-      </div>
-
-      <div class="pub reveal">
-        <div class="title">Multifidelity numerical modeling and Bayesian hierarchical prediction of the desalination discharges</div>
-        <div class="authors"><b>D. Goodarzi</b>, A. Mohammadian</div>
-        <div class="venue">Desalination, 2025</div>
-      </div>
-
+  <section class="sec" id="publications">
+    <div class="wrap">
+      <header class="sec-head reveal">
+        <span class="numeral">III</span>
+        <div><h2>Selected Publications</h2></div>
+      </header>
+      <ul class="pub-list reveal">
+        <li><span class="yr">2025</span><div>
+          <div class="title">Multifidelity numerical modeling and Bayesian hierarchical prediction of the desalination discharges</div>
+          <div class="authors"><b>D. Goodarzi</b>, A. Mohammadian</div>
+          <div class="venue">Desalination, 2025</div></div></li>
+        <li><span class="yr">2025</span><div>
+          <div class="title">The effects of permeable baffles on hydraulic and treatment performance in retention ponds</div>
+          <div class="authors">M. Guo, <b>D. Goodarzi</b>, J. Pearson, A. Mohammadian, S. Abolfathi</div>
+          <div class="venue">Journal of Water Process Engineering, 2025</div></div></li>
+        <li><span class="yr">2022</span><div>
+          <div class="title">Numerical modelling of hydraulic efficiency and pollution transport in waste stabilization ponds</div>
+          <div class="authors"><b>D. Goodarzi</b>, A. Mohammadian, J. Pearson, S. Abolfathi</div>
+          <div class="venue">Ecological Engineering, 2022</div></div></li>
+        <li><span class="yr">2020</span><div>
+          <div class="title">Large eddy simulation of turbidity currents in a narrow channel with different obstacle configurations</div>
+          <div class="authors"><b>D. Goodarzi</b>, K. Sookhak Lari, E. Khavasi, S. Abolfathi</div>
+          <div class="venue">Scientific Reports, 2020</div></div></li>
+        <li><span class="yr">2020</span><div>
+          <div class="title">Modelling solute transport in water disinfection systems: effects of temperature gradient on the hydraulic and disinfection efficiency of serpentine chlorine contact tanks</div>
+          <div class="authors"><b>D. Goodarzi</b>, S. Abolfathi, S. Borzooei</div>
+          <div class="venue">Journal of Water Process Engineering, 2020</div></div></li>
+      </ul>
       <p class="more-link reveal"><a href="publications.html">Full publication list →</a></p>
     </div>
   </section>
 
   <!-- ============ software ============ -->
-  <section class="section" id="software">
-    <div class="container">
-      <h2>Software &amp; Tools</h2>
-      <div class="software-list">
-        <div class="software reveal">
-          <div class="icon">🧭</div>
-          <div>
-            <h3>Ariake Survey Instrument</h3>
-            <p>
-              A Bayesian instrument for microplastic surveys of the Ariake Sea.
-              Place a few stations, enter the concentrations you measured, and
-              it reconstructs the whole suspended field with its uncertainty,
-              names the governing process, says where to sample next, and
-              traces the plastic back to the rivers it came from. Trained on
-              1,304 simulated years of the bay; unlike the two visualizations
-              below, every number comes from the real campaign.
-            </p>
-            <div class="links">
-              <a href="ariake-instrument/index.html">Open the Instrument &rarr;</a>
-            </div>
-          </div>
-        </div>
-        <div class="software reveal">
-          <div class="icon">AI</div>
-          <div>
-            <h3>Constructed Wetland Surrogate Model</h3>
-            <p>
-              A GPU-accelerated CFD and machine-learning framework for rapid prediction of
-              hydraulic efficiency and full residence-time distributions in free-water-surface
-              constructed wetlands and waste stabilization ponds.
-            </p>
-            <div class="links">
-              <a href="constructed-wetland-surrogate/index.html">Explore the Project &rarr;</a>
-            </div>
-          </div>
-        </div>
-        <div class="software reveal">
-          <div class="icon">🌊</div>
-          <div>
-            <h3>Microplastic modeling</h3>
-            <p>
-              Open-source numerical tools for simulating microplastic transport in water systems:
-              a GPU-accelerated Eulerian–Lagrangian framework for turbulent open-channel flow with
-              and without vegetation.
-            </p>
-            <div class="links">
-              <a href="https://github.com/HydroCFD/microplastic_modeling">GitHub →</a>
-              <a href="https://hydrocfd.github.io/microplastic_modeling/">Project Page →</a>
-            </div>
-          </div>
-        </div>
-        <div class="software reveal">
-          <div class="icon">💧</div>
-          <div>
-            <h3>Dense Jet Simulator</h3>
-            <p>
-              An interactive integral-model demonstration of an inclined dense jet: terminal
-              rise, return point, bed impact, and bottom density-current spreading, with
-              crossflow, stratification, and depth effects. Illustrative visualization only, not
-              based on real scientific data.
-            </p>
-            <div class="links">
-              <a href="dense-jet-simulator/index.html">Open the Simulator →</a>
-              <a href="dense-jet-simulator-classic/index.html">Classic Version →</a>
-            </div>
-          </div>
-        </div>
-        <div class="software reveal">
-          <div class="icon">🧴</div>
-          <div>
-            <h3>GPU Microplastic Transport</h3>
-            <p>Research results and animations from a GPU-accelerated three-dimensional Lagrangian model, including biofilm growth, fragmentation, meandering-river deposition and comparisons with laboratory measurements.</p>
-            <div class="links">
-              <a href="microplastic-simulator/index.html">Explore Results and Animations →</a>
-            </div>
-          </div>
-        </div>
-      </div>
+  <section class="sec tint" id="software">
+    <div class="wrap">
+      <header class="sec-head reveal">
+        <span class="numeral">IV</span>
+        <div><h2>Software &amp; Tools</h2></div>
+      </header>
+      <ul class="entries three reveal">
+        <li>
+          <span class="n">1</span>
+          <h3>GPU Microplastic Transport</h3>
+          <p>A GPU-accelerated three-dimensional Lagrangian model that follows every particle through
+            the water, with biofilm growth and number-conserving fragmentation, shown in 3D animations.</p>
+          <div class="links"><a href="microplastic-simulator/index.html">Explore the project →</a></div>
+        </li>
+        <li>
+          <span class="n">2</span>
+          <h3>Constructed Wetland Surrogate Model</h3>
+          <p>A GPU-accelerated CFD and machine-learning framework for rapid prediction of
+            hydraulic efficiency and full residence-time distributions in free-water-surface
+            constructed wetlands and waste stabilization ponds.</p>
+          <div class="links"><a href="constructed-wetland-surrogate/index.html">Explore the project →</a></div>
+        </li>
+        <li>
+          <span class="n">3</span>
+          <h3>Dense Jet Simulator</h3>
+          <p>An interactive integral-model demonstration of an inclined dense jet: terminal
+            rise, return point, bed impact, and bottom density-current spreading, with
+            crossflow, stratification, and depth effects. Illustrative visualization only, not
+            based on real scientific data.</p>
+          <div class="links"><a href="dense-jet-simulator/index.html">Open the simulator →</a><a href="dense-jet-simulator-classic/index.html">Classic version →</a></div>
+        </li>
+        <li>
+          <span class="n">4</span>
+          <h3>Ariake Survey Instrument</h3>
+          <p>A Bayesian instrument for microplastic surveys of the Ariake Sea.
+            Place a few stations, enter the concentrations you measured, and
+            it reconstructs the whole suspended field with its uncertainty,
+            names the governing process, says where to sample next, and
+            traces the plastic back to the rivers it came from. Trained on
+            1,304 simulated years of the bay.</p>
+          <div class="links"><a href="ariake-instrument/index.html">Open the instrument →</a></div>
+        </li>
+        <li>
+          <span class="n">5</span>
+          <h3>Microplastic Modeling</h3>
+          <p>Open-source numerical tools for simulating microplastic transport in water systems:
+            a GPU-accelerated Eulerian–Lagrangian framework for turbulent open-channel flow with
+            and without vegetation.</p>
+          <div class="links"><a href="https://github.com/HydroCFD/microplastic_modeling">GitHub →</a><a href="https://hydrocfd.github.io/microplastic_modeling/">Project page →</a></div>
+        </li>
+        <li>
+          <span class="n">6</span>
+          <h3>Microplastic Journey</h3>
+          <p>A schematic teaching demonstration of how microplastics travel from a river into a
+            lake: advection, mixing, biofouling, vegetation trapping, settling and resuspension.</p>
+          <div class="links"><a href="microplastic-simulator/journey.html">Open the demonstration →</a></div>
+        </li>
+      </ul>
     </div>
   </section>
 
   <!-- ============ contact ============ -->
-  <section class="section" id="contact">
-    <div class="container">
+  <section class="contact" id="contact">
+    <div class="wrap reveal">
       <h2>Contact</h2>
-      <p class="lead reveal">
-        I welcome collaborations on microplastic transport, environmental hydraulics, dense
-        discharges, and physics-informed modeling.
-      </p>
-      <p class="reveal" style="margin-top:14px">
+      <p>I welcome collaborations on microplastic transport, environmental hydraulics, dense
+        discharges, and physics-informed modeling.</p>
+      <p class="contact-lines">
         <strong>Email:</strong> <a href="mailto:dgood006@uottawa.ca">dgood006@uottawa.ca</a><br>
         <strong>Address:</strong> Department of Civil Engineering, University of Ottawa, Ottawa, ON, Canada
       </p>
+      <div class="actions">
+        <a class="btn btn-light" href="mailto:dgood006@uottawa.ca">Write to me <span aria-hidden="true">→</span></a>
+      </div>
     </div>
   </section>
 
 </main>
 
-<footer class="site-footer">
-  <div class="container">
-    <span>© 2026 Danial Goodarzi</span>
-    <span><a href="https://github.com/HydroCFD/HydroCFD.github.io">Site source on GitHub</a></span>
+<footer class="foot">
+  <div class="wrap foot-grid">
+    <div>
+      <p class="foot-name"><a href="index.html">Danial Goodarzi, Ph.D.</a></p>
+      <p>Postdoctoral researcher, Department of Civil Engineering, University of Ottawa, Ottawa, Canada</p>
+      <p><a href="mailto:dgood006@uottawa.ca">dgood006@uottawa.ca</a></p>
+    </div>
+    <div>
+      <h4>Projects</h4>
+      <ul>
+        <li><a href="microplastic-simulator/index.html">GPU microplastic transport</a></li>
+        <li><a href="constructed-wetland-surrogate/index.html">Constructed wetland surrogate</a></li>
+        <li><a href="dense-jet-simulator/index.html">Dense jet simulator</a></li>
+        <li><a href="ariake-instrument/index.html">Ariake survey instrument</a></li>
+        <li><a href="microplastic-simulator/journey.html">Microplastic journey</a></li>
+        <li><a href="publications.html">Publications</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Elsewhere</h4>
+      <ul>
+        <li><a href="https://scholar.google.com/citations?user=inKDJywAAAAJ&amp;hl=en">Google Scholar</a></li>
+        <li><a href="https://orcid.org/0000-0002-1621-5052">ORCID</a></li>
+        <li><a href="https://www.researchgate.net/profile/Danial-Goodarzi">ResearchGate</a></li>
+        <li><a href="https://github.com/HydroCFD">GitHub</a></li>
+        <li><a href="https://www.linkedin.com/in/danial-goodarzi-59243a99">LinkedIn</a></li>
+      </ul>
+    </div>
   </div>
+  <div class="wrap foot-base"><span>&copy; 2026 Danial Goodarzi</span><a href="https://github.com/HydroCFD/HydroCFD.github.io">Site source on GitHub</a></div>
 </footer>
 
-<script>
-  (function () {
-    const progress = document.querySelector('.reading-progress');
-    let progressTicking = false;
-
-    function updateProgress() {
-      const root = document.documentElement;
-      const scrollable = root.scrollHeight - root.clientHeight;
-      const value = scrollable > 0 ? root.scrollTop / scrollable : 0;
-      progress.style.transform = 'scaleX(' + Math.min(1, Math.max(0, value)) + ')';
-      progressTicking = false;
-    }
-
-    window.addEventListener('scroll', function () {
-      if (!progressTicking) {
-        window.requestAnimationFrame(updateProgress);
-        progressTicking = true;
-      }
-    }, { passive: true });
-    updateProgress();
-
-    const obs = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) {
-        if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
-      });
-    }, { threshold: 0.1 });
-    document.querySelectorAll('.reveal').forEach(function (el, index) {
-      el.style.setProperty('--reveal-delay', ((index % 4) * 70) + 'ms');
-      obs.observe(el);
-    });
-
-    const sectionLinks = Array.from(document.querySelectorAll('.site-nav a[href^="#"]'));
-    const sections = sectionLinks
-      .map(function (link) { return document.querySelector(link.getAttribute('href')); })
-      .filter(Boolean);
-    const sectionObserver = new IntersectionObserver(function (entries) {
-      entries.forEach(function (entry) {
-        if (!entry.isIntersecting) return;
-        sectionLinks.forEach(function (link) {
-          link.classList.toggle('active', link.getAttribute('href') === '#' + entry.target.id);
-        });
-      });
-    }, { rootMargin: '-35% 0px -55% 0px' });
-    sections.forEach(function (section) { sectionObserver.observe(section); });
-  })();
+<noscript><style>.reveal{opacity:1!important;transform:none!important}</style></noscript>
+<script src="js/site.js"></script>
+<script type="module">
+  import { startHero } from './js/3d/page.js';
+  startHero(() => import('./js/3d/river.js').then(m => m.initRiver), 'hero-gl', { cx: 14 });
 </script>
 </body>
 </html>

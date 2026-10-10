@@ -1,7 +1,7 @@
 // Ray tracing through a triangular prism mesh: particles move from prism to
 // prism, and each face they cross lights up.
 import * as THREE from 'three';
-import { runWhenVisible, fitGL, isSmall, gauss } from './loop.js';
+import { runWhenVisible, fitGL, isSmall, gauss } from '../../js/3d/loop.js';
 
 export function initMesh(canvas) {
   const small = isSmall();

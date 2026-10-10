@@ -41,11 +41,11 @@
 
   /* ---------- polymers ---------- */
   const POLYMERS = {
-    PE:  { rho: 0.95, color: "#2f86c9", name: "Polyethylene (ρ≈0.95)" },
-    PP:  { rho: 0.90, color: "#18a58a", name: "Polypropylene (ρ≈0.90)" },
-    PS:  { rho: 1.05, color: "#e08a1e", name: "Polystyrene (ρ≈1.05)" },
-    PET: { rho: 1.38, color: "#c94f42", name: "PET (ρ≈1.38)" },
-    PVC: { rho: 1.40, color: "#8455b8", name: "PVC (ρ≈1.40)" }
+    PE:  { rho: 0.95, color: "#2643b8", name: "Polyethylene (ρ≈0.95)" },
+    PP:  { rho: 0.90, color: "#66772a", name: "Polypropylene (ρ≈0.90)" },
+    PS:  { rho: 1.05, color: "#b07d2b", name: "Polystyrene (ρ≈1.05)" },
+    PET: { rho: 1.38, color: "#e4572e", name: "PET (ρ≈1.38)" },
+    PVC: { rho: 1.40, color: "#141414", name: "PVC (ρ≈1.40)" }
   };
   const POLY_KEYS = Object.keys(POLYMERS);
 
@@ -244,13 +244,13 @@
   /* ---------- drawing ---------- */
   function drawScene() {
     // sky strip
-    ctx.fillStyle = "#f6fafd";
+    ctx.fillStyle = "#f7f3eb";
     ctx.fillRect(0, 0, W, SURF);
 
     // water
     const grad = ctx.createLinearGradient(0, SURF, 0, H);
-    grad.addColorStop(0, "#dcecf8");
-    grad.addColorStop(1, "#b9d5ec");
+    grad.addColorStop(0, "#e3e8f1");
+    grad.addColorStop(1, "#c9d3e6");
     ctx.fillStyle = grad;
     ctx.beginPath();
     ctx.moveTo(0, SURF);
@@ -260,14 +260,14 @@
     ctx.fill();
 
     // bed / sediment
-    ctx.fillStyle = "#d9c9a3";
+    ctx.fillStyle = "#dccfae";
     ctx.beginPath();
     ctx.moveTo(0, bedAt(0));
     for (let x = 0; x <= W; x += 10) ctx.lineTo(x, bedAt(x));
     ctx.lineTo(W, H); ctx.lineTo(0, H);
     ctx.closePath();
     ctx.fill();
-    ctx.strokeStyle = "#b09b6c";
+    ctx.strokeStyle = "#141414";
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(0, bedAt(0));
@@ -276,7 +276,7 @@
 
     // animated water surface
     const t = performance.now() / 800;
-    ctx.strokeStyle = "#6f9ec4";
+    ctx.strokeStyle = "#2643b8";
     ctx.lineWidth = 2.5;
     ctx.beginPath();
     ctx.moveTo(0, SURF);
@@ -302,13 +302,13 @@
 
     // outfall pipe
     const ry = releaseY();
-    ctx.fillStyle = "#5b6b80";
+    ctx.fillStyle = "#45413b";
     ctx.fillRect(0, ry - 7, W * 0.04, 14);
-    ctx.fillStyle = "#1e2f44";
+    ctx.fillStyle = "#141414";
     ctx.fillRect(W * 0.04 - 4, ry - 9, 8, 18);
 
     // region captions
-    ctx.font = "600 15px 'Source Sans 3', sans-serif";
+    ctx.font = "600 15px 'Public Sans', sans-serif";
     ctx.fillStyle = "rgba(31,41,55,0.55)";
     ctx.fillText("RIVER", W * 0.26, SURF - 12);
     ctx.fillText("LAKE", W * 0.80, SURF - 12);
@@ -316,7 +316,7 @@
 
     if (storm > 0) {
       ctx.fillStyle = "rgba(162,85,31,0.9)";
-      ctx.font = "700 17px 'Source Sans 3', sans-serif";
+      ctx.font = "700 17px 'Public Sans', sans-serif";
       ctx.fillText("⛈ STORM EVENT: elevated flow, mixing & resuspension", W * 0.28, 30);
     }
   }
@@ -324,7 +324,7 @@
   function drawLabels() {
     if (!chkLabels.checked) return;
     ctx.save();
-    ctx.font = "italic 14px 'Source Serif 4', serif";
+    ctx.font = "italic 14px 'Newsreader', serif";
     ctx.fillStyle = "rgba(14,90,122,0.85)";
     ctx.strokeStyle = "rgba(14,90,122,0.5)";
     ctx.lineWidth = 1.2;

@@ -30,7 +30,7 @@ function centre(s) {
 // depth below the water surface; the pool shifts to the outer bank of each bend
 const depth = (n, kn) => H * (0.12 + 0.88 * (1 - n * n)) * (1 - 0.5 * kn * n);
 
-export function initHero(canvas) {
+export function initRiver(canvas, opts = {}) {
   const small = isSmall();
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: !small, alpha: true, powerPreference: 'high-performance' });
   renderer.setClearColor(0x000000, 0);
@@ -299,7 +299,7 @@ export function initHero(canvas) {
     mouse.sy += (mouse.y - mouse.sy) * 0.04;
     const sway = Math.sin(t * 0.06) * 0.22 + mouse.sx * 0.18;
     const R = small ? 100 : 80, elev = 0.56 - mouse.sy * 0.05;
-    const cx = small ? 0 : 16;
+    const cx = small ? 0 : (opts.cx ?? 16);
     target.set(cx + Math.sin(t * 0.05) * 8, -4, -2);
     camera.position.set(
       target.x - Math.sin(sway) * R * Math.cos(elev),

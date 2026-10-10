@@ -107,7 +107,7 @@
 
     function drawGrid() {
       ctx.save();
-      ctx.strokeStyle = "rgba(17, 38, 65, 0.12)";
+      ctx.strokeStyle = "rgba(20, 20, 20, 0.1)";
       ctx.lineWidth = 1;
       for (let x = 0; x <= canvas.width; x += 80) {
         ctx.beginPath();
@@ -131,8 +131,8 @@
       const axisPxPerM = 110;
 
       ctx.save();
-      ctx.strokeStyle = "rgba(20, 34, 52, 0.9)";
-      ctx.fillStyle = "rgba(20, 34, 52, 0.9)";
+      ctx.strokeStyle = "rgba(20, 20, 20, 0.9)";
+      ctx.fillStyle = "rgba(20, 20, 20, 0.9)";
       ctx.lineWidth = 1.7;
       ctx.font = "13px sans-serif";
 
@@ -190,7 +190,7 @@
       const scale = state.scale;
 
       ctx.save();
-      ctx.strokeStyle = "rgba(33, 90, 170, 0.7)";
+      ctx.strokeStyle = "rgba(228, 87, 46, 0.7)";
       ctx.lineWidth = 2;
       ctx.setLineDash([7, 5]);
       ctx.beginPath();
@@ -211,7 +211,7 @@
     function drawNozzle() {
       const n = nozzlePosition();
       ctx.save();
-      ctx.fillStyle = "#1e2f44";
+      ctx.fillStyle = "#141414";
       ctx.fillRect(n.x - 10, n.y - 4, 18, 8);
       ctx.beginPath();
       ctx.arc(n.x, n.y, 6, 0, Math.PI * 2);

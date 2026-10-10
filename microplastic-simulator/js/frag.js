@@ -1,6 +1,6 @@
 // Fragmentation comparison: a new particle for every fragment (left) versus
 // one weighted particle that represents w fragments (right).
-import { runWhenVisible, fit2d, smooth, clamp, lerp } from './loop.js';
+import { runWhenVisible, fit2d, smooth, clamp, lerp } from '../../js/3d/loop.js';
 
 const GEN = 6, PER = 1.35, HOLD = 2.4, FADE = 0.8;
 const TOTAL = GEN * PER + PER * 0.6 + HOLD + FADE;
