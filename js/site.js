@@ -32,14 +32,40 @@
     update();
   }
 
-  if ('IntersectionObserver' in window) {
+  var reveals = Array.prototype.slice.call(document.querySelectorAll('.reveal'));
+  var showAll = function () { reveals.forEach(function (el) { el.classList.add('in'); }); };
+
+  // Arriving at an anchor (index.html#software, #contact): show everything at
+  // once, and jump to the target again after fonts and images have settled,
+  // because they change the height of the page above it.
+  if (location.hash.length > 1) {
+    showAll();
+    var target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    if (target) {
+      var jump = function () {
+        var root = document.documentElement, old = root.style.scrollBehavior;
+        root.style.scrollBehavior = 'auto';
+        target.scrollIntoView();
+        root.style.scrollBehavior = old;
+      };
+      jump();
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(jump);
+      window.addEventListener('load', jump);
+    }
+  } else if ('IntersectionObserver' in window) {
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (e) {
         if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
       });
-    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-    document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+    }, { threshold: 0.05, rootMargin: '0px 0px -20px 0px' });
+    reveals.forEach(function (el) { io.observe(el); });
   } else {
-    document.querySelectorAll('.reveal').forEach(function (el) { el.classList.add('in'); });
+    showAll();
   }
+
+  // a link to another section on the same page also shows all content
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[href*="#"]');
+    if (a && a.pathname === location.pathname) showAll();
+  });
 })();
