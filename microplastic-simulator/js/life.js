@@ -50,51 +50,183 @@ export function initLife(canvas) {
     color: 0xeef2f6, roughness: 0.3, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.2
   }));
   particle.add(core);
-  const coreLine = outline(core, 1.035);
+  outline(core, 1.035);
 
-  // biofilm: one continuous coat around the same particle. Every vertex is
-  // pushed outwards from the centre by a smooth, nearly even thickness, so
-  // the coat has no seams and keeps the outline of the particle.
+  // ---------- biofilm ----------
+  // A biofilm starts where algal cells land. Colonies appear at scattered
+  // points, spread and thicken, and finally merge into an uneven, glossy
+  // film: cells held in a slime of extracellular polymer. Filamentous algae
+  // grow out of the older colonies and diatoms settle on the film. The plastic
+  // stays visible between the young colonies. b (0..1) drives all of it.
   const shellGeo = coreGeo.clone();
+  const SP = shellGeo.attributes.position, NV = SP.count;
+  const base = new Float32Array(SP.array);
+  const radial = new Float32Array(NV * 3);
+  for (let i = 0; i < NV; i++) {
+    const x = base[3 * i], y = base[3 * i + 1], z = base[3 * i + 2], r = Math.hypot(x, y, z) || 1;
+    radial[3 * i] = x / r; radial[3 * i + 1] = y / r; radial[3 * i + 2] = z / r;
+  }
+  // colony seeds: random places on the surface, the first ones settle early
+  const NC = 34, seeds = [];
+  for (let c = 0; c < NC; c++) {
+    const d = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize();
+    seeds.push({ d, t0: 0.72 * Math.pow(c / NC, 1.25), R: 0.32 + 0.42 * Math.random() });
+  }
+  const ang = new Float32Array(NV * NC);
+  for (let i = 0; i < NV; i++) for (let c = 0; c < NC; c++) {
+    const dot = radial[3 * i] * seeds[c].d.x + radial[3 * i + 1] * seeds[c].d.y + radial[3 * i + 2] * seeds[c].d.z;
+    ang[i * NC + c] = Math.acos(Math.max(-1, Math.min(1, dot)));
+  }
+  const tex = new Float32Array(NV), lump = new Float32Array(NV);
+  const FCOL = new Float32Array(NV * 4);
   {
-    const p = shellGeo.attributes.position;
-    const colors = new Float32Array(p.count * 3), c = new THREE.Color();
-    const g1 = new THREE.Color(0x8a9a44), g2 = new THREE.Color(0x6f7f30), g3 = new THREE.Color(0x9c8f55);
-    for (let i = 0; i < p.count; i++) {
-      const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
-      const r = Math.hypot(x, y, z) || 1;
-      const slow = noise(x * 1.6 + 9, y * 1.6, z * 1.6), fine = noise(x * 5, y * 5, z * 5);
-      const t = 0.12 + 0.025 * slow + 0.008 * fine;
-      const k = 1 + t / r;
-      p.setXYZ(i, x * k, y * k, z * k);
-      c.copy(g1).lerp(g2, 0.5 + 0.5 * slow).lerp(g3, Math.max(0, fine) * 0.35);
-      colors.set([c.r, c.g, c.b], 3 * i);
+    const slime = [0.36, 0.45, 0.14], olive = [0.30, 0.36, 0.10], brown = [0.46, 0.40, 0.12], dark = [0.17, 0.21, 0.06];
+    for (let i = 0; i < NV; i++) {
+      const x = base[3 * i], y = base[3 * i + 1], z = base[3 * i + 2];
+      tex[i] = 0.5 + 0.5 * noise(x * 7 + 3, y * 7, z * 7);
+      lump[i] = 0.5 + 0.5 * noise(x * 3.2, y * 3.2 + 5, z * 3.2);
+      // the nearest colony decides the hue, so neighbouring colonies differ a little
+      let best = 0;
+      for (let c = 1; c < NC; c++) if (ang[i * NC + c] < ang[i * NC + best]) best = c;
+      const hue = best % 3 === 0 ? slime : best % 3 === 1 ? olive : brown;
+      for (let j = 0; j < 3; j++) FCOL[4 * i + j] = hue[j] + (dark[j] - hue[j]) * 0.45 * tex[i];
+      FCOL[4 * i + 3] = 0;
     }
-    shellGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+  }
+  shellGeo.setAttribute('color', new THREE.BufferAttribute(FCOL, 4));
+  const shellMat = new THREE.MeshPhysicalMaterial({
+    vertexColors: true, transparent: true, depthWrite: false,
+    roughness: 0.45, clearcoat: 0.55, clearcoatRoughness: 0.3
+  });
+  const shell = new THREE.Mesh(shellGeo, shellMat);
+  shell.renderOrder = 1;
+  particle.add(shell);
+  const cover = new Float32Array(NV), lift = new Float32Array(NV);
+  let lastB = -1;
+  function growFilm(b) {
+    if (Math.abs(b - lastB) < 1e-4) return;
+    lastB = b;
+    const merge = smooth(0.72, 1.0, b);
+    for (let i = 0; i < NV; i++) {
+      let cv = 0;
+      for (let c = 0; c < NC; c++) {
+        const g = smooth(seeds[c].t0, seeds[c].t0 + 0.38, b);
+        if (g <= 0) continue;
+        const R = seeds[c].R * g, a = ang[i * NC + c];
+        if (a < R) cv = Math.max(cv, (1 - smooth(R * 0.5, R, a)) * (0.55 + 0.45 * g));
+      }
+      cv = Math.max(cv, merge * (0.7 + 0.3 * lump[i]));
+      cover[i] = cv;
+      const h = 0.004 + cv * (0.025 + 0.12 * lump[i] + 0.02 * tex[i]) * (0.35 + 0.65 * b);
+      lift[i] = h;
+      SP.array[3 * i] = base[3 * i] + radial[3 * i] * h;
+      SP.array[3 * i + 1] = base[3 * i + 1] + radial[3 * i + 1] * h;
+      SP.array[3 * i + 2] = base[3 * i + 2] + radial[3 * i + 2] * h;
+      FCOL[4 * i + 3] = cv > 0.02 ? 0.42 + 0.56 * cv : 0;
+    }
+    SP.needsUpdate = true;
+    shellGeo.attributes.color.needsUpdate = true;
     shellGeo.computeVertexNormals();
   }
-  const shellMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8, transparent: true, opacity: 0 });
-  const shell = new THREE.Mesh(shellGeo, shellMat);
-  particle.add(shell);
-  const shellLineMat = new THREE.MeshBasicMaterial({ color: 0x141414, side: THREE.BackSide, transparent: true, opacity: 0 });
-  outline(shell, 1.03, shellLineMat);
-
-  // algal cells that drift in and attach
-  const NA = small ? 70 : 110;
-  const algae = new THREE.InstancedMesh(new THREE.SphereGeometry(0.035, 10, 8),
-    new THREE.MeshStandardMaterial({ color: 0x5d6d26, roughness: 0.7 }), NA);
-  particle.add(algae);
-  const aTarget = [], aStart = [], aTh = [];
-  {
-    const p = shellGeo.attributes.position;
-    for (let i = 0; i < NA; i++) {
-      const j = Math.floor(Math.random() * p.count);
-      const tgt = new THREE.Vector3().fromBufferAttribute(p, j);
-      aTarget.push(tgt);
-      const dir = tgt.clone().normalize();
-      aStart.push(dir.multiplyScalar(2.8 + Math.random() * 3.5).add(new THREE.Vector3((Math.random() - 0.5) * 4, (Math.random() - 0.5) * 2, (Math.random() - 0.5) * 2)));
-      aTh.push(Math.random() * 0.8);
+  // a vertex close to the centre of colony c, used to place cells, diatoms and filaments
+  const near = (c, frac) => {
+    for (let k = 0; k < 400; k++) {
+      const i = Math.floor(Math.random() * NV);
+      if (ang[i * NC + c] < seeds[c].R * frac) return i;
     }
+    let best = 0;
+    for (let i = 1; i < NV; i++) if (ang[i * NC + c] < ang[best * NC + c]) best = i;
+    return best;
+  };
+  const surf = (i, extra, out) => out.set(
+    base[3 * i] + radial[3 * i] * (lift[i] + extra),
+    base[3 * i + 1] + radial[3 * i + 1] * (lift[i] + extra),
+    base[3 * i + 2] + radial[3 * i + 2] * (lift[i] + extra));
+
+  // diatoms: small golden-brown cells lying flat on the film
+  const ND = small ? 110 : 180;
+  const diatoms = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 10, 6),
+    new THREE.MeshStandardMaterial({ color: 0x8a6420, roughness: 0.45 }), ND);
+  particle.add(diatoms);
+  const dVert = [], dRot = [], dLen = [];
+  {
+    const up = new THREE.Vector3(), tg = new THREE.Vector3(), bt = new THREE.Vector3(), m = new THREE.Matrix4();
+    for (let k = 0; k < ND; k++) {
+      const i = near(k % NC, 0.85);
+      up.set(radial[3 * i], radial[3 * i + 1], radial[3 * i + 2]);
+      tg.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).cross(up).normalize();
+      bt.crossVectors(up, tg);
+      dVert.push(i);
+      dRot.push(new THREE.Quaternion().setFromRotationMatrix(m.makeBasis(tg, bt, up)));
+      dLen.push(0.035 + Math.random() * 0.035);
+    }
+  }
+
+  // filamentous algae: thin strands growing out of the older colonies
+  const NFIL = small ? 50 : 80, SEG = 7;
+  const filPos = new Float32Array(NFIL * SEG * 6), filCol = new Float32Array(NFIL * SEG * 6);
+  const fil = [];
+  for (let k = 0; k < NFIL; k++) {
+    const c = k % Math.ceil(NC * 0.6), i = near(c, 0.5);
+    const up = new THREE.Vector3(radial[3 * i], radial[3 * i + 1], radial[3 * i + 2]);
+    const side = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).cross(up).normalize();
+    const dir = up.clone().addScaledVector(side, 0.35 + Math.random() * 0.5).normalize();
+    fil.push({ i, c, dir, side, L: 0.22 + Math.random() * 0.4, ph: Math.random() * 6.28 });
+    for (let s = 0; s < SEG; s++) {
+      for (const [o, f] of [[0, s / SEG], [3, (s + 1) / SEG]]) {
+        const at = (k * SEG + s) * 6 + o;
+        filCol[at] = 0.18 + 0.30 * f; filCol[at + 1] = 0.24 + 0.22 * f; filCol[at + 2] = 0.06 + 0.08 * f;
+      }
+    }
+  }
+  const filGeo = new THREE.BufferGeometry();
+  filGeo.setAttribute('position', new THREE.BufferAttribute(filPos, 3).setUsage(THREE.DynamicDrawUsage));
+  filGeo.setAttribute('color', new THREE.BufferAttribute(filCol, 3));
+  const filaments = new THREE.LineSegments(filGeo, new THREE.LineBasicMaterial({ vertexColors: true }));
+  filaments.frustumCulled = false;
+  particle.add(filaments);
+
+  // algal cells that drift in and land where the colonies will start
+  const NA = small ? 60 : 90;
+  const algae = new THREE.InstancedMesh(new THREE.SphereGeometry(0.035, 10, 8),
+    new THREE.MeshStandardMaterial({ color: 0x4f5f20, roughness: 0.6 }), NA);
+  particle.add(algae);
+  const aVert = [], aStart = [], aTh = [];
+  for (let k = 0; k < NA; k++) {
+    const c = k % NC, i = near(c, 0.35);
+    aVert.push(i);
+    const dir = new THREE.Vector3(radial[3 * i], radial[3 * i + 1], radial[3 * i + 2]);
+    aStart.push(dir.multiplyScalar(2.8 + Math.random() * 3.5).add(new THREE.Vector3((Math.random() - 0.5) * 4, (Math.random() - 0.5) * 2, (Math.random() - 0.5) * 2)));
+    aTh.push(Math.max(0, seeds[c].t0 - 0.14 - Math.random() * 0.08));
+  }
+
+  const gv = new THREE.Vector3(), gup = new THREE.Vector3(), gm = new THREE.Matrix4(), gsc = new THREE.Vector3();
+  function growExtras(b, t) {
+    // diatoms appear once their colony is established
+    for (let k = 0; k < ND; k++) {
+      const i = dVert[k], s = smooth(0.3, 0.7, cover[i]);
+      surf(i, 0.006, gv);
+      gsc.set(dLen[k] * s, dLen[k] * 0.32 * s, dLen[k] * 0.22 * s);
+      gm.compose(gv, dRot[k], gsc);
+      diatoms.setMatrixAt(k, gm);
+    }
+    diatoms.instanceMatrix.needsUpdate = true;
+    // filaments lengthen with the age of their colony and sway in the flow
+    for (let k = 0; k < NFIL; k++) {
+      const f = fil[k], g = smooth(seeds[f.c].t0 + 0.2, seeds[f.c].t0 + 0.7, b) * smooth(0.25, 0.6, cover[f.i]);
+      surf(f.i, 0, gup);
+      const len = f.L * g;
+      for (let s = 0; s < SEG; s++) {
+        for (const [o, q] of [[0, s / SEG], [3, (s + 1) / SEG]]) {
+          const sway = 0.09 * Math.pow(q, 1.6) * Math.sin(t * 1.8 + f.ph + q * 3) * g;
+          const at = (k * SEG + s) * 6 + o;
+          filPos[at] = gup.x + f.dir.x * len * q + f.side.x * sway;
+          filPos[at + 1] = gup.y + f.dir.y * len * q + f.side.y * sway;
+          filPos[at + 2] = gup.z + f.dir.z * len * q + f.side.z * sway;
+        }
+      }
+    }
+    filGeo.attributes.position.needsUpdate = true;
   }
 
   // ---------- fragments ----------
@@ -214,19 +346,17 @@ export function initLife(canvas) {
       (0.3 * Math.sin(t * 0.47 + 1) + 0.14 * Math.sin(t * 1.71)) * amp,
       0.2 * Math.sin(t * 0.37) * amp);
     particle.rotation.set(Math.sin(t * 0.3) * 0.45 + 0.3, t * 0.22, Math.sin(t * 0.21) * 0.25);
-    core.visible = shell.visible = algae.visible = !broken;
-    shellMat.opacity = smooth(0, 0.45, b);
-    shellMat.transparent = shellMat.opacity < 1;
-    shellLineMat.opacity = smooth(0.25, 0.6, b);
-    coreLine.visible = b < 0.3;
-    shell.scale.setScalar(lerp(0.94, 1, b));
+    core.visible = shell.visible = algae.visible = diatoms.visible = filaments.visible = !broken;
+    if (!broken) { growFilm(b); growExtras(b, t); }
 
+    // cells drift with the water, land on the surface and are overgrown by their colony
     for (let i = 0; i < NA; i++) {
       const k = smooth(aTh[i], aTh[i] + 0.16, b);
       const st = aStart[i];
       tv.set(((st.x + t * 0.9 + 60) % 9) - 4.5, st.y + Math.sin(t * 0.8 + i) * 0.2, st.z);
-      tv.lerp(tw.copy(aTarget[i]).multiplyScalar(lerp(0.9, 1, b)), k);
-      M.compose(tv, Q, tv.lengthSq() > 40 ? zero : sc.setScalar(0.6 + 0.4 * k));
+      tv.lerp(surf(aVert[i], 0.02, tw), k);
+      const keep = 1 - 0.8 * smooth(0.4, 0.9, cover[aVert[i]]);
+      M.compose(tv, Q, tv.lengthSq() > 40 ? zero : sc.setScalar((0.6 + 0.4 * k) * keep));
       algae.setMatrixAt(i, M);
     }
     algae.instanceMatrix.needsUpdate = true;
