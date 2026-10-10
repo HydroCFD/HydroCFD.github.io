@@ -15,6 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/site.css">
 <link rel="stylesheet" href="paper.css">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
 </head>
@@ -24,13 +25,15 @@
 <header class="nav" id="nav">
   <div class="nav-inner">
     <a class="brand" href="../index.html">Danial Goodarzi</a>
-    <nav aria-label="Project sections">
-      <a href="#model">Model</a>
-      <a href="#life">A particle's life</a>
-      <a href="#fragmentation">Fragmentation</a>
-      <a href="#gpu">GPU</a>
-      <a href="#films">Films</a>
-      <a href="#team">Team</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-links">Menu</button>
+    <nav id="site-links" aria-label="Main navigation">
+      <a href="../index.html#research">Research</a>
+      <a href="../publications.html">Publications</a>
+      <a href="../index.html#software">Software</a>
+      <a href="../constructed-wetland-surrogate/index.html">Wetland AI</a>
+      <a href="../dense-jet-simulator/index.html">Dense Jet</a>
+      <a href="../microplastic-simulator/index.html" class="active" aria-current="page">Microplastics</a>
+      <a href="../index.html#contact">Contact</a>
     </nav>
   </div>
   <div class="nav-progress" aria-hidden="true"></div>
@@ -276,6 +279,20 @@
   </div>
 </section>
 
+<section class="more" aria-labelledby="more-title">
+  <div class="wrap">
+    <header class="sec-head"><span class="numeral">&rarr;</span><div><h2 id="more-title">More projects</h2></div></header>
+    <ul class="project-list">
+      <li class="here"><a href="../microplastic-simulator/index.html" aria-current="page"><span class="kind">You are here</span><h3>GPU microplastic transport</h3><p>Following every microplastic through the water, with biofilm growth and number-conserving fragmentation.</p></a></li>
+      <li><a href="../constructed-wetland-surrogate/index.html"><span class="kind">CFD and machine learning</span><h3>Constructed wetland surrogate</h3><p>Rapid prediction of hydraulic efficiency and residence time in wetlands and ponds.</p><span class="go">Open the project</span></a></li>
+      <li><a href="../dense-jet-simulator/index.html"><span class="kind">Interactive simulator</span><h3>Dense jet simulator</h3><p>An inclined brine jet rises, falls back and spreads along the bed.</p><span class="go">Open the simulator</span></a></li>
+      <li><a href="../ariake-instrument/index.html"><span class="kind">Bayesian instrument</span><h3>Ariake survey instrument</h3><p>A few samples give the whole suspended field of the bay, with its uncertainty.</p><span class="go">Open the instrument</span></a></li>
+      <li><a href="../microplastic-simulator/journey.html"><span class="kind">Teaching demonstration</span><h3>Microplastic journey</h3><p>A schematic river-to-lake demonstration of how microplastics travel and settle.</p><span class="go">Open the demonstration</span></a></li>
+      <li><a href="../publications.html"><span class="kind">Publications</span><h3>Journal articles and theses</h3><p>Microplastic transport, environmental hydraulics, dense jets and turbulence.</p><span class="go">See the list</span></a></li>
+    </ul>
+  </div>
+</section>
+
 <!-- ================= CONTACT ================= -->
 <section class="contact" id="contact">
   <div class="wrap contact-inner reveal">
@@ -292,13 +309,39 @@
 </main>
 
 <footer class="foot">
-  <div class="wrap foot-inner">
-    <span>© 2026 Danial Goodarzi</span>
-    <a href="https://github.com/HydroCFD/HydroCFD.github.io">Site source on GitHub</a>
+  <div class="wrap foot-grid">
+    <div>
+      <p class="foot-name"><a href="../index.html">Danial Goodarzi, Ph.D.</a></p>
+      <p>Postdoctoral researcher, Department of Civil Engineering, University of Ottawa, Ottawa, Canada</p>
+      <p><a href="mailto:dgood006@uottawa.ca">dgood006@uottawa.ca</a></p>
+    </div>
+    <div>
+      <h4>Projects</h4>
+      <ul>
+        <li><a href="../microplastic-simulator/index.html">GPU microplastic transport</a></li>
+        <li><a href="../constructed-wetland-surrogate/index.html">Constructed wetland surrogate</a></li>
+        <li><a href="../dense-jet-simulator/index.html">Dense jet simulator</a></li>
+        <li><a href="../ariake-instrument/index.html">Ariake survey instrument</a></li>
+        <li><a href="../microplastic-simulator/journey.html">Microplastic journey</a></li>
+        <li><a href="../publications.html">Publications</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Elsewhere</h4>
+      <ul>
+        <li><a href="https://scholar.google.com/citations?user=inKDJywAAAAJ&amp;hl=en">Google Scholar</a></li>
+        <li><a href="https://orcid.org/0000-0002-1621-5052">ORCID</a></li>
+        <li><a href="https://www.researchgate.net/profile/Danial-Goodarzi">ResearchGate</a></li>
+        <li><a href="https://github.com/HydroCFD">GitHub</a></li>
+        <li><a href="https://www.linkedin.com/in/danial-goodarzi-59243a99">LinkedIn</a></li>
+      </ul>
+    </div>
   </div>
+  <div class="wrap foot-base"><span>&copy; 2026 Danial Goodarzi</span><a href="https://github.com/HydroCFD/HydroCFD.github.io">Site source on GitHub</a></div>
 </footer>
 
 <noscript><style>.reveal{opacity:1!important;transform:none!important}</style></noscript>
+<script src="../js/site.js"></script>
 <script type="module" src="js/main.js"></script>
 </body>
 </html>

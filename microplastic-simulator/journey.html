@@ -5,50 +5,54 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Microplastic Journey | Danial Goodarzi</title>
 <meta name="description" content="Schematic interactive visualization of how microplastic particles travel through a river and lake: advection, mixing, biofouling, vegetation trapping, settling, and resuspension.">
+<meta name="theme-color" content="#f2ede3">
+<link rel="canonical" href="https://hydrocfd.github.io/microplastic-simulator/journey.html">
 <link rel="icon" href="../favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/site.css">
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 
-<header class="site-header">
-  <div class="container">
-    <a class="site-name" href="../index.html">Danial Goodarzi</a>
-    <nav class="site-nav">
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="brand" href="../index.html">Danial Goodarzi</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-links">Menu</button>
+    <nav id="site-links" aria-label="Main navigation">
       <a href="../index.html#research">Research</a>
       <a href="../publications.html">Publications</a>
       <a href="../index.html#software">Software</a>
+      <a href="../constructed-wetland-surrogate/index.html">Wetland AI</a>
       <a href="../dense-jet-simulator/index.html">Dense Jet</a>
-      <a href="index.html" class="active">Microplastics</a>
+      <a href="../microplastic-simulator/index.html" class="active" aria-current="page">Microplastics</a>
       <a href="../index.html#contact">Contact</a>
     </nav>
   </div>
+  <div class="nav-progress" aria-hidden="true"></div>
 </header>
 
-<main>
-  <div class="page-title">
-    <div class="container">
-      <h1>Microplastic Journey</h1>
-      <p class="sub">
-        A schematic, side-view visualization of how microplastic particles travel through a river
+<main id="main">
+  <section class="page-head">
+    <div class="wrap">
+      <p class="overline">Teaching demonstration <span>river to lake</span></p>
+      <h1>Microplastic <em>journey</em></h1>
+      <p class="lede">A schematic, side-view visualization of how microplastic particles travel through a river
         and into a lake. Particles are advected by the flow, mixed by turbulence, and trapped by
         aquatic vegetation. Depending on their polymer density, size, and biofouling, they
         float at the surface, stay suspended, or settle to the bed, where river shear can
-        resuspend them. A live <em>fate budget</em> tracks where every released particle ends up.
-      </p>
-      <div class="disclaimer">
-        <strong>⚠ Illustrative demonstration only.</strong> This animation is a simplified,
+        resuspend them. A live <em>fate budget</em> tracks where every released particle ends up.</p>
+      <div class="disclaimer"><strong>Illustrative demonstration only.</strong> This animation is a simplified,
         conceptual visualization intended for teaching and outreach. It is <strong>not based on
         real scientific data</strong>, has not been validated against experiments or field
         observations, and must not be used for research, design, or regulatory purposes.
-      </div>
+        For the research model, see <a href="index.html">GPU microplastic transport</a>.</div>
     </div>
-  </div>
+  </section>
 
-  <section class="section">
-    <div class="container">
+  <section class="sec tint">
+    <div class="wrap">
       <div class="sim-app">
         <div class="sim-controls" role="group" aria-label="Microplastic simulation controls">
 
@@ -110,7 +114,7 @@
             <button id="mp-storm" type="button" class="storm">⛈ Trigger Storm Event</button>
           </div>
 
-          <p style="font-size:0.82rem; color:var(--ink-faint); margin:0;">
+          <p class="try" style="margin-top:12px;font-size:0.84rem">
             Tip: click anywhere in the water to release a burst of particles at that point.
           </p>
         </div>
@@ -121,63 +125,100 @@
           </div>
 
           <div class="sim-legend">
-            <span><i style="background:#2f86c9"></i> PE (buoyant)</span>
-            <span><i style="background:#18a58a"></i> PP (buoyant)</span>
-            <span><i style="background:#e08a1e"></i> PS (near-neutral)</span>
-            <span><i style="background:#c94f42"></i> PET (dense)</span>
-            <span><i style="background:#8455b8"></i> PVC (dense)</span>
-            <span><i style="background:#fff; border:2px solid #48703a; box-sizing:border-box"></i> green ring = biofouled</span>
+            <span><i style="background:#2643b8"></i> PE (buoyant)</span>
+            <span><i style="background:#66772a"></i> PP (buoyant)</span>
+            <span><i style="background:#b07d2b"></i> PS (near-neutral)</span>
+            <span><i style="background:#e4572e"></i> PET (dense)</span>
+            <span><i style="background:#141414"></i> PVC (dense)</span>
+            <span><i style="background:#fff; border:2px solid #66772a; box-sizing:border-box"></i> green ring = biofouled</span>
           </div>
 
           <div class="fate-bars" aria-label="Particle fate budget">
             <div class="fate-row">
               <span class="f-label">Drifting in water</span>
-              <div class="f-track"><div class="f-fill" id="f-drift" style="background:#0e5a7a"></div></div>
+              <div class="f-track"><div class="f-fill" id="f-drift" style="background:#2643b8"></div></div>
               <span class="f-count" id="c-drift">0</span>
             </div>
             <div class="fate-row">
               <span class="f-label">Trapped in vegetation</span>
-              <div class="f-track"><div class="f-fill" id="f-veg" style="background:#2e7d49"></div></div>
+              <div class="f-track"><div class="f-fill" id="f-veg" style="background:#66772a"></div></div>
               <span class="f-count" id="c-veg">0</span>
             </div>
             <div class="fate-row">
               <span class="f-label">Settled (river bed)</span>
-              <div class="f-track"><div class="f-fill" id="f-river" style="background:#a2551f"></div></div>
+              <div class="f-track"><div class="f-fill" id="f-river" style="background:#b07d2b"></div></div>
               <span class="f-count" id="c-river">0</span>
             </div>
             <div class="fate-row">
               <span class="f-label">Settled (lake bed)</span>
-              <div class="f-track"><div class="f-fill" id="f-lake" style="background:#6d4c2c"></div></div>
+              <div class="f-track"><div class="f-fill" id="f-lake" style="background:#45413b"></div></div>
               <span class="f-count" id="c-lake">0</span>
             </div>
             <div class="fate-row">
               <span class="f-label">Exported downstream</span>
-              <div class="f-track"><div class="f-fill" id="f-out" style="background:#6b7280"></div></div>
+              <div class="f-track"><div class="f-fill" id="f-out" style="background:#7a746a"></div></div>
               <span class="f-count" id="c-out">0</span>
             </div>
           </div>
         </div>
       </div>
 
-      <p style="margin-top:26px; font-size:0.92rem; color:var(--ink-faint);">
-        <em>What to try:</em> release pure polyethylene and watch it raft along the surface until
+      <p class="try"><em>What to try:</em> release pure polyethylene and watch it raft along the surface until
         biofouling makes it heavy enough to sink; switch to PVC and see it settle quickly in the
         river reach; increase vegetation density and compare how much material the canopy traps;
         trigger a storm event to flush trapped and settled particles back into suspension and
-        watch the fate budget redistribute; then let the lake do what lakes do: act as a
-        long-term sink for whatever arrives.
-      </p>
+        watch the fate budget redistribute.</p>
     </div>
   </section>
+
+<section class="more" aria-labelledby="more-title">
+  <div class="wrap">
+    <header class="sec-head"><span class="numeral">&rarr;</span><div><h2 id="more-title">More projects</h2></div></header>
+    <ul class="project-list">
+      <li><a href="../microplastic-simulator/index.html"><span class="kind">3D Lagrangian model</span><h3>GPU microplastic transport</h3><p>Following every microplastic through the water, with biofilm growth and number-conserving fragmentation.</p><span class="go">Open the project</span></a></li>
+      <li><a href="../constructed-wetland-surrogate/index.html"><span class="kind">CFD and machine learning</span><h3>Constructed wetland surrogate</h3><p>Rapid prediction of hydraulic efficiency and residence time in wetlands and ponds.</p><span class="go">Open the project</span></a></li>
+      <li><a href="../dense-jet-simulator/index.html"><span class="kind">Interactive simulator</span><h3>Dense jet simulator</h3><p>An inclined brine jet rises, falls back and spreads along the bed.</p><span class="go">Open the simulator</span></a></li>
+      <li><a href="../ariake-instrument/index.html"><span class="kind">Bayesian instrument</span><h3>Ariake survey instrument</h3><p>A few samples give the whole suspended field of the bay, with its uncertainty.</p><span class="go">Open the instrument</span></a></li>
+      <li class="here"><a href="../microplastic-simulator/journey.html" aria-current="page"><span class="kind">You are here</span><h3>Microplastic journey</h3><p>A schematic river-to-lake demonstration of how microplastics travel and settle.</p></a></li>
+      <li><a href="../publications.html"><span class="kind">Publications</span><h3>Journal articles and theses</h3><p>Microplastic transport, environmental hydraulics, dense jets and turbulence.</p><span class="go">See the list</span></a></li>
+    </ul>
+  </div>
+</section>
 </main>
 
-<footer class="site-footer">
-  <div class="container">
-    <span>© 2026 Danial Goodarzi</span>
-    <span><a href="https://github.com/HydroCFD/HydroCFD.github.io">Site source on GitHub</a></span>
+<footer class="foot">
+  <div class="wrap foot-grid">
+    <div>
+      <p class="foot-name"><a href="../index.html">Danial Goodarzi, Ph.D.</a></p>
+      <p>Postdoctoral researcher, Department of Civil Engineering, University of Ottawa, Ottawa, Canada</p>
+      <p><a href="mailto:dgood006@uottawa.ca">dgood006@uottawa.ca</a></p>
+    </div>
+    <div>
+      <h4>Projects</h4>
+      <ul>
+        <li><a href="../microplastic-simulator/index.html">GPU microplastic transport</a></li>
+        <li><a href="../constructed-wetland-surrogate/index.html">Constructed wetland surrogate</a></li>
+        <li><a href="../dense-jet-simulator/index.html">Dense jet simulator</a></li>
+        <li><a href="../ariake-instrument/index.html">Ariake survey instrument</a></li>
+        <li><a href="../microplastic-simulator/journey.html">Microplastic journey</a></li>
+        <li><a href="../publications.html">Publications</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Elsewhere</h4>
+      <ul>
+        <li><a href="https://scholar.google.com/citations?user=inKDJywAAAAJ&amp;hl=en">Google Scholar</a></li>
+        <li><a href="https://orcid.org/0000-0002-1621-5052">ORCID</a></li>
+        <li><a href="https://www.researchgate.net/profile/Danial-Goodarzi">ResearchGate</a></li>
+        <li><a href="https://github.com/HydroCFD">GitHub</a></li>
+        <li><a href="https://www.linkedin.com/in/danial-goodarzi-59243a99">LinkedIn</a></li>
+      </ul>
+    </div>
   </div>
+  <div class="wrap foot-base"><span>&copy; 2026 Danial Goodarzi</span><a href="https://github.com/HydroCFD/HydroCFD.github.io">Site source on GitHub</a></div>
 </footer>
 
+<script src="../js/site.js"></script>
 <script src="../js/microplastic-simulator.js"></script>
 </body>
 </html>

@@ -1,0 +1,43 @@
+/* Site theme for the instrument: paper, ink and one vermilion accent.
+   Loaded after app.css; only colours, fonts and the space for the site menu. */
+:root {
+  --ink: #141414;
+  --muted: #6b665d;
+  --line: #cbc2b2;
+  --bg: #f2ede3;
+  --card: #f7f3eb;
+  --accent: #141414;
+  --red: #e4572e;
+  --amber: #b07d2b;
+  --green: #66772a;
+}
+body {
+  padding-top: 58px;
+  background: var(--bg);
+  font-family: "Public Sans", "Helvetica Neue", Arial, sans-serif;
+}
+.preview-bar { font-family: "Public Sans", "Helvetica Neue", Arial, sans-serif !important; }
+header:not(.nav) { background: var(--bg); border-bottom: 1px solid var(--ink); padding: 34px 0 26px; }
+h1 { font-family: "Newsreader", Georgia, serif; font-weight: 400; font-size: clamp(28px, 4vw, 44px); letter-spacing: -0.02em; }
+h2, .rhead { font-family: "Newsreader", Georgia, serif; font-weight: 500; font-size: 20px; }
+.card { border: 1px solid var(--ink); border-radius: 0; background: var(--card); }
+button { border-radius: 0; border-color: var(--ink); background: var(--bg); }
+button.primary { background: var(--ink); border-color: var(--ink); }
+button.primary:hover { background: var(--red); border-color: var(--red); }
+button.ghost:hover { background: var(--ink); color: var(--bg); }
+select, input[type=text] { border-radius: 0; border-color: var(--ink); background: var(--bg); }
+.fill { background: var(--ink); }
+.bar.lead .fill { background: var(--red); }
+.p68 { background: var(--ink); }
+.p95 { background: #b9b1a2; }
+.pmed { background: var(--red); }
+.help.intro, body.help-on .card > .help, body.help-on .mapcard > .help { background: var(--bg); border: 1px solid var(--line); border-left: 3px solid var(--red); border-radius: 0; }
+.help p { color: #45413b; }
+.help h4, .elab, .eqlab { color: var(--red); }
+body.help-on .help-btn { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+.warn, .warnbox { background: #f7efe2; border-color: #d9b98a; border-radius: 0; }
+.eq { color: var(--ink); }
+main > footer, .wrap > footer { border-top: 1px solid var(--ink); }
+a { color: var(--ink); }
+@media print { header.nav, footer.foot, .more { display: none !important; } body { padding-top: 0; } }
+@media (max-width: 760px) { .eqbody { width: 100%; } }

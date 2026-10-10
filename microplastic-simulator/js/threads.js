@@ -1,6 +1,6 @@
 // GPU thread grid: every square is one thread advancing one particle.
 // All threads start each time step together and finish at different times.
-import { runWhenVisible, fit2d } from './loop.js';
+import { runWhenVisible, fit2d } from '../../js/3d/loop.js';
 
 const STEP = 1.8, CELL = 10, GAP = 4;
 const INK = '20,20,20', RED = '228,87,46';

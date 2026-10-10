@@ -1,7 +1,7 @@
 // "A particle's life": one microplastic fragment, driven by scroll position.
 // Stages (life.P): 0 transport, 1 biofilm, 2 sinking, 3 fragmentation, 4 bed.
 import * as THREE from 'three';
-import { runWhenVisible, fitGL, life, smooth, lerp, makeNoise, isSmall } from './loop.js';
+import { runWhenVisible, fitGL, life, smooth, lerp, makeNoise, isSmall } from '../../js/3d/loop.js';
 
 const BREAK = 2.45; // value of P at which the particle breaks
 
@@ -50,34 +50,38 @@ export function initLife(canvas) {
     color: 0xeef2f6, roughness: 0.3, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.2
   }));
   particle.add(core);
-  outline(core, 1.035);
+  const coreLine = outline(core, 1.035);
 
-  // biofilm shell: the core pushed out along its normals by an uneven thickness
+  // biofilm: one continuous coat around the same particle. Every vertex is
+  // pushed outwards from the centre by a smooth, nearly even thickness, so
+  // the coat has no seams and keeps the outline of the particle.
   const shellGeo = coreGeo.clone();
   {
-    const p = shellGeo.attributes.position, nrm = shellGeo.attributes.normal;
+    const p = shellGeo.attributes.position;
     const colors = new Float32Array(p.count * 3), c = new THREE.Color();
-    const g1 = new THREE.Color(0x8a9a44), g2 = new THREE.Color(0x5d6d26), g3 = new THREE.Color(0xa88f52);
+    const g1 = new THREE.Color(0x8a9a44), g2 = new THREE.Color(0x6f7f30), g3 = new THREE.Color(0x9c8f55);
     for (let i = 0; i < p.count; i++) {
       const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
-      const bump = noise(x * 6, y * 6, z * 6), patch = noise(x * 2.2 + 9, y * 2.2, z * 2.2);
-      const t = 0.15 + 0.07 * bump + 0.05 * Math.max(0, patch);
-      p.setXYZ(i, x + nrm.getX(i) * t, y + nrm.getY(i) * t, z + nrm.getZ(i) * t);
-      c.copy(g1).lerp(g2, 0.5 + 0.5 * bump).lerp(g3, Math.max(0, patch) * 0.6);
+      const r = Math.hypot(x, y, z) || 1;
+      const slow = noise(x * 1.6 + 9, y * 1.6, z * 1.6), fine = noise(x * 5, y * 5, z * 5);
+      const t = 0.12 + 0.025 * slow + 0.008 * fine;
+      const k = 1 + t / r;
+      p.setXYZ(i, x * k, y * k, z * k);
+      c.copy(g1).lerp(g2, 0.5 + 0.5 * slow).lerp(g3, Math.max(0, fine) * 0.35);
       colors.set([c.r, c.g, c.b], 3 * i);
     }
     shellGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
     shellGeo.computeVertexNormals();
   }
-  const shellMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85, transparent: true, opacity: 0, flatShading: true });
+  const shellMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.8, transparent: true, opacity: 0 });
   const shell = new THREE.Mesh(shellGeo, shellMat);
   particle.add(shell);
   const shellLineMat = new THREE.MeshBasicMaterial({ color: 0x141414, side: THREE.BackSide, transparent: true, opacity: 0 });
   outline(shell, 1.03, shellLineMat);
 
   // algal cells that drift in and attach
-  const NA = small ? 140 : 220;
-  const algae = new THREE.InstancedMesh(new THREE.SphereGeometry(0.05, 10, 8),
+  const NA = small ? 70 : 110;
+  const algae = new THREE.InstancedMesh(new THREE.SphereGeometry(0.035, 10, 8),
     new THREE.MeshStandardMaterial({ color: 0x5d6d26, roughness: 0.7 }), NA);
   particle.add(algae);
   const aTarget = [], aStart = [], aTh = [];
@@ -211,9 +215,11 @@ export function initLife(canvas) {
       0.2 * Math.sin(t * 0.37) * amp);
     particle.rotation.set(Math.sin(t * 0.3) * 0.45 + 0.3, t * 0.22, Math.sin(t * 0.21) * 0.25);
     core.visible = shell.visible = algae.visible = !broken;
-    shellMat.opacity = 0.92 * smooth(0, 0.35, b);
+    shellMat.opacity = smooth(0, 0.45, b);
+    shellMat.transparent = shellMat.opacity < 1;
     shellLineMat.opacity = smooth(0.25, 0.6, b);
-    shell.scale.setScalar(lerp(0.9, 1, b));
+    coreLine.visible = b < 0.3;
+    shell.scale.setScalar(lerp(0.94, 1, b));
 
     for (let i = 0; i < NA; i++) {
       const k = smooth(aTh[i], aTh[i] + 0.16, b);

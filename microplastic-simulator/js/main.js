@@ -1,15 +1,10 @@
-// Page wiring: navigation, reveals, scroll story, films and the animated scenes.
-import { motion, setPaused, life, isSmall, clamp } from './loop.js';
+// Page wiring: scroll story, films and the animated scenes.
+// The menu, progress bar and fade-ins come from ../../js/site.js.
+import { motion, setPaused, life, isSmall, clamp } from '../../js/3d/loop.js';
 import { initFrag } from './frag.js';
 import { initThreads } from './threads.js';
 
 const root = document.documentElement;
-
-// ---------- navigation ----------
-const nav = document.getElementById('nav');
-const bar = nav.querySelector('.nav-progress');
-const links = [...nav.querySelectorAll('nav a')];
-const targets = links.map(a => document.querySelector(a.getAttribute('href')));
 
 // ---------- scroll story ----------
 const steps = [...document.querySelectorAll('.step')];
@@ -31,34 +26,9 @@ function updateLife() {
 }
 
 let ticking = false;
-function onScroll() {
-  ticking = false;
-  const y = window.scrollY;
-  const max = root.scrollHeight - window.innerHeight;
-  bar.style.transform = `scaleX(${max > 0 ? y / max : 0})`;
-  let active = -1;
-  targets.forEach((s, i) => { if (s && s.getBoundingClientRect().top < window.innerHeight * 0.45) active = i; });
-  links.forEach((a, i) => a.classList.toggle('active', i === active));
-  updateLife();
-}
-window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
-window.addEventListener('resize', onScroll);
-onScroll();
-
-// ---------- reveal on scroll ----------
-const io = new IntersectionObserver(entries => entries.forEach(e => {
-  if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
-}), { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-document.querySelectorAll('.reveal').forEach(el => io.observe(el));
-
-// ---------- feature cards follow the pointer ----------
-document.querySelectorAll('.feature').forEach(card => {
-  card.addEventListener('pointermove', e => {
-    const r = card.getBoundingClientRect();
-    card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-    card.style.setProperty('--my', `${e.clientY - r.top}px`);
-  });
-});
+window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { ticking = false; updateLife(); }); } }, { passive: true });
+window.addEventListener('resize', updateLife);
+updateLife();
 
 // ---------- films ----------
 const film = document.getElementById('film');
@@ -104,7 +74,7 @@ function hasWebGL() {
   catch { return false; }
 }
 if (hasWebGL()) {
-  import('./hero.js').then(m => m.initHero(document.getElementById('hero-gl'))).catch(noWebGL);
+  import('../../js/3d/river.js').then(m => m.initRiver(document.getElementById('hero-gl'))).catch(noWebGL);
   import('./life.js').then(m => m.initLife(document.getElementById('life-gl'))).catch(noWebGL);
   import('./mesh.js').then(m => m.initMesh(document.getElementById('mesh-gl'))).catch(noWebGL);
 } else noWebGL();

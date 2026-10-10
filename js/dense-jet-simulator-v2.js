@@ -197,9 +197,9 @@
   (function () {
     const sctx = sprite.getContext("2d");
     const g = sctx.createRadialGradient(32, 32, 0, 32, 32, 32);
-    g.addColorStop(0, "rgba(13, 70, 105, 0.55)");
-    g.addColorStop(0.45, "rgba(13, 70, 105, 0.28)");
-    g.addColorStop(1, "rgba(13, 70, 105, 0)");
+    g.addColorStop(0, "rgba(228, 87, 46, 0.5)");
+    g.addColorStop(0.45, "rgba(228, 87, 46, 0.24)");
+    g.addColorStop(1, "rgba(228, 87, 46, 0)");
     sctx.fillStyle = g;
     sctx.fillRect(0, 0, 64, 64);
   })();
@@ -300,14 +300,14 @@
   function drawBackground() {
     // water body
     const grad = ctx.createLinearGradient(0, margin.top, 0, canvas.height - margin.bottom);
-    grad.addColorStop(0, "#f2f7fc");
-    grad.addColorStop(1, "#dce9f5");
+    grad.addColorStop(0, "#eef0f2");
+    grad.addColorStop(1, "#dfe4ee");
     ctx.fillStyle = grad;
     ctx.fillRect(margin.left, margin.top, canvas.width - margin.left - margin.right, canvas.height - margin.top - margin.bottom);
 
     // free surface
     const ps = toPx(0, state.H);
-    ctx.strokeStyle = "#7fa8c9";
+    ctx.strokeStyle = "#2643b8";
     ctx.lineWidth = 2;
     ctx.beginPath();
     const t = performance.now() / 900;
@@ -319,9 +319,9 @@
 
     // bed
     const pb = toPx(0, 0);
-    ctx.fillStyle = "#d9c9a3";
+    ctx.fillStyle = "#dccfae";
     ctx.fillRect(margin.left, pb.y, canvas.width - margin.left - margin.right, canvas.height - margin.bottom - pb.y + 8);
-    ctx.strokeStyle = "#b09b6c";
+    ctx.strokeStyle = "#141414";
     ctx.beginPath();
     ctx.moveTo(margin.left, pb.y);
     ctx.lineTo(canvas.width - margin.right, pb.y);
@@ -330,10 +330,10 @@
 
   function drawAxes() {
     ctx.save();
-    ctx.strokeStyle = "rgba(20,34,52,0.55)";
-    ctx.fillStyle = "rgba(20,34,52,0.8)";
+    ctx.strokeStyle = "rgba(20,20,20,0.6)";
+    ctx.fillStyle = "rgba(20,20,20,0.85)";
     ctx.lineWidth = 1.2;
-    ctx.font = "13px 'Source Sans 3', sans-serif";
+    ctx.font = "13px 'Public Sans', sans-serif";
 
     // x ticks every 1 m along the bed
     const pb = toPx(0, 0);
@@ -363,13 +363,13 @@
     const pb = toPx(portX, 0);
     ctx.save();
     // riser
-    ctx.strokeStyle = "#5b6b80";
+    ctx.strokeStyle = "#45413b";
     ctx.lineWidth = 6;
     ctx.beginPath(); ctx.moveTo(pb.x, pb.y); ctx.lineTo(p.x, p.y); ctx.stroke();
     // nozzle aligned with release angle
     ctx.translate(p.x, p.y);
     ctx.rotate(-state.theta0);
-    ctx.fillStyle = "#1e2f44";
+    ctx.fillStyle = "#141414";
     ctx.fillRect(-4, -5, 20, 10);
     ctx.restore();
   }
@@ -377,7 +377,7 @@
   function drawCenterline() {
     if (!chkCenterline.checked || stations.length < 2) return;
     ctx.save();
-    ctx.strokeStyle = "rgba(14,90,122,0.75)";
+    ctx.strokeStyle = "rgba(20,20,20,0.8)";
     ctx.lineWidth = 2;
     ctx.setLineDash([7, 5]);
     ctx.beginPath();
@@ -394,7 +394,7 @@
   function drawEnvelope() {
     if (!chkEnvelope.checked || stations.length < 2) return;
     ctx.save();
-    ctx.strokeStyle = "rgba(14,90,122,0.35)";
+    ctx.strokeStyle = "rgba(20,20,20,0.35)";
     ctx.lineWidth = 1.4;
     for (const side of [1, -1]) {
       ctx.beginPath();
@@ -414,7 +414,7 @@
   function drawMarkers() {
     if (!chkMarkers.checked) return;
     ctx.save();
-    ctx.font = "12px 'Source Sans 3', sans-serif";
+    ctx.font = "12px 'Public Sans', sans-serif";
 
     // terminal rise
     const pr = toPx(model.riseX, model.riseY);

@@ -6,16 +6,18 @@ The page shows the model and its processes. It deliberately carries no graphs or
 
 ## Design
 
-Print style: paper `#f2ede3`, ink `#141414`, one vermilion accent `#e4572e`, pale cobalt for water. Newsreader for headings and captions, Public Sans for text. Hairline rules, square corners, no glow and no gradients. All colours are set at the top of `paper.css`; the 3D scenes use the same values in their own files.
+Print style: paper `#f2ede3`, ink `#141414`, one vermilion accent `#e4572e`, pale cobalt for water. Newsreader for headings and captions, Public Sans for text. Hairline rules, square corners, no glow and no gradients. All colours are set at the top of `../css/site.css`; the 3D scenes use the same values in their own files. The whole site shares this design, the home page menu and the footer.
 
 ## Files
 
 | File | What it draws |
 |---|---|
-| `paper.css` | All page styles |
-| `js/main.js` | Navigation, reveal on scroll, scroll position of the particle story, film tabs, motion toggle, loads the scenes |
-| `js/loop.js` | Shared helpers: animation loop that runs only while a canvas is on screen, resizing, noise |
-| `js/hero.js` | Fig. 1: three.js meandering river with helical secondary flow; particles foul, fragment, sink and settle |
+| `../css/site.css` | Shared site styles: colours, menu, hero, sections, footer (used by every page) |
+| `paper.css` | Styles for this page only |
+| `../js/site.js` | Shared menu, progress bar and fade-in on scroll |
+| `js/main.js` | Scroll position of the particle story, film tabs, motion toggle, loads the scenes |
+| `../js/3d/loop.js` | Shared helpers: animation loop that runs only while a canvas is on screen, resizing, noise |
+| `../js/3d/river.js` | Fig. 1: three.js meandering river with helical secondary flow; particles foul, fragment, sink and settle (also the home page hero) |
 | `js/life.js` | Fig. 2: one particle driven by scroll: transport, biofilm, sinking, break-up, bed |
 | `js/frag.js` | Fig. 3: new particle per fragment versus weighted particles |
 | `js/mesh.js` | Fig. 4: particles ray-traced through a triangular prism mesh; crossed faces are marked |
