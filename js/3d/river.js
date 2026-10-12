@@ -3,6 +3,7 @@
 // Illustrative only; the motion is a sketch of the processes in the model.
 import * as THREE from 'three';
 import { runWhenVisible, fitGL, isSmall, gauss, makeNoise, smooth, lerp } from './loop.js';
+import { createChannelFluid } from './fluid.js';
 
 // ---------- river geometry (scene units, vertical scale exaggerated) ----------
 const S = 220;          // length of the parameter range covered by particles
@@ -99,8 +100,12 @@ export function initRiver(canvas, opts = {}) {
   scene.add(wire);
 
   // ---------- water surface ----------
-  const SW0 = -70, SW1 = S + 70, NS = small ? 400 : 640, NNW = 9;
-  const wPos = [], wUv = [], wIdx = [];
+  // A moving surface: ripples carried downstream (faster on the axis than at
+  // the banks), sun glints, a little sky reflection at grazing angles, colour
+  // from the depth (deep blue on the axis, clearer water over the shallows),
+  // long foam streaks that follow the flow and a soft shoreline.
+  const SW0 = -70, SW1 = S + 70, NS = small ? 400 : 640, NNW = small ? 13 : 19;
+  const wPos = [], wUv = [], wTan = [], wIdx = [];
   for (let i = 0; i <= NS; i++) {
     const s = SW0 + (SW1 - SW0) * i / NS;
     const c = centre(s);
@@ -108,6 +113,7 @@ export function initRiver(canvas, opts = {}) {
       const n = -1.35 + 2.7 * j / (NNW - 1);
       wPos.push(c.x + n * HALF_W * c.nx, 0, c.z + n * HALF_W * c.nz);
       wUv.push(s, n);
+      wTan.push(c.nz, -c.nx);           // unit vector along the channel
     }
   }
   for (let i = 0; i < NS; i++) for (let j = 0; j < NNW - 1; j++) {
@@ -117,40 +123,149 @@ export function initRiver(canvas, opts = {}) {
   const water = new THREE.BufferGeometry();
   water.setAttribute('position', new THREE.Float32BufferAttribute(wPos, 3));
   water.setAttribute('uv', new THREE.Float32BufferAttribute(wUv, 2));
+  water.setAttribute('aTan', new THREE.Float32BufferAttribute(wTan, 2));
   water.setIndex(wIdx);
   const waterMat = new THREE.ShaderMaterial({
     transparent: true, depthWrite: false, side: THREE.DoubleSide,
-    uniforms: { uTime: { value: 0 }, uFog: { value: FOG } },
+    uniforms: {
+      uTime: { value: 0 }, uFog: { value: FOG }, uU: { value: U }, uHalfW: { value: HALF_W },
+      uSun: { value: new THREE.Vector3(-50, 80, 40).normalize() },
+      uDye: { value: null }, uSpan: { value: new THREE.Vector2(SW0, SW1) }, uDyeOn: { value: 0 }
+    },
     vertexShader: `
-      varying vec2 vUv; varying float vFog;
+      attribute vec2 aTan;
+      varying vec2 vUv; varying vec2 vTan; varying vec3 vWorld; varying float vFog;
       uniform float uFog;
       void main(){
-        vUv = uv;
-        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        vUv = uv; vTan = aTan;
+        vec4 w = modelMatrix * vec4(position, 1.0);
+        vWorld = w.xyz;
+        vec4 mv = viewMatrix * w;
         vFog = exp(-uFog * uFog * mv.z * mv.z);
         gl_Position = projectionMatrix * mv;
       }`,
     fragmentShader: `
-      varying vec2 vUv; varying float vFog;
-      uniform float uTime;
+      varying vec2 vUv; varying vec2 vTan; varying vec3 vWorld; varying float vFog;
+      uniform float uTime, uFog, uU, uHalfW, uDyeOn;
+      uniform sampler2D uDye; uniform vec2 uSpan;
+      uniform vec3 uSun;
+
+      float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+      float vnoise(vec2 p){
+        vec2 i = floor(p), f = fract(p), u = f * f * (3.0 - 2.0 * f);
+        return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), u.x),
+                   mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);
+      }
+      float fbm(vec2 p){
+        float v = 0.0, a = 0.5;
+        for (int k = 0; k < 4; k++) { v += a * vnoise(p); p = p * 2.03 + vec2(17.1, 9.3); a *= 0.5; }
+        return v;
+      }
+      // surface height in channel coordinates (q.x along, q.y across, scene units)
+      float height(vec2 q, float speed){
+        vec2 a = vec2(q.x - uTime * uU * speed * 0.85, q.y);
+        vec2 b = vec2(q.x - uTime * uU * speed * 1.15 + 31.0, q.y * 1.3 + 7.0);
+        return 0.6 * fbm(a * 0.55) + 0.4 * fbm(b * 1.4);
+      }
       void main(){
-        float s = vUv.x, n = vUv.y;
-        float an = abs(n);
-        float speed = 1.0 - 0.7 * n * n;
-        float w1 = sin(s * 1.1 - uTime * 5.0 * speed + sin(n * 6.0 + s * 0.21) * 1.8);
-        float w2 = sin(s * 0.37 + n * 3.0 - uTime * 2.1 * speed);
-        float streak = smoothstep(0.965, 1.0, w1) * (0.55 + 0.45 * w2);
-        float edge = 1.0 - smoothstep(0.85, 1.35, an);
-        vec3 base = mix(vec3(0.25, 0.42, 0.74), vec3(0.42, 0.58, 0.84), 0.5 + 0.5 * w2);
-        vec3 c = mix(base, vec3(0.97, 0.95, 0.91), streak * 0.85);
-        c = mix(vec3(0.949, 0.929, 0.890), c, vFog);
-        float a = (0.5 + streak * 0.35) * edge;
-        gl_FragColor = vec4(c, a);
+        float s = vUv.x, n = vUv.y, an = abs(n);
+        float speed = max(0.15, 1.0 - 0.7 * n * n);
+        vec2 q = vec2(s, n * uHalfW);
+
+        // normal from the height field, then turned into the world frame
+        float e = 0.12, h = height(q, speed);
+        float hs = (height(q + vec2(e, 0.0), speed) - h) / e;
+        float hn = (height(q + vec2(0.0, e), speed) - h) / e;
+        vec3 T = vec3(vTan.x, 0.0, vTan.y), B = vec3(-vTan.y, 0.0, vTan.x);
+        // the fluid simulation: its dye gives eddies of darker and lighter water, foam and relief
+        vec2 duv = vec2((s - uSpan.x) / (uSpan.y - uSpan.x), (n + 1.35) / 2.7);
+        vec4 dye = texture2D(uDye, duv) * uDyeOn;
+        float tone = dye.g - dye.b;
+        vec2 o = vec2(0.0015, 0.012);
+        float ts = (texture2D(uDye, duv + vec2(o.x, 0.0)).g - texture2D(uDye, duv + vec2(o.x, 0.0)).b - tone) * uDyeOn;
+        float tn = (texture2D(uDye, duv + vec2(0.0, o.y)).g - texture2D(uDye, duv + vec2(0.0, o.y)).b - tone) * uDyeOn;
+        hs += 3.0 * ts; hn += 3.0 * tn;
+        vec3 N = normalize(vec3(0.0, 1.0, 0.0) - 0.9 * (hs * T + hn * B));
+        vec3 V = normalize(cameraPosition - vWorld);
+
+        // colour from depth: deep on the axis, shallow and clearer at the banks
+        float depth = clamp(1.0 - n * n, 0.0, 1.0);
+        vec3 deep = vec3(0.11, 0.27, 0.50), shallow = vec3(0.42, 0.60, 0.74);
+        vec3 col = mix(shallow, deep, smoothstep(0.0, 0.9, depth));
+        col *= 0.88 + 0.24 * h;                            // ripples darken and lighten the water
+        col = mix(col, deep * 0.62, clamp(dye.g, 0.0, 1.0) * 0.7);
+        col = mix(col, vec3(0.55, 0.72, 0.85), clamp(dye.b, 0.0, 1.0) * 0.65);
+
+        // sky reflection at grazing angles and sun glints on the ripples
+        float fres = 0.04 + 0.96 * pow(1.0 - max(dot(N, V), 0.0), 5.0);
+        col = mix(col, vec3(0.86, 0.90, 0.94), fres * 0.7);
+        vec3 R = reflect(-uSun, N);
+        float glint = pow(max(dot(R, V), 0.0), 160.0);
+        col += vec3(1.0, 0.98, 0.94) * glint * 1.6;
+
+        // foam: long streaks that follow the flow, and a broken line along the banks
+        float streak = fbm(vec2((s - uTime * uU * speed) * 0.12, n * uHalfW * 1.6));
+        float foam = smoothstep(0.7, 0.82, streak) * 0.25 + clamp(dye.r, 0.0, 1.0) * 0.85;
+        float bankFoam = smoothstep(0.82, 1.02, an) * smoothstep(0.45, 0.7, fbm(vec2((s - uTime * 1.2) * 0.9, n * 9.0)));
+        col = mix(col, vec3(0.95, 0.96, 0.96), clamp(foam + 0.7 * bankFoam, 0.0, 0.85));
+
+        // soft, slightly irregular shoreline
+        float shore = 1.0 - smoothstep(1.0, 1.3, an + 0.12 * (fbm(vec2(s * 0.7, n * 3.0)) - 0.5));
+        float alpha = (0.55 + 0.35 * depth + glint * 0.3 + foam * 0.3) * shore;
+
+        col = mix(vec3(0.949, 0.929, 0.890), col, vFog);
+        gl_FragColor = vec4(col, clamp(alpha, 0.0, 0.96));
       }`
   });
   const waterMesh = new THREE.Mesh(water, waterMat);
   waterMesh.renderOrder = 1;
   scene.add(waterMesh);
+
+  // ---------- fluid simulation inside the channel ----------
+  let fluid = null;
+  try {
+    const nx = small ? 640 : 1024, ny = small ? 32 : 48;
+    fluid = createChannelFluid(renderer, { nx, ny, wall: 0.5 / 1.35, speed: U / ((SW1 - SW0) / nx), curl: 24 });
+    waterMat.uniforms.uDyeOn.value = 1;
+  } catch (e) { console.warn('fluid simulation unavailable:', e); }
+  const cellU = (SW1 - SW0) / (small ? 640 : 1024), cellV = 2.7 * HALF_W / (small ? 32 : 48);
+  const toUV = (s, n) => [(s - SW0) / (SW1 - SW0), (n + 1.35) / 2.7];
+  let stirClock = 0;
+  function stir(dt) {
+    // small random disturbances, as from the bed and the banks, keep eddies forming
+    stirClock += dt;
+    const spd = U / cellU;
+    while (stirClock > 0.09) {
+      stirClock -= 0.09;
+      const s0 = lerp(-20, S + 20, Math.random()), n0 = (Math.random() * 2 - 1) * 0.92;
+      const [u, v] = toUV(s0, n0);
+      const kind = Math.random();
+      const dye = kind < 0.42 ? [0, 0.55, 0] : kind < 0.84 ? [0, 0, 0.5] : [0.4, 0, 0];
+      const bank = Math.abs(n0) > 0.65 ? -Math.sign(n0) : (Math.random() - 0.5) * 2;
+      fluid.splat(u, v, (Math.random() - 0.65) * spd * 0.9, bank * spd * (0.5 + Math.random()), dye, 0.0012 + Math.random() * 0.0025);
+    }
+  }
+  // run the river for a while before the first frame, so eddies already fill it
+  if (fluid) for (let k = 0; k < 150; k++) { stir(1 / 30); fluid.step(1 / 30); }
+
+  // the pointer stirs the water where it crosses the river
+  const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+  let lastHit = null;
+  window.addEventListener('pointermove', e => {
+    if (!fluid) return;
+    const r = canvas.getBoundingClientRect();
+    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) { lastHit = null; return; }
+    ndc.set((e.clientX - r.left) / r.width * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    ray.setFromCamera(ndc, camera);
+    const hit = ray.intersectObject(waterMesh)[0];
+    if (!hit || !hit.uv || Math.abs(hit.uv.y) > 1) { lastHit = null; return; }
+    if (lastHit) {
+      const ds = hit.uv.x - lastHit.x, dn = hit.uv.y - lastHit.y;
+      const [u, v] = toUV(hit.uv.x, hit.uv.y);
+      fluid.splat(u, v, ds / cellU * 25, dn * HALF_W / cellV * 25, [0.35, 0, 0.45], 0.002);
+    }
+    lastHit = hit.uv.clone();
+  }, { passive: true });
 
   // ---------- particles ----------
   const N = small ? 3200 : 7000;
@@ -294,6 +409,8 @@ export function initRiver(canvas, opts = {}) {
   function frame(dt, t) {
     if (fitGL(renderer, camera, canvas)) pMat.uniforms.uScale.value = renderer.domElement.height * 0.17;
     if (dt > 0) { step(dt); writeBuffers(); }
+    if (fluid && dt > 0) { stir(dt); fluid.step(dt); }
+    if (fluid) waterMat.uniforms.uDye.value = fluid.dye;
     waterMat.uniforms.uTime.value = t;
     mouse.sx += (mouse.x - mouse.sx) * 0.04;
     mouse.sy += (mouse.y - mouse.sy) * 0.04;
