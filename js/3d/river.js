@@ -230,7 +230,7 @@ export function initRiver(canvas, opts = {}) {
   } catch (e) { console.warn('fluid simulation unavailable:', e); }
   const cellU = (SW1 - SW0) / (small ? 640 : 1024), cellV = 2.7 * HALF_W / (small ? 32 : 48);
   const toUV = (s, n) => [(s - SW0) / (SW1 - SW0), (n + 1.35) / 2.7];
-  let stirClock = 0;
+  let stirClock = 0, readTick = 0;
   function stir(dt) {
     // small random disturbances, as from the bed and the banks, keep eddies forming
     stirClock += dt;
@@ -297,12 +297,25 @@ export function initRiver(canvas, opts = {}) {
     return cc;
   }
 
+  // the simulated water carries the particles too: its eddies, and the pointer
+  // stirring, are added to the drift, most strongly near the surface
+  const FP = [0, 0];
+  const stirAt = i => {
+    if (!fluid) { FP[0] = 0; FP[1] = 0; return FP; }
+    const [u, v] = toUV(ps[i], pn[i]);
+    fluid.perturbation(u, v, FP);
+    FP[0] = Math.max(-18, Math.min(18, FP[0] * cellU));          // along the channel, units/s
+    FP[1] = Math.max(-1.5, Math.min(1.5, FP[1] * cellV / HALF_W)); // across, half widths/s
+    return FP;
+  };
   function step(dt) {
     const sq = Math.sqrt(dt);
     for (let i = 0; i < N; i++) {
       if (pstate[i] === 1) { // on the bed
         pt[i] += dt;
-        if (Math.random() < 0.012 * dt) { pstate[i] = 0; pd[i] = 0.85; }
+        const f = stirAt(i);
+        // strong stirring lifts particles off the bed
+        if (Math.random() < 0.012 * dt || Math.hypot(f[0], f[1] * HALF_W) > 8) { pstate[i] = 0; pd[i] = 0.85; }
         else if (pt[i] > 40) spawn(i, false);
         pflash[i] = Math.max(0, pflash[i] - 2.5 * dt);
         continue;
@@ -312,7 +325,9 @@ export function initRiver(canvas, opts = {}) {
       const dep = depth(n, c.kn);
       const prof = 0.3 + 0.7 * Math.pow(Math.max(0, 1 - d), 0.22);
       const us = U * (1 - 0.7 * n * n) * prof;
-      ps[i] += us * dt / c.ds;
+      const f = stirAt(i), k = 1 - 0.7 * d;
+      ps[i] += (us + f[0] * k) * dt / c.ds;
+      pn[i] += f[1] * k * dt;
       // helical secondary flow: towards the outer bank at the surface, inner bank at the bed
       const sec = 0.9 * c.kn;
       const a1 = Math.PI * (n + 1) * 0.5, a2 = Math.PI * d;
@@ -409,7 +424,7 @@ export function initRiver(canvas, opts = {}) {
   function frame(dt, t) {
     if (fitGL(renderer, camera, canvas)) pMat.uniforms.uScale.value = renderer.domElement.height * 0.17;
     if (dt > 0) { step(dt); writeBuffers(); }
-    if (fluid && dt > 0) { stir(dt); fluid.step(dt); }
+    if (fluid && dt > 0) { stir(dt); fluid.step(dt); if (++readTick % 3 === 0) fluid.readVelocity(); }
     if (fluid) waterMat.uniforms.uDye.value = fluid.dye;
     waterMat.uniforms.uTime.value = t;
     mouse.sx += (mouse.x - mouse.sx) * 0.04;
