@@ -108,7 +108,7 @@ export function createChannelFluid(renderer, { nx = 1024, ny = 48, wall = 0.37, 
       vec2 target = vec2(uSpeed * (1.0 - 0.7 * n * n), 0.0);
       v += (target - v) * clamp(uRelax * uDt, 0.0, 1.0);
       v *= water(vUv) * smoothstep(1.0, 0.92, abs(n));
-      if (vUv.x < 3.0 * texel.x) v = target * water(vUv);
+      if (vUv.x < 3.0 * texel.x || vUv.x > 1.0 - 3.0 * texel.x) v = target * water(vUv);   // inflow and outflow
       gl_FragColor = vec4(v, 0.0, 1.0);
     }`, { uVel: { value: null }, uDt: { value: 0 }, uDiss: { value: 0.15 }, uSpeed: { value: speed }, uRelax: { value: 0.35 } });
 
@@ -171,8 +171,52 @@ export function createChannelFluid(renderer, { nx = 1024, ny = 48, wall = 0.37, 
   }
   init();
 
+  // ---------- velocity back to the CPU, so particles can ride the eddies ----------
+  // A coarse copy of the velocity field is read back a few times a second.
+  const RW = 256, RH = 16;
+  let readOK = true, small = null, buf = null, rowMean = null;
+  try {
+    small = new THREE.WebGLRenderTarget(RW, RH, { type: THREE.FloatType, format: THREE.RGBAFormat, minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter, depthBuffer: false, stencilBuffer: false });
+    buf = new Float32Array(RW * RH * 4);
+    rowMean = new Float32Array(RH);
+  } catch (e) { readOK = false; }
+  const copyM = mat(`
+    uniform sampler2D uSrc;
+    void main(){ gl_FragColor = texture2D(uSrc, vUv); }`, { uSrc: { value: null } });
+  function readVelocity() {
+    if (!readOK) return false;
+    const prev = renderer.getRenderTarget();
+    try {
+      copyM.uniforms.uSrc.value = vel.read.texture;
+      run(copyM, small);
+      renderer.readRenderTargetPixels(small, 0, 0, RW, RH, buf);
+      // the mean flow at each distance from the bank, so only eddies and stirring remain
+      for (let j = 0; j < RH; j++) {
+        let m = 0;
+        const i0 = Math.floor(RW * 0.1), i1 = Math.floor(RW * 0.9);
+        for (let i = i0; i < i1; i++) m += buf[4 * (j * RW + i)];
+        rowMean[j] = m / (i1 - i0);
+      }
+    } catch (e) { readOK = false; }
+    renderer.setRenderTarget(prev);
+    return readOK;
+  }
+  // velocity minus the mean river flow at (u, v), in cells per second
+  function perturbation(u, v, out) {
+    out[0] = 0; out[1] = 0;
+    if (!readOK) return out;
+    const x = Math.min(RW - 1.001, Math.max(0, u * RW - 0.5)), y = Math.min(RH - 1.001, Math.max(0, v * RH - 0.5));
+    const i = Math.floor(x), j = Math.floor(y), fx = x - i, fy = y - j;
+    const at = (a, b, c) => buf[4 * (b * RW + a) + c];
+    for (let c = 0; c < 2; c++) {
+      out[c] = (at(i, j, c) * (1 - fx) + at(i + 1, j, c) * fx) * (1 - fy) + (at(i, j + 1, c) * (1 - fx) + at(i + 1, j + 1, c) * fx) * fy;
+    }
+    out[0] -= rowMean[j] * (1 - fy) + rowMean[j + 1] * fy;
+    return out;
+  }
+
   return {
-    step, splat, wall,
+    step, splat, wall, readVelocity, perturbation,
     get dye() { return dye.read.texture; },
     get velocity() { return vel.read.texture; }
   };
