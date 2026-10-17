@@ -1,9 +1,9 @@
 // Page wiring: scroll story, films and the animated scenes.
 // The menu, progress bar and fade-ins come from ../../js/site.js.
 import { motion, setPaused, life, isSmall, clamp } from '../../js/3d/loop.js';
-import { initFrag } from './frag.js';
-import { initThreads } from './threads.js';
-import { initRace } from './race.js';
+import { initFrag } from './frag.js?v=20261017a';
+import { initThreads } from './threads.js?v=20261017a';
+import { initRace } from './race.js?v=20261017a';
 
 const root = document.documentElement;
 
@@ -76,7 +76,7 @@ function hasWebGL() {
   catch { return false; }
 }
 if (hasWebGL()) {
-  import('../../js/3d/river.js').then(m => m.initRiver(document.getElementById('hero-gl'))).catch(noWebGL);
-  import('./life.js').then(m => m.initLife(document.getElementById('life-gl'))).catch(noWebGL);
-  import('./mesh.js').then(m => m.initMesh(document.getElementById('mesh-gl'))).catch(noWebGL);
+  import('../../js/3d/river.js?v=20261017a').then(m => m.initRiver(document.getElementById('hero-gl'))).catch(noWebGL);
+  import('./life.js?v=20261017a').then(m => m.initLife(document.getElementById('life-gl'))).catch(noWebGL);
+  import('./mesh.js?v=20261017a').then(m => m.initMesh(document.getElementById('mesh-gl'))).catch(noWebGL);
 } else noWebGL();
