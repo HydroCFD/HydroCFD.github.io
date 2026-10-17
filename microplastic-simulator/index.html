@@ -240,6 +240,14 @@
       <canvas id="threads" aria-hidden="true"></canvas>
       <figcaption><span>Fig. 5</span> Each square is one GPU thread advancing one particle. All threads start a time step together and finish at different times.</figcaption>
     </figure>
+    <figure class="race reveal">
+      <div class="race-actions">
+        <button type="button" id="race-go">Start the race</button>
+        <label>Particles <select id="race-n"><option>1024</option><option selected>4096</option><option>16384</option></select></label>
+      </div>
+      <canvas id="race-cv" aria-hidden="true"></canvas>
+      <figcaption><span>Fig. 6</span> The same particles advanced one time step after another. On the CPU, 24 threads work through the particles in turn; on the GPU, every particle has its own thread. An illustration of the idea, not a measured benchmark.</figcaption>
+    </figure>
   </div>
 </section>
 
