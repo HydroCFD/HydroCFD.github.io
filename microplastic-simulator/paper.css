@@ -97,6 +97,13 @@
 .frag-count { font-size: 0.86rem; color: var(--ink-2); }
 .frag-count b { font-weight: 600; color: var(--ink); }
 #frag-count-a { color: var(--red); }
+.ram { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; align-items: center; margin-top: 10px; }
+.ram-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; }
+.ram-bar { height: 10px; border: 1px solid var(--ink); background: var(--paper); }
+.ram-bar i { display: block; height: 100%; width: 1.6%; background: var(--ink); transition: width .5s var(--ease), background .3s; }
+.ram-bar i.full { background: var(--red); }
+.ram-val { grid-column: 2; font-family: var(--serif); font-style: italic; font-size: 0.85rem; color: var(--ink-2); }
+.ram-val.full { color: var(--red); }
 #frag-w { font-family: var(--serif); font-style: italic; font-weight: 400; color: var(--red); font-size: 1.05rem; }
 .frag-demo figcaption { grid-column: 1 / -1; padding: 14px 18px; border-top: 1px solid var(--ink); }
 

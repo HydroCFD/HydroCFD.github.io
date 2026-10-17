@@ -61,7 +61,7 @@
     <span class="key-dot red"></span> heavier than water
     <span class="key-dot bed"></span> on the bed
   </figure>
-  <p class="hero-caption"><span>Fig. 1</span> A meandering river, drawn live. Particles drift, grow a biofilm, break apart and settle.</p>
+  <p class="hero-caption">A meandering river, drawn live. Particles drift, grow a biofilm, break apart and settle.</p>
   <button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">Pause motion</button>
 </section>
 
@@ -147,7 +147,6 @@
           </div>
           <div class="weight"><span class="hud-label">Fragments represented</span><strong id="weight-val">w = 1</strong></div>
         </div>
-        <span class="plate-label">Fig. 2</span>
       </div>
       <ol class="life-dots" id="life-dots"><li></li><li></li><li></li><li></li><li></li><li></li></ol>
     </div>
@@ -203,13 +202,15 @@
           <p class="frag-title">A new particle for every fragment</p>
           <canvas id="frag-a"></canvas>
           <p class="frag-count"><b id="frag-count-a">1</b> tracked particles</p>
+          <div class="ram"><span class="ram-label">RAM</span><div class="ram-bar"><i id="ram-a"></i></div><span class="ram-val" id="ram-a-v">1.6 % used</span></div>
         </div>
         <div class="frag-panel">
           <p class="frag-title">Weighted particles</p>
           <canvas id="frag-b"></canvas>
           <p class="frag-count"><b id="frag-count-b">1</b> tracked particle, <b id="frag-w">w = 1</b></p>
+          <div class="ram"><span class="ram-label">RAM</span><div class="ram-bar"><i id="ram-b"></i></div><span class="ram-val">1.6 % used, after any number of breaks</span></div>
         </div>
-        <figcaption><span>Fig. 3</span> Both schemes carry the same plastic mass. Only the number of particles that the computer has to follow differs.</figcaption>
+        <figcaption>Both schemes carry the same plastic mass. Only the number of particles that the computer has to follow differs.</figcaption>
       </figure>
     </div>
   </div>
@@ -225,7 +226,7 @@
     <div class="split split-rev">
       <figure class="mesh-stage reveal">
         <canvas id="mesh-gl" aria-hidden="true"></canvas>
-        <figcaption><span>Fig. 4</span> Particles crossing the faces of a triangular prism mesh. Each crossed face is marked.</figcaption>
+        <figcaption>Particles crossing the faces of a triangular prism mesh. Each crossed face is marked.</figcaption>
       </figure>
       <div class="reveal prose">
         <p>The solver reads the three-dimensional velocity field of the hydrodynamic model on its own mesh of triangular prisms. For each particle, it finds which face of the hosting prism is reached first, moves the particle to that face and passes it to the neighbouring prism.</p>
@@ -238,7 +239,7 @@
     </div>
     <figure class="threads reveal">
       <canvas id="threads" aria-hidden="true"></canvas>
-      <figcaption><span>Fig. 5</span> Each square is one GPU thread advancing one particle. All threads start a time step together and finish at different times.</figcaption>
+      <figcaption>Each square is one GPU thread advancing one particle. All threads start a time step together and finish at different times.</figcaption>
     </figure>
     <figure class="race reveal">
       <div class="race-actions">
@@ -246,7 +247,7 @@
         <label>Particles <select id="race-n"><option>1024</option><option selected>4096</option><option>16384</option></select></label>
       </div>
       <canvas id="race-cv" aria-hidden="true"></canvas>
-      <figcaption><span>Fig. 6</span> The same particles advanced one time step after another. On the CPU, 24 threads work through the particles in turn; on the GPU, every particle has its own thread. An illustration of the idea, not a measured benchmark.</figcaption>
+      <figcaption>The same particles advanced one time step after another. On the CPU, 24 threads work through the particles in turn; on the GPU, every particle has its own thread. An illustration of the idea, not a measured benchmark.</figcaption>
     </figure>
   </div>
 </section>
