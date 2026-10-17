@@ -3,6 +3,7 @@
 import { motion, setPaused, life, isSmall, clamp } from '../../js/3d/loop.js';
 import { initFrag } from './frag.js';
 import { initThreads } from './threads.js';
+import { initRace } from './race.js';
 
 const root = document.documentElement;
 
@@ -64,6 +65,7 @@ showMotion();
 // ---------- animated scenes ----------
 initFrag();
 initThreads();
+initRace(document.getElementById('race-cv'));
 
 function noWebGL(err) {
   if (err) console.warn('3D scene unavailable:', err);
