@@ -12,6 +12,11 @@ export function initFrag() {
   const countA = document.getElementById('frag-count-a');
   const countB = document.getElementById('frag-count-b');
   const wEl = document.getElementById('frag-w');
+  // memory: every tracked particle takes a share; this RAM holds 2^GEN of them
+  const ramA = document.getElementById('ram-a'), ramAv = document.getElementById('ram-a-v');
+  const ramB = document.getElementById('ram-b');
+  const share = 100 / Math.pow(2, GEN);
+  if (ramB) ramB.style.width = share + '%';
 
   let dots = [], gen = 0, lastC = 0;
   function reset() { dots = [{ x: 0.5, y: 0.5, px: 0.5, py: 0.5, ph: 0 }]; gen = 0; }
@@ -72,7 +77,16 @@ export function initFrag() {
     dot(xb, cx, cy, lerp(rad(Math.max(0, gen - 1)), r, sp), '20,20,20', fade);
 
     const a = String(dots.length), bw = `w = ${w}`;
-    if (a !== shownA) { countA.textContent = a; shownA = a; }
+    if (a !== shownA) {
+      countA.textContent = a; shownA = a;
+      if (ramA) {
+        const used = Math.min(100, dots.length * share), full = used >= 100;
+        ramA.style.width = used + '%';
+        ramA.classList.toggle('full', full);
+        ramAv.textContent = full ? 'Full: the run stops here' : used.toFixed(used < 10 ? 1 : 0) + ' % used';
+        ramAv.classList.toggle('full', full);
+      }
+    }
     if (bw !== shownB) { wEl.textContent = bw; countB.textContent = '1'; shownB = bw; }
   }
   runWhenVisible(ca.closest('.frag-demo'), frame);

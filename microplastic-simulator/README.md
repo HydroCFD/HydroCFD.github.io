@@ -17,11 +17,12 @@ Print style: paper `#f2ede3`, ink `#141414`, one vermilion accent `#e4572e`, pal
 | `../js/site.js` | Shared menu, progress bar and fade-in on scroll |
 | `js/main.js` | Scroll position of the particle story, film tabs, motion toggle, loads the scenes |
 | `../js/3d/loop.js` | Shared helpers: animation loop that runs only while a canvas is on screen, resizing, noise |
-| `../js/3d/river.js` | Fig. 1: three.js meandering river with helical secondary flow; particles foul, fragment, sink and settle (also the home page hero) |
-| `js/life.js` | Fig. 2: one particle driven by scroll: transport, biofilm, sinking, break-up, bed |
-| `js/frag.js` | Fig. 3: new particle per fragment versus weighted particles |
-| `js/mesh.js` | Fig. 4: particles ray-traced through a triangular prism mesh; crossed faces are marked |
-| `js/threads.js` | Fig. 5: one GPU thread per particle |
+| `../js/3d/river.js` | Three.js meandering river with helical secondary flow; particles foul, fragment, sink and settle (also the home page hero) |
+| `js/life.js` | One particle driven by scroll: transport, biofilm, sinking, break-up, bed |
+| `js/frag.js` | New particle per fragment versus weighted particles, with a RAM bar for each |
+| `js/mesh.js` | Particles ray-traced through a triangular prism mesh; crossed faces are marked |
+| `js/threads.js` | One GPU thread per particle |
+| `js/race.js` | GPU against CPU race: 24 CPU threads against one GPU thread per particle (an illustration, not a benchmark) |
 
 three.js 0.160.0 is loaded from jsDelivr through the import map in `index.html`. Without WebGL the page still works; the 3D canvases are hidden.
 
