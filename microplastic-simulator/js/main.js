@@ -35,8 +35,8 @@ updateLife();
 const film = document.getElementById('film');
 const captions = {
   '3d': '3D view. The vertical scale is enlarged so that the water column is visible.',
-  plan: 'Plan view. Compare how far particles travel downstream with each process.',
-  side: 'Side view. Compare how particles move through the water column and reach the bed.'
+  plan: 'Plan view on the TELEMAC-3D flow, one row per diameter. Colour shows whether a particle rises (red) or sinks (blue).',
+  side: 'Side view on the TELEMAC-3D flow, one row per diameter. Watch the film turn rising particles into sinking ones.'
 };
 document.querySelectorAll('[data-view]').forEach(button => {
   button.addEventListener('click', () => {
