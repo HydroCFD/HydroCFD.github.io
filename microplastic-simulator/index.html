@@ -4,19 +4,19 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>GPU Microplastic Transport | Danial Goodarzi</title>
-<meta name="description" content="A GPU-accelerated three-dimensional Lagrangian numerical model that follows every microplastic particle through rivers, estuaries and coastal seas, with biofilm growth and number-conserving fragmentation.">
+<meta name="description" content="A three-dimensional Lagrangian solver for microplastic transport on the unstructured prism meshes of coastal hydrodynamic models, with particle transport calculated in parallel on a GPU and biofilm growth and fragmentation calculated along each particle trajectory.">
 <meta name="theme-color" content="#f2ede3">
 <link rel="canonical" href="https://hydrocfd.github.io/microplastic-simulator/index.html">
 <link rel="icon" href="../favicon.ico">
 <meta property="og:title" content="A GPU-accelerated 3D Lagrangian model for microplastic transport">
-<meta property="og:description" content="Following every microplastic particle through the water: transport, biofilm growth and fragmentation, one GPU thread per particle.">
-<meta property="og:image" content="https://hydrocfd.github.io/microplastic-simulator/assets/meander3d_both_day1.webp">
+<meta property="og:description" content="Particle transport calculated in parallel on a GPU, with biofilm growth and fragmentation calculated along each particle trajectory.">
+<meta property="og:image" content="https://hydrocfd.github.io/microplastic-simulator/assets/meander_3d_poster.webp">
 <meta property="og:type" content="website">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/site.css?v=20261017a">
-<link rel="stylesheet" href="paper.css?v=20261017a">
+<link rel="stylesheet" href="paper.css?v=20261030c">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
 </head>
 <body>
@@ -57,11 +57,11 @@
     </div>
   </div>
   <figure class="hero-key" aria-hidden="true">
-    <span class="key-dot ink"></span> lighter than water
-    <span class="key-dot red"></span> heavier than water
-    <span class="key-dot bed"></span> on the bed
+    <span class="key-dot ink"></span> lighter than the water
+    <span class="key-dot red"></span> denser than the water
+    <span class="key-dot bed"></span> settled
   </figure>
-  <p class="hero-caption">A meandering river, drawn live. Particles drift, grow a biofilm, break apart and settle.</p>
+  <p class="hero-caption">A schematic meandering river with a helical secondary flow, in which the microplastics are transported, grow a biofilm, fragment and settle.</p>
   <button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">Pause motion</button>
 </section>
 
@@ -71,56 +71,13 @@
     <header class="sec-head reveal">
       <span class="numeral">I</span>
       <div>
-        <h2>One particle, one thread, the whole water column</h2>
+        <h2>A three-dimensional Lagrangian solver for microplastic transport</h2>
       </div>
     </header>
     <div class="cols reveal">
-      <p class="dropcap">Microplastics do not stay the same while they travel. Algae grow on them, they break into smaller pieces, and their size and density change on the way from a river to the sea. These changes decide whether a particle floats, stays in suspension or settles on the bed.</p>
-      <p>This solver follows each particle through the three-dimensional flow field of a hydrodynamic model. The transport and the transformation of every particle are calculated together on the graphics card, with one GPU thread for each particle.</p>
+      <p class="dropcap">The size, the density and the shape of a microplastic particle determine the drag and the settling velocity, and hence whether the microplastic remains in suspension or is deposited. These properties change during the transport of microplastics in water systems, as a biofilm grows on the particle and increases its size and density, and as the microplastic breaks into smaller fragments under weathering and mechanical stress.</p>
+      <p>This study develops a three-dimensional Lagrangian solver for the unstructured prism meshes of coastal hydrodynamic models, with particle transport calculated in parallel on a graphics processing unit (GPU). The solver includes a drift-corrected random walk, a settling velocity calculated from the density and viscosity of the ambient water, and models for biofilm growth and fragmentation, and each component is verified against an analytical solution or against reference values from the literature.</p>
     </div>
-
-    <ol class="processes">
-      <li class="reveal">
-        <svg class="ico" viewBox="0 0 64 64" aria-hidden="true"><path class="ln" d="M6 50 L22 14 L38 44 Z M22 14 L52 18 L38 44 Z M38 44 L52 18 L60 52 Z"/><path class="ray" d="M8 46 L24 30 L40 36 L56 24"/><circle class="dot ray-dot" r="3"/></svg>
-        <h3>Ray tracing on prisms</h3>
-        <p>Particles move from face to face through the triangular prism mesh of the hydrodynamic model. The hosting prism is always known, so no search is needed.</p>
-      </li>
-      <li class="reveal">
-        <svg class="ico" viewBox="0 0 64 64" aria-hidden="true"><path class="ln faint" d="M8 34 l6 -6 l5 9 l6 -12 l5 14 l6 -10 l5 6 l6 -8 l6 7"/><circle class="dot walk-dot" r="3"/></svg>
-        <h3>Drift-corrected random walk</h3>
-        <p>Turbulent mixing is represented by a random walk with a drift correction, so particles do not collect artificially where the diffusivity changes.</p>
-      </li>
-      <li class="reveal">
-        <svg class="ico" viewBox="0 0 64 64" aria-hidden="true"><rect class="ln faint" x="8" y="8" width="48" height="48"/><path class="ln hatch" d="M8 20 H56 M8 32 H56 M8 44 H56"/><circle class="dot red sink-dot" cx="24" r="4"/><circle class="dot rise-dot" cx="42" r="4"/></svg>
-        <h3>Settling in real water</h3>
-        <p>Rise and settling velocities use the local density and viscosity of the water, which vary with salinity and temperature.</p>
-      </li>
-      <li class="reveal">
-        <svg class="ico" viewBox="0 0 64 64" aria-hidden="true"><path class="ln" d="M4 50 Q16 44 28 50 T52 50 T64 48"/><path class="ln faint dash" d="M8 22 h40 M8 32 h28"/><circle class="dot red bed-dot" r="3.5"/></svg>
-        <h3>Bed exchange</h3>
-        <p>Particles settle on a moving bed and return to the water when the flow is strong enough to lift them again.</p>
-      </li>
-      <li class="reveal">
-        <svg class="ico" viewBox="0 0 64 64" aria-hidden="true"><path class="ln" d="M4 44 Q30 40 40 30 L60 14"/><path class="ln blue tide" d="M4 36 H40"/><circle class="dot beach-dot" r="3.5"/></svg>
-        <h3>Beaching and washout</h3>
-        <p>Particles carried onto drying shores are stranded, and they can be washed back into the water when the tide returns.</p>
-      </li>
-      <li class="reveal">
-        <svg class="ico" viewBox="0 0 64 64" aria-hidden="true"><circle class="ln" cx="32" cy="32" r="11"/><circle class="ln olive film" cx="32" cy="32" r="16"/><g class="algae"><circle cx="32" cy="10" r="2.4"/><circle cx="54" cy="30" r="2.4"/><circle cx="14" cy="50" r="2.4"/><circle cx="50" cy="52" r="2.4"/></g></svg>
-        <h3>Biofilm growth</h3>
-        <p>Algae attach and grow on each particle. The film changes its size and density, and a floating particle can start to sink.</p>
-      </li>
-      <li class="reveal">
-        <svg class="ico" viewBox="0 0 64 64" aria-hidden="true"><g class="frag"><path class="f1" d="M32 18 L44 26 L36 34 L26 30 Z"/><path class="f2" d="M26 30 L36 34 L32 46 L20 40 Z"/><path class="f3" d="M36 34 L44 26 L48 40 L32 46 Z"/></g><text class="w" x="32" y="60" text-anchor="middle">w × 4</text></svg>
-        <h3>Weighted fragmentation</h3>
-        <p>When a particle breaks, it becomes smaller and represents more fragments. Mass is conserved and the number of computational particles stays constant.</p>
-      </li>
-      <li class="reveal">
-        <svg class="ico" viewBox="0 0 64 64" aria-hidden="true"><rect class="ln" x="10" y="10" width="44" height="44"/><g class="threads"><rect x="16" y="16" width="8" height="8"/><rect x="28" y="16" width="8" height="8"/><rect x="40" y="16" width="8" height="8"/><rect x="16" y="28" width="8" height="8"/><rect x="28" y="28" width="8" height="8"/><rect x="40" y="28" width="8" height="8"/><rect x="16" y="40" width="8" height="8"/><rect x="28" y="40" width="8" height="8"/><rect x="40" y="40" width="8" height="8"/></g></svg>
-        <h3>Written for the GPU</h3>
-        <p>Every particle is independent, so thousands of GPU threads advance thousands of particles at the same time. A CPU version runs the same physics.</p>
-      </li>
-    </ol>
   </div>
 </section>
 
@@ -130,8 +87,8 @@
     <header class="sec-head reveal">
       <span class="numeral">II</span>
       <div>
-        <h2>What happens to one piece of plastic</h2>
-        <p class="lede">Scroll to follow a single particle as the model sees it.</p>
+        <h2>Transformation of one microplastic</h2>
+        <p class="lede">Scroll to follow a spherical microplastic of 0.3&nbsp;mm and 950&nbsp;kg/m<sup>3</sup> at an algal concentration of 10<sup>10</sup>&nbsp;cells/m<sup>3</sup>, under the cycle of day and night, in water of 1023.6&nbsp;kg/m<sup>3</sup>.</p>
       </div>
     </header>
   </div>
@@ -139,13 +96,18 @@
     <div class="life-stage" aria-hidden="true">
       <div class="plate">
         <canvas id="life-gl"></canvas>
+        <div class="film-hud">
+          <div><span class="hud-label">Particle diameter</span><strong id="hud-d">0.30 mm</strong></div>
+          <div><span class="hud-label">Biofilm thickness</span><strong id="hud-film">0.0 &micro;m</strong><em id="hud-lim">limit 15.0 &micro;m</em></div>
+          <div><span class="hud-label">Effective density</span><strong id="hud-rho">950 kg/m&sup3;</strong></div>
+        </div>
         <div class="life-hud">
           <div class="gauge">
             <span class="hud-label">Density</span>
             <div class="gauge-bar"><i class="gauge-water"></i><b id="gauge-mark"></b></div>
-            <span class="gauge-ends"><span>lighter</span><span>water</span><span>heavier</span></span>
+            <span class="gauge-ends"><span>lighter</span><span>water</span><span>denser</span></span>
           </div>
-          <div class="weight"><span class="hud-label">Fragments represented</span><strong id="weight-val">w = 1</strong></div>
+          <div class="weight"><span class="hud-label">Multiplicity</span><strong id="weight-val">w = 1</strong></div>
         </div>
       </div>
       <ol class="life-dots" id="life-dots"><li></li><li></li><li></li><li></li><li></li><li></li></ol>
@@ -153,33 +115,33 @@
     <div class="life-steps">
       <article class="step" data-step="0">
         <span class="step-n">1</span>
-        <h3>Released into the flow</h3>
-        <p>A small polyethylene microplastic is lighter than water. The flow carries it downstream, and turbulence moves it up and down in the water column. The model follows it through each prism of the mesh.</p>
+        <h3>Release and transport</h3>
+        <p>The microplastic is released from a point source and starts without biofilm. In each hydrodynamic step, it is traced through the triangular prism cells of the hydrodynamic mesh by ray tracing, first by advection and then by a separate random displacement that represents turbulent diffusion.</p>
       </article>
       <article class="step" data-step="1">
         <span class="step-n">2</span>
-        <h3>A biofilm grows</h3>
-        <p>Algal cells meet the particle by Brownian motion, by the shear of the flow and as the particle moves through the water. They attach and grow in colonies, and the colonies join into a layer that thickens around the microplastic.</p>
+        <h3>Biofilm growth</h3>
+        <p>Algae attach to the particle at a rate that is the sum of three contributions, from Brownian motion, from the shear of the flow and from the difference in settling velocity. The attached algae grow at a rate that depends on the light they receive, and they are lost by grazing and respiration. The film is limited to a thickness of 30&nbsp;&micro;m and to an effective diameter of 1.1 times the diameter of the microplastic, and the smaller of the two limits applies, which is 15&nbsp;&micro;m for this particle. The film remains near 9&nbsp;&micro;m, since the growth of the attached cells is balanced by the losses.</p>
       </article>
       <article class="step" data-step="2">
         <span class="step-n">3</span>
-        <h3>It starts to sink</h3>
-        <p>The film is denser than the plastic. Once the fouled particle becomes heavier than the surrounding water, it leaves the surface and settles through the water column.</p>
+        <h3>Change of the buoyancy</h3>
+        <p>The fouled particle is treated as a mixture of plastic and biofilm, and its effective density is the volume weighted mean of the two densities. The density of this particle exceeds the density of the water for the first time after 1.6 days and then every day between about 13:00 and 19:00. At 10<sup>10</sup>&nbsp;cells/m<sup>3</sup>, the particles at the surface that sink have diameters between 0.16 and 0.63&nbsp;mm, and at 10<sup>9</sup>&nbsp;cells/m<sup>3</sup> the particles of all diameters remain buoyant. A particle mixed over the water column sinks later, because the light decreases with depth.</p>
       </article>
       <article class="step" data-step="3">
         <span class="step-n">4</span>
-        <h3>It breaks apart</h3>
-        <p>Weathering and stress break the particle into smaller microplastics. In the model, the computational particle becomes smaller and represents more fragments, instead of creating new particles. Each fragment takes its share of the biofilm.</p>
+        <h3>Fragmentation with weighted particles</h3>
+        <p>A fragmentation event reduces the size of the physical particle and increases the multiplicity <i>w</i> of the computational particle, so that the represented mass is conserved exactly and the number of computational particles remains constant. With the coarse grained fractal cascade, each event replaces the parent by 2.26 fragments with a mass fraction of 0.442, so the diameter decreases by the factor 0.762. The position and the polymer density remain unchanged, and the physical particles of one computational particle have the same position, so the fragments are drawn apart here only so that they can be seen, in a rounded number. Three events are shown close together. At a background rate of 10<sup>&minus;6</sup>&nbsp;s<sup>&minus;1</sup>, an event occurs on average every 12 days, and fragmentation is applied in the same way to suspended, settled and beached particles, down to a smallest fragment size of 1&nbsp;&micro;m.</p>
       </article>
       <article class="step" data-step="4">
         <span class="step-n">5</span>
-        <h3>The film is shared among the fragments</h3>
-        <p>At a break, the algal cells of the parent are shared among the fragments by their mass. No cells are created, so the effective density does not change at that moment. Each fragment carries a thinner film, and its fracture face is clean. New algae then colonise it, and the size of the fragment decides the result: some stay close to the density of the water, and the smallest become denser than the water.</p>
+        <h3>Attached algal cells at a fragmentation event</h3>
+        <p>The attached algal cells of the parent are shared among the fragments in proportion to their mass, so an event neither creates nor removes cells, and the total number of attached cells and the effective density remain unchanged at the event. The fracture faces, 24&nbsp;% of the surface of a fragment, are treated as clean surfaces that are colonised afterwards through the attachment term. A fragment therefore carries a thinner film than its parent, with a mean thickness of 9&nbsp;&micro;m at 0.30&nbsp;mm, 7&nbsp;&micro;m at 0.23&nbsp;mm, 5&nbsp;&micro;m at 0.17&nbsp;mm and 4&nbsp;&micro;m at 0.13&nbsp;mm. The fragments of this particle remain close to the density of the water, and fragments smaller than about 0.015&nbsp;mm are denser than the water at almost every hour. The fragment in the close-up is enlarged.</p>
       </article>
       <article class="step" data-step="5">
         <span class="step-n">6</span>
-        <h3>It reaches the bed</h3>
-        <p>The fragments settle on the bed and follow it as it moves. A strong current can lift them back into the water, and the journey continues.</p>
+        <h3>Bed exchange, beaching and washout</h3>
+        <p>A particle that reaches the bed with a downward settling velocity is marked as settled and is kept at the bed elevation, so it follows a moving bed until the local flow speed exceeds its critical erosion velocity and it is resuspended. The fragments of this particle below 0.14&nbsp;mm are denser than the water during at most 4&nbsp;% of the time. A particle is marked as beached when the water depth of its cell falls below the drying threshold, and it returns to the water with a refloating probability given by the washout rate.</p>
       </article>
     </div>
   </div>
@@ -190,27 +152,27 @@
   <div class="wrap">
     <header class="sec-head reveal">
       <span class="numeral">III</span>
-      <div><h2>Plastic breaks up, the particle count does not explode</h2></div>
+      <div><h2>Number of computational particles during fragmentation</h2></div>
     </header>
     <div class="split">
       <div class="reveal prose">
-        <p>If every fragment became a new computational particle, the number of particles would double again and again until the memory runs out. The cost of the simulation would then depend on how fast plastic breaks, not on the accuracy that the map needs.</p>
-        <p>The model uses weighted particles instead, an idea taken from the super-droplet method of cloud physics. Each computational particle stands for <i>w</i> identical fragments. A break makes the fragments smaller and multiplies <i>w</i>, so the represented mass is conserved exactly and the number of computational particles stays the same.</p>
+        <p>If the model created a new computational particle for every fragment, the number of particles would grow without limit and exceed the available memory, and it would be determined by the fragmentation rate rather than by the accuracy required of the map.</p>
+        <p>Fragmentation is therefore represented with weighted computational particles, following the super droplet method. Each computational particle represents <i>w</i> identical physical particles, where <i>w</i> is the multiplicity. In contrast to previous microplastic models, in which fragmentation is a transfer of mass between fixed size classes, the scheme applies fragmentation to each Lagrangian particle during its transport.</p>
       </div>
-      <figure class="frag-demo reveal" aria-label="Animation comparing a model that creates new particles at each break with the weighted-particle scheme" role="img">
+      <figure class="frag-demo reveal" aria-label="Animation comparing a model that creates a new computational particle for every fragment with weighted computational particles" role="img">
         <div class="frag-panel">
-          <p class="frag-title">A new particle for every fragment</p>
+          <p class="frag-title">A new computational particle for every fragment</p>
           <canvas id="frag-a"></canvas>
-          <p class="frag-count"><b id="frag-count-a">1</b> tracked particles</p>
-          <div class="ram"><span class="ram-label">RAM</span><div class="ram-bar"><i id="ram-a"></i></div><span class="ram-val" id="ram-a-v">1.6 % used</span></div>
+          <p class="frag-count"><b id="frag-count-a">1</b> computational particles</p>
+          <div class="ram"><span class="ram-label">RAM</span><div class="ram-bar"><i id="ram-a"></i></div><span class="ram-val" id="ram-a-v">0.7 % used</span></div>
         </div>
         <div class="frag-panel">
-          <p class="frag-title">Weighted particles</p>
+          <p class="frag-title">Weighted computational particles</p>
           <canvas id="frag-b"></canvas>
-          <p class="frag-count"><b id="frag-count-b">1</b> tracked particle, <b id="frag-w">w = 1</b></p>
-          <div class="ram"><span class="ram-label">RAM</span><div class="ram-bar"><i id="ram-b"></i></div><span class="ram-val">1.6 % used, after any number of breaks</span></div>
+          <p class="frag-count"><b id="frag-count-b">1</b> computational particle, <b id="frag-w">w = 1</b></p>
+          <div class="ram"><span class="ram-label">RAM</span><div class="ram-bar"><i id="ram-b"></i></div><span class="ram-val">0.7 % used, after any number of events</span></div>
         </div>
-        <figcaption>Both schemes carry the same plastic mass. Only the number of particles that the computer has to follow differs.</figcaption>
+        <figcaption>Both schemes represent the same plastic mass, and only the number of computational particles differs. Each event multiplies the represented number by 2.26, the value of the coarse grained fractal cascade, with the count on the left rounded.</figcaption>
       </figure>
     </div>
   </div>
@@ -221,33 +183,34 @@
   <div class="wrap">
     <header class="sec-head reveal">
       <span class="numeral">IV</span>
-      <div><h2>Ray tracing through the mesh of the flow model</h2></div>
+      <div><h2>Implementation on GPUs</h2></div>
     </header>
     <div class="split split-rev">
       <figure class="mesh-stage reveal">
         <canvas id="mesh-gl" aria-hidden="true"></canvas>
-        <figcaption>Particles crossing the faces of a triangular prism mesh. Each crossed face is marked.</figcaption>
+        <figcaption>Schematic of particles crossing the faces of a triangular prism mesh, with each crossed face marked.</figcaption>
       </figure>
       <div class="reveal prose">
-        <p>The solver reads the three-dimensional velocity field of the hydrodynamic model on its own mesh of triangular prisms. For each particle, it finds which face of the hosting prism is reached first, moves the particle to that face and passes it to the neighbouring prism.</p>
+        <p>For each of the five faces of the hosting prism, the time at which the particle would reach the face is calculated from the centroid and the normal of the face and from the particle velocity, and the particle is moved to the face that is reached first. If this face is an internal face, the velocity is interpolated again from the nodes of the face and the neighbouring prism becomes the hosting prism.</p>
         <ul class="ticks">
-          <li>No interpolation onto a regular grid and no search for the hosting cell.</li>
-          <li>The same tracing is used for advection and for the random walk.</li>
-          <li>Particles are sorted so that neighbouring threads read neighbouring parts of the mesh.</li>
+          <li>The hosting prism changes only when the particle crosses a face, so no search is required during the simulation.</li>
+          <li>The same tracing procedure is used for the advection and for the random walk.</li>
+          <li>The particles in suspension are sorted by hosting prism, so that the GPU threads executed together read the same part of the mesh.</li>
         </ul>
       </div>
     </div>
     <figure class="threads reveal">
       <canvas id="threads" aria-hidden="true"></canvas>
-      <figcaption>Each square is one GPU thread advancing one particle. All threads start a time step together and finish at different times.</figcaption>
+      <figcaption>Each square is one GPU thread, which calculates one particle. All threads start a time step together and finish after different numbers of face crossings.</figcaption>
     </figure>
     <figure class="race reveal">
       <div class="race-actions">
-        <button type="button" id="race-go">Start the race</button>
-        <label>Particles <select id="race-n"><option>1024</option><option selected>4096</option><option>16384</option></select></label>
+        <button type="button" id="race-go">Start</button>
+        <label>Test case <select id="race-case"><option value="ariake" selected>Ariake Sea mesh</option><option value="tidal">Tidal test case</option></select></label>
+        <label>Computational particles <select id="race-n"></select></label>
       </div>
       <canvas id="race-cv" aria-hidden="true"></canvas>
-      <figcaption>The same particles advanced one time step after another. On the CPU, 24 threads work through the particles in turn; on the GPU, every particle has its own thread. An illustration of the idea, not a measured benchmark.</figcaption>
+      <figcaption>Wall time per time step measured with transport alone on one workstation, for an NVIDIA GeForce RTX 3080 in single precision and the 24 threads of an AMD Ryzen 9 5900X. A CPU divides the particles between its threads, whereas the GPU assigns one thread to each particle and executes the threads of all particles in parallel. The display is slowed down and the ratio of the two speeds is the measured one. The values at 500,000 particles are interpolated between the two neighbouring measured numbers of particles.</figcaption>
     </figure>
   </div>
 </section>
@@ -258,8 +221,8 @@
     <header class="sec-head reveal">
       <span class="numeral">V</span>
       <div>
-        <h2>A journey through the meander bends</h2>
-        <p class="lede">A synthetic meandering river with helical secondary flow. The 3D view compares transport alone, biofilm growth, fragmentation and both together. The plan and side views follow microplastics of 0.1, 0.3 and 1&nbsp;mm through the TELEMAC-3D flow while a biofilm grows on them.</p>
+        <h2>Synthetic meandering river with an instantaneous release</h2>
+        <p class="lede">The channel has meander bends, a cross section that is deepest near the outer bank of each bend and the helical secondary flow of the bends, with the flow calculated with TELEMAC-3D. Microplastics of 950&nbsp;kg/m<sup>3</sup> with diameters of 0.1, 0.3 and 1&nbsp;mm are released at once and followed for three days, with biofilm growth at 2&times;10<sup>10</sup>&nbsp;cells/m<sup>3</sup>.</p>
       </div>
     </header>
     <div class="tabs reveal" role="group" aria-label="Film view">
@@ -268,12 +231,12 @@
       <button type="button" data-view="side" aria-pressed="false">Side view</button>
     </div>
     <figure class="movie reveal">
-      <video id="film" controls playsinline preload="none" poster="assets/meander3d_both_day1.webp" aria-label="Meandering river simulation: 3D view">
+      <video id="film" controls playsinline preload="none" poster="assets/meander_3d_poster.webp" aria-label="Meandering river simulation: 3D view">
         <source src="assets/meander_3d.mp4" type="video/mp4">
       </video>
-      <figcaption><span>Film</span> <span id="view-caption">3D view. The vertical scale is enlarged so that the water column is visible.</span></figcaption>
+      <figcaption><span>Film</span> <span id="view-caption">3D view, one row for each diameter, with the vertical scale enlarged 150 times.</span></figcaption>
     </figure>
-    <p class="downloads reveal">Download MP4: <a href="assets/meander_3d.mp4" download>3D (7.9 MB)</a>, <a href="assets/meander_plan.mp4" download>plan (1.7 MB)</a>, <a href="assets/meander_side.mp4" download>side (6.3 MB)</a></p>
+    <p class="downloads reveal">Download MP4: <a href="assets/meander_3d.mp4" download>3D (1.8 MB)</a>, <a href="assets/meander_plan.mp4" download>plan (1.7 MB)</a>, <a href="assets/meander_side.mp4" download>side (6.3 MB)</a></p>
   </div>
 </section>
 
@@ -283,23 +246,23 @@
     <header class="sec-head reveal">
       <span class="numeral">VI</span>
       <div>
-        <h2>A year in the Ariake Sea</h2>
-        <p class="lede">Microplastics of 0.1, 0.3 and 1&nbsp;mm released from fourteen sources through 2023, carried by the tidal flow of a TELEMAC-3D model of the Ariake Sea, Japan. Compare transport alone with biofilm growth, fragmentation and both together. Each frame is 3.5 days after the last.</p>
+        <h2>Impact of biofilm growth and fragmentation in the Ariake Sea</h2>
+        <p class="lede">Microplastics of 950&nbsp;kg/m<sup>3</sup> with diameters of 0.1, 0.3 and 1&nbsp;mm are released from fourteen locations around the Ariake Sea, Japan, every hour of 2023, with the flow field simulated with TELEMAC-3D. The four simulations differ only in the active transformation processes, and the outputs are 3.5 days apart.</p>
       </div>
     </header>
     <div class="tabs reveal" role="group" aria-label="Ariake Sea case">
       <button type="button" data-ariake="passive" aria-pressed="false">Transport alone</button>
-      <button type="button" data-ariake="bio" aria-pressed="false">Biofilm</button>
+      <button type="button" data-ariake="bio" aria-pressed="false">Biofilm growth</button>
       <button type="button" data-ariake="frg" aria-pressed="false">Fragmentation</button>
-      <button type="button" data-ariake="both" aria-pressed="true">Both</button>
+      <button type="button" data-ariake="both" aria-pressed="true">Both processes</button>
     </div>
     <figure class="movie reveal">
       <video id="ariake-film" controls playsinline preload="none" poster="assets/ariake_both_poster.webp" aria-label="Ariake Sea simulation: biofilm growth and fragmentation">
         <source src="assets/ariake_both.mp4" type="video/mp4">
       </video>
-      <figcaption><span>Film</span> <span id="ariake-caption">Biofilm growth and fragmentation together. Most microplastics settle on the bed near their sources within days of release.</span></figcaption>
+      <figcaption><span>Film</span> <span id="ariake-caption">Both processes. Most of the microplastics settle on the bed near their release points within days of the release.</span></figcaption>
     </figure>
-    <p class="downloads reveal">Download MP4: <a href="assets/ariake_passive.mp4" download>transport alone (7.3 MB)</a>, <a href="assets/ariake_bio.mp4" download>biofilm (3.7 MB)</a>, <a href="assets/ariake_frg.mp4" download>fragmentation (8.8 MB)</a>, <a href="assets/ariake_both.mp4" download>both (4.3 MB)</a></p>
+    <p class="downloads reveal">Download MP4: <a href="assets/ariake_passive.mp4" download>transport alone (7.3 MB)</a>, <a href="assets/ariake_bio.mp4" download>biofilm growth (3.7 MB)</a>, <a href="assets/ariake_frg.mp4" download>fragmentation (8.8 MB)</a>, <a href="assets/ariake_both.mp4" download>both processes (4.3 MB)</a></p>
   </div>
 </section>
 
@@ -308,7 +271,7 @@
   <div class="wrap">
     <header class="sec-head reveal">
       <span class="numeral">VII</span>
-      <div><h2>People behind the model</h2></div>
+      <div><h2>Authors</h2></div>
     </header>
     <ul class="team">
       <li class="reveal"><h3>Danial Goodarzi</h3><p>Department of Civil Engineering, University of Ottawa</p></li>
@@ -323,7 +286,7 @@
   <div class="wrap">
     <header class="sec-head"><span class="numeral">&rarr;</span><div><h2 id="more-title">More projects</h2></div></header>
     <ul class="project-list">
-      <li class="here"><a href="../microplastic-simulator/index.html" aria-current="page"><span class="kind">You are here</span><h3>GPU microplastic transport</h3><p>Following every microplastic through the water, with biofilm growth and number-conserving fragmentation.</p></a></li>
+      <li class="here"><a href="../microplastic-simulator/index.html" aria-current="page"><span class="kind">You are here</span><h3>GPU microplastic transport</h3><p>Following every microplastic through the water, with biofilm growth and mass-conserving fragmentation.</p></a></li>
       <li><a href="../constructed-wetland-surrogate/index.html"><span class="kind">CFD and machine learning</span><h3>Constructed wetland surrogate</h3><p>Rapid prediction of hydraulic efficiency and residence time in wetlands and ponds.</p><span class="go">Open the project</span></a></li>
       <li><a href="../dense-jet-simulator/index.html"><span class="kind">Interactive simulator</span><h3>Dense jet simulator</h3><p>An inclined brine jet rises, falls back and spreads along the bed.</p><span class="go">Open the simulator</span></a></li>
       <li><a href="../ariake-instrument/index.html"><span class="kind">Bayesian instrument</span><h3>Ariake survey instrument</h3><p>A few samples give the whole suspended field of the bay, with its uncertainty.</p><span class="go">Open the instrument</span></a></li>
@@ -382,6 +345,6 @@
 
 <noscript><style>.reveal{opacity:1!important;transform:none!important}</style></noscript>
 <script src="../js/site.js?v=20261017a"></script>
-<script type="module" src="js/main.js?v=20261030b"></script>
+<script type="module" src="js/main.js?v=20261030c"></script>
 </body>
 </html>

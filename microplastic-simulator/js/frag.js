@@ -4,6 +4,9 @@ import { runWhenVisible, fit2d, smooth, clamp, lerp } from '../../js/3d/loop.js'
 
 const GEN = 6, PER = 1.35, HOLD = 2.4, FADE = 0.8;
 const TOTAL = GEN * PER + PER * 0.6 + HOLD + FADE;
+// coarse grained fractal cascade of the paper: each break gives 2.26 fragments,
+// each with 44 % of the mass and 76 % of the diameter of the parent
+const MF = 0.442, NFRAG = 1 / MF, DF = Math.cbrt(MF);
 
 export function initFrag() {
   const ca = document.getElementById('frag-a'), cb = document.getElementById('frag-b');
@@ -12,17 +15,19 @@ export function initFrag() {
   const countA = document.getElementById('frag-count-a');
   const countB = document.getElementById('frag-count-b');
   const wEl = document.getElementById('frag-w');
-  // memory: every tracked particle takes a share; this RAM holds 2^GEN of them
+  // memory: every tracked particle takes a share; this RAM holds the particles of GEN breaks
   const ramA = document.getElementById('ram-a'), ramAv = document.getElementById('ram-a-v');
   const ramB = document.getElementById('ram-b');
-  const share = 100 / Math.pow(2, GEN);
+  const count = g => Math.round(Math.pow(NFRAG, g));
+  const share = 100 / count(GEN);
   if (ramB) ramB.style.width = share + '%';
 
   let dots = [], gen = 0, lastC = 0;
   function reset() { dots = [{ x: 0.5, y: 0.5, px: 0.5, py: 0.5, ph: 0 }]; gen = 0; }
   function split() {
-    const next = [], r = 0.2 * Math.pow(0.74, gen);
-    for (const d of dots) for (let k = 0; k < 2; k++) {
+    const next = [], r = 0.2 * Math.pow(0.74, gen), n = count(gen + 1);
+    for (let k = 0; k < n; k++) {
+      const d = dots[Math.floor(k * dots.length / n)];
       const a = Math.random() * Math.PI * 2;
       next.push({
         x: clamp(d.x + Math.cos(a) * r, 0.08, 0.92), y: clamp(d.y + Math.sin(a) * r, 0.08, 0.92),
@@ -49,7 +54,7 @@ export function initFrag() {
     const sp = gen === 0 ? 1 : smooth(0, 0.5, (c - gen * PER) / PER);
     const fade = 1 - smooth(TOTAL - FADE, TOTAL, c);
     const R0 = Math.min(A.w, A.h) * 0.075;
-    const rad = g => R0 * Math.pow(2, -g / 3); // equal mass split: r scales with m^(1/3)
+    const rad = g => R0 * Math.pow(DF, g);
 
     // left: every fragment is tracked
     xa.clearRect(0, 0, A.w, A.h);
@@ -61,9 +66,9 @@ export function initFrag() {
     }
     // right: one particle, w fragments
     xb.clearRect(0, 0, B.w, B.h);
-    const w = Math.pow(2, gen), cx = B.w / 2, cy = B.h / 2;
+    const w = Math.pow(NFRAG, gen), cx = B.w / 2, cy = B.h / 2;
     const r = rad(gen);
-    for (let i = 1; i < Math.min(w, 64); i++) {
+    for (let i = 1; i < Math.min(count(gen), 64); i++) {
       const a = i * 2.39996 + t * 0.15, rr = R0 * 1.15 + Math.sqrt(i) * R0 * 0.32;
       xb.strokeStyle = `rgba(122,116,106,${0.7 * fade * sp})`;
       xb.lineWidth = 1;
@@ -76,14 +81,14 @@ export function initFrag() {
     }
     dot(xb, cx, cy, lerp(rad(Math.max(0, gen - 1)), r, sp), '20,20,20', fade);
 
-    const a = String(dots.length), bw = `w = ${w}`;
+    const a = String(dots.length), bw = 'w = ' + (gen === 0 ? '1' : w < 10 ? w.toFixed(2) : w < 100 ? w.toFixed(1) : w.toFixed(0));
     if (a !== shownA) {
       countA.textContent = a; shownA = a;
       if (ramA) {
         const used = Math.min(100, dots.length * share), full = used >= 100;
         ramA.style.width = used + '%';
         ramA.classList.toggle('full', full);
-        ramAv.textContent = full ? 'Full: the run stops here' : used.toFixed(used < 10 ? 1 : 0) + ' % used';
+        ramAv.textContent = full ? 'Full: the available memory is exceeded' : used.toFixed(used < 10 ? 1 : 0) + ' % used';
         ramAv.classList.toggle('full', full);
       }
     }

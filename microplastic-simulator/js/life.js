@@ -4,8 +4,28 @@
 import * as THREE from 'three';
 import { runWhenVisible, fitGL, life, smooth, lerp, makeNoise, isSmall } from '../../js/3d/loop.js';
 
-const BREAK = 2.45; // value of P at which the particle breaks
-const FILM = 0.2;   // thickness of the mature film, as a share of the radius of the parent
+// A particle of 0.3 mm and 950 kg/m3 at 1e10 algal cells/m3 under the cycle of day and night, with the
+// coarse grained fractal cascade of the paper. Scene unit: the radius of the parent, 150 um.
+const UM = 1 / 150;               // scene units per micrometre
+const MF = 0.442, DF = Math.cbrt(MF), NFRAG = 1 / MF; // mass and diameter of a fragment, fragments per break
+const EVENTS = [2.45, 2.75, 3.05]; // values of P at which the three breaks shown happen
+const COUNTS = [1, 2, 5, 12];     // fragments drawn after 0 to 3 breaks: the multiplicity, rounded
+const RHO_P = 950, RHO_BF = 1388, RHO_W = 1023.6;
+// plastic diameter (mm), film thickness (um), its half range over day and night (um), for 0 to 3 breaks;
+// from grow_and_break(0.3e-3) of paper2/postprocess/biofilm_growth_curves.py, the reference of Section 3.3.3
+const GEN = [
+  { d: 0.3, film: 9.24, amp: 0.48 },
+  { d: 0.2285, film: 6.96, amp: 0.37 },
+  { d: 0.1741, film: 5.25, amp: 0.29 },
+  { d: 0.1326, film: 4.04, amp: 0.15 }
+];
+const FILM = GEN[0].film * UM;    // thickness of the mature film on the parent
+const radiusOf = g => GEN[g].d / GEN[0].d;
+// the effective density of Eq. rhoeff, from the plastic diameter (mm) and the film thickness (um)
+const rhoOf = (d, film) => {
+  const v = Math.pow(1 + film / (500 * d), 3);
+  return RHO_P + (RHO_BF - RHO_P) * (1 - 1 / v);
+};
 
 export function initLife(canvas) {
   const small = isSmall();
@@ -93,7 +113,7 @@ export function initLife(canvas) {
   particle.add(shell);
   const shellLineMat = new THREE.MeshBasicMaterial({ color: 0x141414, side: THREE.BackSide, transparent: true, opacity: 0 });
   const shellLine = new THREE.Mesh(shellGeo, shellLineMat);
-  shellLine.scale.setScalar(1.025);
+  shellLine.scale.setScalar(1.018);
   shell.add(shellLine);
   const cover = new Float32Array(NV), lift = new Float32Array(NV);
   let lastB = -1;
@@ -153,7 +173,7 @@ export function initLife(canvas) {
       bt.crossVectors(up, tg);
       dVert.push(i);
       dRot.push(new THREE.Quaternion().setFromRotationMatrix(m.makeBasis(tg, bt, up)));
-      dLen.push(0.035 + Math.random() * 0.035);
+      dLen.push(0.025 + Math.random() * 0.025);
     }
   }
 
@@ -166,7 +186,7 @@ export function initLife(canvas) {
     const up = new THREE.Vector3(radial[3 * i], radial[3 * i + 1], radial[3 * i + 2]);
     const side = new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).cross(up).normalize();
     const dir = up.clone().addScaledVector(side, 0.35 + Math.random() * 0.5).normalize();
-    fil.push({ i, c, dir, side, L: 0.14 + Math.random() * 0.22, ph: Math.random() * 6.28 });
+    fil.push({ i, c, dir, side, L: 0.05 + Math.random() * 0.07, ph: Math.random() * 6.28 });
     for (let s = 0; s < SEG; s++) {
       for (const [o, f] of [[0, s / SEG], [3, (s + 1) / SEG]]) {
         const at = (k * SEG + s) * 6 + o;
@@ -183,7 +203,7 @@ export function initLife(canvas) {
 
   // algal cells that drift in and land where the colonies will start
   const NA = small ? 60 : 90;
-  const algae = new THREE.InstancedMesh(new THREE.SphereGeometry(0.035, 10, 8),
+  const algae = new THREE.InstancedMesh(new THREE.SphereGeometry(3.6 * UM, 10, 8),
     new THREE.MeshStandardMaterial({ color: 0x4f5f20, roughness: 0.6 }), NA);
   particle.add(algae);
   const aVert = [], aStart = [], aTh = [];
@@ -213,7 +233,7 @@ export function initLife(canvas) {
       const len = f.L * g;
       for (let s = 0; s < SEG; s++) {
         for (const [o, q] of [[0, s / SEG], [3, (s + 1) / SEG]]) {
-          const sway = 0.09 * Math.pow(q, 1.6) * Math.sin(t * 1.8 + f.ph + q * 3) * g;
+          const sway = 0.03 * Math.pow(q, 1.6) * Math.sin(t * 1.8 + f.ph + q * 3) * g;
           const at = (k * SEG + s) * 6 + o;
           filPos[at] = gup.x + f.dir.x * len * q + f.side.x * sway;
           filPos[at + 1] = gup.y + f.dir.y * len * q + f.side.y * sway;
@@ -225,18 +245,21 @@ export function initLife(canvas) {
   }
 
   // ---------- fragments ----------
-  // Each fragment is a smaller plastic sphere that takes its share of the film.
-  // The attached cells are shared by mass, so no cells are created and the film
-  // keeps the same share of the volume: it is thinner than on the parent, and
-  // the effective density does not change at the break. The fracture face is
-  // clean, and new algae colonise it afterwards.
-  const NF = 8, RF = 0.42;
+  // Each break gives 2.26 fragments, each with 44 % of the mass and 76 % of the
+  // diameter of the parent. The attached cells are shared by mass, so no cells
+  // are created: the density of cells over the surface falls to 76 %, the film
+  // keeps its share of the volume and the effective density does not change.
+  // Right after a break the old surface keeps the film of the parent and the
+  // fracture face, 24 % of the new surface, is clean. As the face is colonised
+  // the film evens out to its mean thickness, 76 % of that of the parent.
+  // Each fragment is drawn on a unit sphere and scaled to its radius.
+  const NF = COUNTS[COUNTS.length - 1];
   const shards = [];
   const fragCore = new THREE.MeshPhysicalMaterial({ color: 0xeef2f6, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.2 });
   function coatedSphere(seed, faceDir) {
     const g = new THREE.Group();
-    const c = new THREE.Mesh(new THREE.SphereGeometry(RF, 40, 28), fragCore);
-    outline(c, 1.04);
+    const c = new THREE.Mesh(new THREE.SphereGeometry(1, 40, 28), fragCore);
+    outline(c, 1.03);
     g.add(c);
     const fg = new THREE.SphereGeometry(1, 48, 32), fp = fg.attributes.position;
     const fc = new Float32Array(fp.count * 4);
@@ -255,9 +278,9 @@ export function initLife(canvas) {
     g.userData.setFilm = (thick, clean) => {
       for (let i = 0; i < fp.count; i++) {
         const edge = clean > 0.01 ? smooth(clean - 0.18, clean + 0.08, toFace[i]) : 1;
-        const r = RF + 0.004 + thick * (0.8 + 0.4 * lumps[i]) * edge;
+        const r = 1.004 + thick * (0.8 + 0.4 * lumps[i]) * edge;
         fp.setXYZ(i, unit[3 * i] * r, unit[3 * i + 1] * r, unit[3 * i + 2] * r);
-        fc[4 * i + 3] = 0.74 * edge;
+        fc[4 * i + 3] = 0.82 * edge;
       }
       fp.needsUpdate = true;
       fg.attributes.color.needsUpdate = true;
@@ -267,7 +290,7 @@ export function initLife(canvas) {
     const f = new THREE.Mesh(fg, filmMat);
     f.renderOrder = 1;
     const fl = new THREE.Mesh(fg, new THREE.MeshBasicMaterial({ color: 0x141414, side: THREE.BackSide }));
-    fl.scale.setScalar(1.025);
+    fl.scale.setScalar(1.018);
     f.add(fl);
     g.add(f);
     g.userData.filmMat = filmMat;
@@ -289,6 +312,14 @@ export function initLife(canvas) {
     scene.add(m);
     shards.push(m);
   }
+  // where the fragments sit after each break; a new fragment starts at its parent
+  const circle = (n, R) => Array.from({ length: n }, (_, i) => new THREE.Vector3(R * Math.cos(i * 6.2832 / n + 0.6), R * Math.sin(i * 6.2832 / n + 0.6), 0));
+  const SPOT = [
+    [new THREE.Vector3(0, 0, 0)],
+    [new THREE.Vector3(-0.86, 0.1, 0), new THREE.Vector3(0.86, -0.1, 0)],
+    circle(5, 1.28),
+    shards.map(m => m.userData.dir.clone().multiply(new THREE.Vector3(1.7, 1.75, 0.9)))
+  ];
 
   // ---------- the bed ----------
   const bed = new THREE.Group();
@@ -351,6 +382,9 @@ export function initLife(canvas) {
   // ---------- HUD ----------
   const gaugeMark = document.getElementById('gauge-mark');
   const weightVal = document.getElementById('weight-val');
+  const hudD = document.getElementById('hud-d'), hudFilm = document.getElementById('hud-film'),
+    hudLim = document.getElementById('hud-lim'), hudRho = document.getElementById('hud-rho');
+  const setText = (el, s) => { if (el && el.textContent !== s) el.textContent = s; };
   let lastW = '', lastG = -1;
 
   // ---------- pointer ----------
@@ -364,21 +398,22 @@ export function initLife(canvas) {
 
   const V = new THREE.Vector3(), Vn = new THREE.Vector3(), M = new THREE.Matrix4(), Q = new THREE.Quaternion(),
     zero = new THREE.Vector3(0, 0, 0), sc = new THREE.Vector3(), tv = new THREE.Vector3(), tw = new THREE.Vector3();
-  let prevP = life.P, flashT = 0, lastFilmKey = -2;
+  let prevGen = 0, flashT = 0, lastFilmKey = -2;
 
   function frame(dt, t) {
     fitGL(renderer, camera, canvas);
     const P = life.P;
     const b = smooth(0.25, 1.15, P);                       // biofilm amount
     const sinkV = smooth(1.3, 1.8, P) * (1 - smooth(4.2, 4.8, P)); // settling, relative to the water
-    const broken = P >= BREAK;
-    const ex = smooth(BREAK, 3.1, P);                       // spread of the fragments
+    const gen = EVENTS.reduce((n, e) => n + (P >= e ? 1 : 0), 0); // number of breaks so far
+    const broken = gen > 0;
     const focus = smooth(3.2, 3.8, P) * (1 - smooth(4.15, 4.55, P)); // close look at one fragment
-    const colonise = smooth(BREAK, 4.1, P);                 // new algae on the fracture faces
+    // new algae on the fracture faces of the latest break
+    const colonise = !broken ? 0 : gen < 3 ? smooth(EVENTS[gen - 1], EVENTS[gen - 1] + 0.28, P) : smooth(3.55, 4.15, P);
     const settle = smooth(4.1, 4.9, P);                     // arrival at the bed
     const resus = smooth(4.85, 5.3, P);                     // resuspension
-    if ((prevP < BREAK) !== (P < BREAK)) flashT = 1;
-    prevP = P;
+    if (gen !== prevGen) flashT = 1;
+    prevGen = gen;
     flashT = Math.max(0, flashT - (dt > 0 ? dt : 0.016) * 1.6);
 
     // the particle: turbulent wobble, tumbling
@@ -403,19 +438,26 @@ export function initLife(canvas) {
     }
     algae.instanceMatrix.needsUpdate = true;
 
-    // the fragments
+    // the film of the fragments: mean thickness over the new surface, the law of the paper at the break
+    const filmNow = broken ? lerp(GEN[gen - 1].film * DF, GEN[gen].film, colonise) : GEN[0].film * b;
+    const clean = broken ? (1 - DF) * (1 - colonise) : 0;   // share of the surface still without cells
     const floorY = -1.55;
-    const filmKey = broken ? Math.round(P * 150) : -1;
+    const filmKey = broken ? gen * 1000 + Math.round(colonise * 80) : -1;
     if (broken && filmKey !== lastFilmKey) {
-      for (let i = 0; i < NF; i++) shards[i].userData.setFilm(FILM * RF + 0.05 * colonise, 1.25 * (1 - colonise));
+      const thick = filmNow * UM / radiusOf(gen) / (1 - clean); // the same cells over the part still covered
+      const angle = clean > 0.002 ? Math.acos(1 - 2 * clean) : 0;
+      for (let i = 0; i < COUNTS[gen]; i++) shards[i].userData.setFilm(thick, angle);
     }
     lastFilmKey = filmKey;
     for (let i = 0; i < NF; i++) {
       const s = shards[i], u = s.userData;
-      s.visible = broken;
-      if (!broken) continue;
+      s.visible = broken && i < COUNTS[gen];
+      if (!s.visible) continue;
       const lead = i === 0;
-      tv.copy(u.dir).multiplyScalar(0.3 + 1.6 * ex + (lead ? 0 : 2.2 * focus)).add(particle.position);
+      const par = i < COUNTS[gen - 1] ? i : i % COUNTS[gen - 1];
+      tv.lerpVectors(SPOT[gen - 1][par], SPOT[gen][i], smooth(EVENTS[gen - 1], EVENTS[gen - 1] + 0.2, P));
+      if (!lead) tv.multiplyScalar(1 + 0.9 * focus);
+      tv.add(particle.position);
       if (lead) tv.lerp(tw.set(0, 0.35, 0.9), focus);
       // drift down to the bed
       const bx = u.bed.x, bz = u.bed.z;
@@ -424,9 +466,9 @@ export function initLife(canvas) {
         const ph = (t * 0.16 + u.phase) % 1;
         hx = (ph - 0.5) * 3.2 * resus;
         hy = 1.0 * Math.pow(Math.max(0, Math.sin(ph * Math.PI * 2)), 3) * resus;
-        s.scale.setScalar(smooth(0, 0.06, ph) * (1 - smooth(0.94, 1, ph)) * resus + (1 - resus));
-      } else s.scale.setScalar(lead ? 1 + 0.85 * focus : 1 - 0.55 * focus);
-      tv.lerp(tw.set(bx + hx, floorY + bedY(bx + hx) + 0.4 + hy, bz), settle);
+        s.scale.setScalar(radiusOf(gen) * (smooth(0, 0.06, ph) * (1 - smooth(0.94, 1, ph)) * resus + (1 - resus)));
+      } else s.scale.setScalar(radiusOf(gen) * (lead ? 1 + 1.25 * focus : 1 - 0.55 * focus));
+      tv.lerp(tw.set(bx + hx, floorY + bedY(bx + hx) + 0.46 + hy, bz), settle);
       s.position.copy(tv);
       const still = (lead ? 1 - focus : 1) * (1 - settle * 0.8 + hy);
       u.turn.x += u.spin.x * dt * still; u.turn.y += u.spin.y * dt * still; u.turn.z += u.spin.z * dt * still;
@@ -471,12 +513,20 @@ export function initLife(canvas) {
 
     // HUD
     // no jump at the break; then the fragment moves to the daily cycle of its new size
-    const cycle = smooth(3.2, 4.1, P);
-    const r = 0.93 + 0.19 * b - 0.035 * cycle + 0.012 * Math.sin(t * 1.3) * cycle * (1 - settle);
-    // water sits in the middle of the gauge; heavier side spans up to 1.25 times water
-    const g = Math.round(Math.min(100, Math.max(0, r < 1 ? 50 * (r - 0.85) / 0.15 : 50 + 50 * (r - 1) / 0.25)));
+    const st = GEN[gen];
+    // the whole film shrinks with the diameter at a break, including its part of the daily cycle
+    const filmAmp = broken ? lerp(GEN[gen - 1].amp * DF, st.amp, colonise) : st.amp * smooth(1.1, 1.3, P);
+    const film = filmNow + filmAmp * Math.sin(t * 1.05);
+    const rho = film > 0 ? rhoOf(st.d, film) : RHO_P;
+    setText(hudD, st.d.toFixed(2) + ' mm');
+    setText(hudFilm, film.toFixed(1) + ' µm');
+    setText(hudLim, 'limit ' + (500 * st.d * 0.1).toFixed(1) + ' µm');
+    setText(hudRho, Math.round(rho) + ' kg/m³');
+    // water sits in the middle of the gauge; the heavier side ends at the densest fragments of the paper
+    const g = Math.round(Math.min(100, Math.max(0, rho < RHO_W ? 50 * (rho - 940) / (RHO_W - 940) : 50 + 50 * (rho - RHO_W) / (1060 - RHO_W))));
     if (g !== lastG && gaugeMark) { gaugeMark.style.left = g + '%'; lastG = g; }
-    const w = broken ? 'w = 8' : 'w = 1';
+    const nw = Math.pow(NFRAG, gen);
+    const w = 'w = ' + (nw < 1.5 ? '1' : nw < 10 ? nw.toFixed(2) : nw.toFixed(1));
     if (w !== lastW && weightVal) { weightVal.textContent = w; lastW = w; }
   }
   runWhenVisible(canvas, frame);
