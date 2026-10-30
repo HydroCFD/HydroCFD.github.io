@@ -277,11 +277,37 @@
   </div>
 </section>
 
+<!-- ================= ARIAKE SEA ================= -->
+<section class="sec films" id="ariake">
+  <div class="wrap">
+    <header class="sec-head reveal">
+      <span class="numeral">VI</span>
+      <div>
+        <h2>A year in the Ariake Sea</h2>
+        <p class="lede">Microplastics of 0.1, 0.3 and 1&nbsp;mm released from fourteen sources through 2023, carried by the tidal flow of a TELEMAC-3D model of the Ariake Sea, Japan. Compare transport alone with biofilm growth, fragmentation and both together. Each frame is 3.5 days after the last.</p>
+      </div>
+    </header>
+    <div class="tabs reveal" role="group" aria-label="Ariake Sea case">
+      <button type="button" data-ariake="passive" aria-pressed="false">Transport alone</button>
+      <button type="button" data-ariake="bio" aria-pressed="false">Biofilm</button>
+      <button type="button" data-ariake="frg" aria-pressed="false">Fragmentation</button>
+      <button type="button" data-ariake="both" aria-pressed="true">Both</button>
+    </div>
+    <figure class="movie reveal">
+      <video id="ariake-film" controls playsinline preload="none" poster="assets/ariake_both_poster.webp" aria-label="Ariake Sea simulation: biofilm growth and fragmentation">
+        <source src="assets/ariake_both.mp4" type="video/mp4">
+      </video>
+      <figcaption><span>Film</span> <span id="ariake-caption">Biofilm growth and fragmentation together. Most microplastics settle on the bed near their sources within days of release.</span></figcaption>
+    </figure>
+    <p class="downloads reveal">Download MP4: <a href="assets/ariake_passive.mp4" download>transport alone (7.3 MB)</a>, <a href="assets/ariake_bio.mp4" download>biofilm (3.7 MB)</a>, <a href="assets/ariake_frg.mp4" download>fragmentation (8.8 MB)</a>, <a href="assets/ariake_both.mp4" download>both (4.3 MB)</a></p>
+  </div>
+</section>
+
 <!-- ================= TEAM ================= -->
 <section class="sec" id="team">
   <div class="wrap">
     <header class="sec-head reveal">
-      <span class="numeral">VI</span>
+      <span class="numeral">VII</span>
       <div><h2>People behind the model</h2></div>
     </header>
     <ul class="team">
@@ -356,6 +382,6 @@
 
 <noscript><style>.reveal{opacity:1!important;transform:none!important}</style></noscript>
 <script src="../js/site.js?v=20261017a"></script>
-<script type="module" src="js/main.js?v=20261024a"></script>
+<script type="module" src="js/main.js?v=20261030a"></script>
 </body>
 </html>
