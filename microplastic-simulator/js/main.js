@@ -100,6 +100,6 @@ function hasWebGL() {
 }
 if (hasWebGL()) {
   import('../../js/3d/river.js?v=20261017a').then(m => m.initRiver(document.getElementById('hero-gl'))).catch(noWebGL);
-  import('./life.js?v=20261017a').then(m => m.initLife(document.getElementById('life-gl'))).catch(noWebGL);
+  import('./life.js?v=20261030b').then(m => m.initLife(document.getElementById('life-gl'))).catch(noWebGL);
   import('./mesh.js?v=20261017a').then(m => m.initMesh(document.getElementById('mesh-gl'))).catch(noWebGL);
 } else noWebGL();
