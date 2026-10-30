@@ -2,7 +2,7 @@
 
 `index.html` is the project page for the paper **A GPU-accelerated three-dimensional Lagrangian numerical model for microplastic transport** (Danial Goodarzi, Abdolmajid Mohammadian, Abolghasem Pilechi and Atsuhiko Isobe). `journey.html` keeps the original schematic teaching demonstration and uses `../js/microplastic-simulator.js`.
 
-The page shows the model and its processes. It deliberately carries no graphs or numerical results. The only simulation output is the three `meander_*.mp4` films.
+The page shows the model and its processes. It deliberately carries no graphs or numerical results. The only simulation output is the films: the three `meander_*.mp4` and the four `ariake_<case>.mp4` year films of the Ariake Sea (section VI, made by `paper2/figures/gen_github_anim.py ariake p1v3_<case>`, posters `ariake_<case>_poster.webp` = last frame).
 
 ## Design
 

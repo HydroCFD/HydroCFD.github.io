@@ -52,6 +52,29 @@ document.querySelectorAll('[data-view]').forEach(button => {
   });
 });
 
+// ---------- Ariake Sea films ----------
+const ariake = document.getElementById('ariake-film');
+const ariakeCaptions = {
+  passive: 'Transport alone. The microplastics float and most of them leave the Ariake Sea through the open boundary in the south.',
+  bio: 'Biofilm growth. The film makes most microplastics denser than the water around them, and they settle near their sources within days.',
+  frg: 'Fragmentation. The pieces become smaller and rise more slowly, but they stay afloat and most of them still leave the Ariake Sea.',
+  both: 'Biofilm growth and fragmentation together. Most microplastics settle on the bed near their sources within days of release.'
+};
+const ariakeLabels = { passive: 'transport alone', bio: 'biofilm growth', frg: 'fragmentation', both: 'biofilm growth and fragmentation' };
+document.querySelectorAll('[data-ariake]').forEach(button => {
+  button.addEventListener('click', () => {
+    if (button.getAttribute('aria-pressed') === 'true') return;
+    ariake.pause();
+    document.querySelectorAll('[data-ariake]').forEach(b => b.setAttribute('aria-pressed', String(b === button)));
+    const c = button.dataset.ariake;
+    ariake.querySelector('source').src = `assets/ariake_${c}.mp4`;
+    ariake.setAttribute('poster', `assets/ariake_${c}_poster.webp`);
+    ariake.setAttribute('aria-label', `Ariake Sea simulation: ${ariakeLabels[c]}`);
+    document.getElementById('ariake-caption').textContent = ariakeCaptions[c];
+    ariake.load();
+  });
+});
+
 // ---------- motion toggle ----------
 const toggle = document.getElementById('motion-toggle');
 function showMotion() {
