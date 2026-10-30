@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { runWhenVisible, fitGL, life, smooth, lerp, makeNoise, isSmall } from '../../js/3d/loop.js';
 
 const BREAK = 2.45; // value of P at which the particle breaks
-const FILM = 0.2;   // thickness of the mature film, the same on the parent and on each fragment
+const FILM = 0.2;   // thickness of the mature film, as a share of the radius of the parent
 
 export function initLife(canvas) {
   const small = isSmall();
@@ -225,31 +225,44 @@ export function initLife(canvas) {
   }
 
   // ---------- fragments ----------
-  // Each fragment is a smaller plastic sphere that keeps the film: the number
-  // of algal cells per unit surface does not change at a break, so the film has
-  // the same thickness and forms a larger share of the fragment.
+  // Each fragment is a smaller plastic sphere that takes its share of the film.
+  // The attached cells are shared by mass, so no cells are created and the film
+  // keeps the same share of the volume: it is thinner than on the parent, and
+  // the effective density does not change at the break. The fracture face is
+  // clean, and new algae colonise it afterwards.
   const NF = 8, RF = 0.42;
   const shards = [];
   const fragCore = new THREE.MeshPhysicalMaterial({ color: 0xeef2f6, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.2 });
-  function coatedSphere(seed) {
+  function coatedSphere(seed, faceDir) {
     const g = new THREE.Group();
     const c = new THREE.Mesh(new THREE.SphereGeometry(RF, 40, 28), fragCore);
     outline(c, 1.04);
     g.add(c);
     const fg = new THREE.SphereGeometry(1, 48, 32), fp = fg.attributes.position;
     const fc = new Float32Array(fp.count * 4);
+    const unit = new Float32Array(fp.array), lumps = new Float32Array(fp.count), toFace = new Float32Array(fp.count);
     const hues = [[0.36, 0.45, 0.14], [0.30, 0.36, 0.10], [0.46, 0.40, 0.12]], dark = [0.17, 0.21, 0.06];
     for (let i = 0; i < fp.count; i++) {
       const x = fp.getX(i), y = fp.getY(i), z = fp.getZ(i);
       const n1 = 0.5 + 0.5 * noise(x * 2.4 + seed, y * 2.4, z * 2.4), n2 = 0.5 + 0.5 * noise(x * 7 + seed, y * 7, z * 7);
-      const r = RF + FILM * (0.8 + 0.4 * n1);
-      fp.setXYZ(i, x * r, y * r, z * r);
+      lumps[i] = n1;
+      toFace[i] = Math.acos(Math.max(-1, Math.min(1, x * faceDir.x + y * faceDir.y + z * faceDir.z)));
       const h = hues[Math.floor(n1 * 2.99)];
       for (let j = 0; j < 3; j++) fc[4 * i + j] = h[j] + (dark[j] - h[j]) * 0.45 * n2;
-      fc[4 * i + 3] = 0.74;
     }
     fg.setAttribute('color', new THREE.BufferAttribute(fc, 4));
-    fg.computeVertexNormals();
+    // thickness of the film, and the angular size of the part of the fracture face still clean
+    g.userData.setFilm = (thick, clean) => {
+      for (let i = 0; i < fp.count; i++) {
+        const edge = clean > 0.01 ? smooth(clean - 0.18, clean + 0.08, toFace[i]) : 1;
+        const r = RF + 0.004 + thick * (0.8 + 0.4 * lumps[i]) * edge;
+        fp.setXYZ(i, unit[3 * i] * r, unit[3 * i + 1] * r, unit[3 * i + 2] * r);
+        fc[4 * i + 3] = 0.74 * edge;
+      }
+      fp.needsUpdate = true;
+      fg.attributes.color.needsUpdate = true;
+      fg.computeVertexNormals();
+    };
     const filmMat = new THREE.MeshPhysicalMaterial({ vertexColors: true, transparent: true, depthWrite: false, roughness: 0.5, clearcoat: 0.4, emissive: 0xe4572e, emissiveIntensity: 0 });
     const f = new THREE.Mesh(fg, filmMat);
     f.renderOrder = 1;
@@ -264,10 +277,12 @@ export function initLife(canvas) {
     // directions spread on a sphere (Fibonacci lattice)
     const y = 1 - (i + 0.5) / NF * 2, r = Math.sqrt(1 - y * y), th = i * 2.39996;
     const dir = new THREE.Vector3(Math.cos(th) * r, y * 0.6, Math.sin(th) * r).normalize();
-    const m = coatedSphere(i * 3.7);
+    // the fragment shown close up turns its fracture face towards the viewer
+    const faceDir = i === 0 ? new THREE.Vector3(0.35, 0.25, 0.9).normalize() : new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize();
+    const m = coatedSphere(i * 3.7, faceDir);
     m.visible = false;
     Object.assign(m.userData, {
-      dir, spin: new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).multiplyScalar(1.2),
+      turn: new THREE.Vector3(), dir, spin: new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).multiplyScalar(1.2),
       bed: new THREE.Vector3(dir.x * 2.4 + (Math.random() - 0.5) * 0.6, 0, dir.z * 1.6 + (Math.random() - 0.5) * 0.6),
       phase: Math.random()
     });
@@ -349,7 +364,7 @@ export function initLife(canvas) {
 
   const V = new THREE.Vector3(), Vn = new THREE.Vector3(), M = new THREE.Matrix4(), Q = new THREE.Quaternion(),
     zero = new THREE.Vector3(0, 0, 0), sc = new THREE.Vector3(), tv = new THREE.Vector3(), tw = new THREE.Vector3();
-  let prevP = life.P, flashT = 0;
+  let prevP = life.P, flashT = 0, lastFilmKey = -2;
 
   function frame(dt, t) {
     fitGL(renderer, camera, canvas);
@@ -359,6 +374,7 @@ export function initLife(canvas) {
     const broken = P >= BREAK;
     const ex = smooth(BREAK, 3.1, P);                       // spread of the fragments
     const focus = smooth(3.2, 3.8, P) * (1 - smooth(4.15, 4.55, P)); // close look at one fragment
+    const colonise = smooth(BREAK, 4.1, P);                 // new algae on the fracture faces
     const settle = smooth(4.1, 4.9, P);                     // arrival at the bed
     const resus = smooth(4.85, 5.3, P);                     // resuspension
     if ((prevP < BREAK) !== (P < BREAK)) flashT = 1;
@@ -389,6 +405,11 @@ export function initLife(canvas) {
 
     // the fragments
     const floorY = -1.55;
+    const filmKey = broken ? Math.round(P * 150) : -1;
+    if (broken && filmKey !== lastFilmKey) {
+      for (let i = 0; i < NF; i++) shards[i].userData.setFilm(FILM * RF + 0.05 * colonise, 1.25 * (1 - colonise));
+    }
+    lastFilmKey = filmKey;
     for (let i = 0; i < NF; i++) {
       const s = shards[i], u = s.userData;
       s.visible = broken;
@@ -407,9 +428,10 @@ export function initLife(canvas) {
       } else s.scale.setScalar(lead ? 1 + 0.85 * focus : 1 - 0.55 * focus);
       tv.lerp(tw.set(bx + hx, floorY + bedY(bx + hx) + 0.4 + hy, bz), settle);
       s.position.copy(tv);
-      s.rotation.x += u.spin.x * dt * (1 - settle * 0.8 + hy);
-      s.rotation.y += u.spin.y * dt * (1 - settle * 0.8 + hy);
-      s.rotation.z += u.spin.z * dt * (1 - settle * 0.8 + hy);
+      const still = (lead ? 1 - focus : 1) * (1 - settle * 0.8 + hy);
+      u.turn.x += u.spin.x * dt * still; u.turn.y += u.spin.y * dt * still; u.turn.z += u.spin.z * dt * still;
+      const face = lead ? 1 - focus : 1;
+      s.rotation.set(u.turn.x * face, u.turn.y * face, u.turn.z * face);
       u.filmMat.emissiveIntensity = flashT * 0.9;
     }
     flash.intensity = flashT * 25;
@@ -448,7 +470,9 @@ export function initLife(canvas) {
     renderer.render(scene, camera);
 
     // HUD
-    const r = 0.93 + 0.19 * b + 0.07 * smooth(BREAK, 3.6, P);
+    // no jump at the break; then the fragment moves to the daily cycle of its new size
+    const cycle = smooth(3.2, 4.1, P);
+    const r = 0.93 + 0.19 * b - 0.035 * cycle + 0.012 * Math.sin(t * 1.3) * cycle * (1 - settle);
     // water sits in the middle of the gauge; heavier side spans up to 1.25 times water
     const g = Math.round(Math.min(100, Math.max(0, r < 1 ? 50 * (r - 0.85) / 0.15 : 50 + 50 * (r - 1) / 0.25)));
     if (g !== lastG && gaugeMark) { gaugeMark.style.left = g + '%'; lastG = g; }
