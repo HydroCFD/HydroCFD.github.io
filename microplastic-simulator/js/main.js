@@ -1,9 +1,9 @@
 // Page wiring: scroll story, films and the animated scenes.
 // The menu, progress bar and fade-ins come from ../../js/site.js.
 import { motion, setPaused, life, isSmall, clamp } from '../../js/3d/loop.js';
-import { initFrag } from './frag.js?v=20261017a';
+import { initFrag } from './frag.js?v=20261030c';
 import { initThreads } from './threads.js?v=20261017a';
-import { initRace } from './race.js?v=20261017a';
+import { initRace } from './race.js?v=20261030c';
 
 const root = document.documentElement;
 
@@ -34,9 +34,9 @@ updateLife();
 // ---------- films ----------
 const film = document.getElementById('film');
 const captions = {
-  '3d': '3D view. The vertical scale is enlarged so that the water column is visible.',
-  plan: 'Plan view on the TELEMAC-3D flow, one row per diameter. Colour shows whether a particle rises (red) or sinks (blue).',
-  side: 'Side view on the TELEMAC-3D flow, one row per diameter. Watch the film turn rising particles into sinking ones.'
+  '3d': '3D view, one row for each diameter, with the vertical scale enlarged 150 times.',
+  plan: 'Plan view, one row for each diameter. The colour shows the vertical velocity relative to the rise velocity without biofilm, with rising microplastics in red and sinking microplastics in blue.',
+  side: 'Side view, one row for each diameter. The film makes the rising microplastics denser than the water, and they settle on the bed.'
 };
 document.querySelectorAll('[data-view]').forEach(button => {
   button.addEventListener('click', () => {
@@ -55,10 +55,10 @@ document.querySelectorAll('[data-view]').forEach(button => {
 // ---------- Ariake Sea films ----------
 const ariake = document.getElementById('ariake-film');
 const ariakeCaptions = {
-  passive: 'Transport alone. The microplastics float and most of them leave the Ariake Sea through the open boundary in the south.',
-  bio: 'Biofilm growth. The film makes most microplastics denser than the water around them, and they settle near their sources within days.',
-  frg: 'Fragmentation. The pieces become smaller and rise more slowly, but they stay afloat and most of them still leave the Ariake Sea.',
-  both: 'Biofilm growth and fragmentation together. Most microplastics settle on the bed near their sources within days of release.'
+  passive: 'Transport alone. No microplastics settle, because their density is lower than the water density, and most of them leave the Ariake Sea through the open boundary.',
+  bio: 'Biofilm growth. Most of the microplastics settle on the bed near their release points within days of the release.',
+  frg: 'Fragmentation. The fragments retain the density of their parent particles and remain buoyant, and most of them leave the Ariake Sea through the open boundary.',
+  both: 'Both processes. Most of the microplastics settle on the bed near their release points within days of the release.'
 };
 const ariakeLabels = { passive: 'transport alone', bio: 'biofilm growth', frg: 'fragmentation', both: 'biofilm growth and fragmentation' };
 document.querySelectorAll('[data-ariake]').forEach(button => {
@@ -100,6 +100,6 @@ function hasWebGL() {
 }
 if (hasWebGL()) {
   import('../../js/3d/river.js?v=20261017a').then(m => m.initRiver(document.getElementById('hero-gl'))).catch(noWebGL);
-  import('./life.js?v=20261030b').then(m => m.initLife(document.getElementById('life-gl'))).catch(noWebGL);
+  import('./life.js?v=20261030c').then(m => m.initLife(document.getElementById('life-gl'))).catch(noWebGL);
   import('./mesh.js?v=20261017a').then(m => m.initMesh(document.getElementById('mesh-gl'))).catch(noWebGL);
 } else noWebGL();
