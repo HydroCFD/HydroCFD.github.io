@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/site.css?v=20261104a">
-<link rel="stylesheet" href="page.css?v=20261104p">
+<link rel="stylesheet" href="page.css?v=20261105b">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
 </head>
 <body>
@@ -80,11 +80,76 @@
   </div>
 </section>
 
+<!-- ================= STORY ================= -->
+<section class="sec life" id="journey">
+  <div class="wrap">
+    <header class="sec-head reveal">
+      <span class="numeral">II</span>
+      <div>
+        <h2>The journey of one microplastic</h2>
+        <p class="lede">Scroll to follow one microplastic, slightly denser than the water, from its release near the free surface to the bed of a flume with submerged vegetation.</p>
+      </div>
+    </header>
+  </div>
+  <div class="life-body">
+    <div class="life-stage" aria-hidden="true">
+      <div class="plate">
+        <canvas id="story-gl"></canvas>
+        <div class="film-hud">
+          <div><span class="hud-label">Position</span><strong id="hud-layer">free surface</strong></div>
+          <div><span class="hud-label">Height, z / h</span><strong id="hud-z">0.85</strong></div>
+          <div><span class="hud-label">State</span><strong id="hud-state">in suspension</strong></div>
+        </div>
+        <div class="life-hud">
+          <div class="gauge">
+            <span class="hud-label">Local flow velocity, u / u<sub>s</sub></span>
+            <div class="ubar"><i id="hud-ubar"></i></div>
+            <span class="gauge-ends"><span>0</span><strong id="hud-u">1.00</strong><span>1</span></span>
+          </div>
+        </div>
+      </div>
+      <ol class="life-dots" id="story-dots"><li></li><li></li><li></li><li></li><li></li><li></li></ol>
+    </div>
+    <div class="life-steps" id="story-steps">
+      <article class="step" data-step="0">
+        <span class="step-n">1</span>
+        <h3>Release upstream</h3>
+        <p>The microplastic is released near the free surface at the upstream end of the flume. From this moment, its velocity is calculated from the force balance at each time step with the exponential update, and its position changes by advection and by a random displacement that represents the turbulence.</p>
+      </article>
+      <article class="step" data-step="1">
+        <span class="step-n">2</span>
+        <h3>Carried by the overflow layer</h3>
+        <p>Above the stems the flow is fast, and the drag carries the particle downstream at nearly the velocity of the surrounding water, while the random displacement, scaled by the eddy diffusivity, moves it up and down through the overflow layer.</p>
+      </article>
+      <article class="step" data-step="2">
+        <span class="step-n">3</span>
+        <h3>Through the shear layer</h3>
+        <p>At the top of the vegetation the velocity changes sharply, and the large eddies of this shear layer exchange water and particles between the overflow and the stems. The eddy diffusivity reaches its maximum here, and the Saffman lift acts across the shear.</p>
+      </article>
+      <article class="step" data-step="3">
+        <span class="step-n">4</span>
+        <h3>Among the stems</h3>
+        <p>Within the vegetation the flow is slow, and the particle travels through the wakes between the stems, where the drift correction prevents an artificial accumulation in the regions of low diffusivity. The difference between this slow layer and the overflow stretches the cloud of microplastics along the channel.</p>
+      </article>
+      <article class="step" data-step="4">
+        <span class="step-n">5</span>
+        <h3>Counted at a virtual station</h3>
+        <p>When the particle crosses a virtual station, placed at the location of a laboratory fluorometer, its crossing time is recorded. The crossings of all particles give the response curve, from which the longitudinal dispersion coefficient is calculated with the method of moments.</p>
+      </article>
+      <article class="step" data-step="5">
+        <span class="step-n">6</span>
+        <h3>Settling to the bed</h3>
+        <p>Being denser than the water, the particle settles toward the end of its path. At the bed it is deposited while the bed shear velocity remains below the critical value of the Shields criterion, and it is re-entrained when the bed shear velocity exceeds this value.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
 <!-- ================= WORKFLOW ================= -->
 <section class="sec" id="workflow">
   <div class="wrap">
     <header class="sec-head reveal">
-      <span class="numeral">II</span>
+      <span class="numeral">III</span>
       <div>
         <h2>From the flow field to every particle</h2>
         <p class="lede">The flow is computed once, mapped once onto a structured grid on the GPU, and the particles are then tracked through this frozen flow field, which is appropriate for the dilute suspensions of microplastics in water systems.</p>
@@ -428,7 +493,7 @@
 <section class="sec" id="forces">
   <div class="wrap">
     <header class="sec-head reveal">
-      <span class="numeral">III</span>
+      <span class="numeral">IV</span>
       <div>
         <h2>The force balance on one microplastic</h2>
         <p class="lede">Each microplastic is a rigid particle with its own density, volume and shape, accelerated by the sum of the forces that act on it, and moved by the turbulence through a random displacement.</p>
@@ -458,7 +523,7 @@
 <section class="sec" id="integrator">
   <div class="wrap">
     <header class="sec-head reveal">
-      <span class="numeral">IV</span>
+      <span class="numeral">V</span>
       <div>
         <h2>An exponential drag integrator</h2>
         <p class="lede">A microplastic adjusts to the surrounding flow in a fraction of a millisecond, and an explicit integrator must resolve this relaxation time to remain stable. The exponential update treats the linearized drag exactly, so the time step is set by the flow rather than by the particle.</p>
@@ -485,7 +550,7 @@
 <section class="sec" id="vegetation">
   <div class="wrap">
     <header class="sec-head reveal">
-      <span class="numeral">V</span>
+      <span class="numeral">VI</span>
       <div>
         <h2>Vegetation and the dispersion of microplastics</h2>
         <p class="lede">Submerged vegetation divides the flow into a slow layer within the stems and a faster layer above them, and the exchange between the two layers spreads the microplastics along the channel.</p>
@@ -506,7 +571,7 @@
 <section class="sec" id="boundaries">
   <div class="wrap">
     <header class="sec-head reveal">
-      <span class="numeral">VI</span>
+      <span class="numeral">VII</span>
       <div>
         <h2>Buoyant and settling microplastics</h2>
         <p class="lede">Microplastics lighter than the water rise toward the surface and microplastics denser than the water settle toward the bed, and three boundary rules decide what happens when they arrive.</p>
@@ -523,7 +588,7 @@
 <section class="sec" id="shapes">
   <div class="wrap">
     <header class="sec-head reveal">
-      <span class="numeral">VII</span>
+      <span class="numeral">VIII</span>
       <div>
         <h2>Particles of different shapes</h2>
         <p class="lede">Microplastics in water systems occur as spheres, fibres, flat fragments and irregular grains, and their drag depends on the shape and on the orientation during settling.</p>
@@ -544,7 +609,7 @@
 <section class="sec" id="tests">
   <div class="wrap">
     <header class="sec-head reveal">
-      <span class="numeral">VIII</span>
+      <span class="numeral">IX</span>
       <div>
         <h2>Tested against laboratory experiments</h2>
         <p class="lede">After verification of each sub-model against analytical solutions, the coupled model is compared without calibration with four groups of laboratory measurements.</p>
@@ -563,7 +628,7 @@
 <section class="sec" id="team">
   <div class="wrap">
     <header class="sec-head reveal">
-      <span class="numeral">IX</span>
+      <span class="numeral">X</span>
       <div><h2>Authors</h2></div>
     </header>
     <ul class="team">
@@ -579,7 +644,7 @@
 <section class="sec" id="code">
   <div class="wrap">
     <header class="sec-head reveal">
-      <span class="numeral">X</span>
+      <span class="numeral">XI</span>
       <div>
         <h2>Source code</h2>
         <p class="lede">The model, its documentation and the scripts that accompany the paper are kept in the microplastic_modeling repository on GitHub.</p>
@@ -591,6 +656,100 @@
         <strong>HydroCFD / microplastic_modeling</strong>
         <span class="go">github.com/HydroCFD/microplastic_modeling <span aria-hidden="true">&rarr;</span></span>
       </a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CITE ================= -->
+<section class="sec" id="cite">
+  <div class="wrap">
+    <header class="sec-head reveal">
+      <span class="numeral">XII</span>
+      <div>
+        <h2>How to cite</h2>
+        <p class="lede">If you use the model or the material on this page, please cite the paper and the repository, together with the laboratory datasets against which the model was tested.</p>
+      </div>
+    </header>
+    <div class="cite-grid reveal">
+      <article class="cite-card">
+        <h3>This paper</h3>
+        <p class="cite-text" id="cite-t0">Goodarzi, D., Mohammadian, A., Pilechi, A., &amp; Abolfathi, S. (in preparation). A GPU accelerated Eulerian-Lagrangian model for microplastics transport in water systems.</p>
+        <details><summary>BibTeX</summary><pre id="cite-b0">@article{goodarzi_gpu_microplastics,
+  author = {Goodarzi, Danial and Mohammadian, Abdolmajid and Pilechi, Abolghasem and Abolfathi, Soroush},
+  title  = {A GPU Accelerated Eulerian-Lagrangian Model for Microplastics Transport in Water Systems},
+  year   = {2026},
+  note   = {Manuscript in preparation}
+}</pre></details>
+        <div class="cite-actions"><button type="button" class="copy" data-copy="cite-t0">Copy reference</button><button type="button" class="copy" data-copy="cite-b0">Copy BibTeX</button></div>
+      </article>
+      <article class="cite-card">
+        <h3>Source code</h3>
+        <p class="cite-text" id="cite-t1">Goodarzi, D., Mohammadian, A., Pilechi, A., &amp; Abolfathi, S. (2026). Microplastic Modeling in Water Systems: a GPU accelerated Eulerian-Lagrangian model for microplastics transport [GitHub repository]. <a href="https://github.com/HydroCFD/microplastic_modeling">https://github.com/HydroCFD/microplastic_modeling</a></p>
+        <details><summary>BibTeX</summary><pre id="cite-b1">@misc{microplastic_modeling,
+  author = {Goodarzi, Danial and Mohammadian, Abdolmajid and Pilechi, Abolghasem and Abolfathi, Soroush},
+  title  = {Microplastic Modeling in Water Systems: a GPU accelerated Eulerian-Lagrangian model for microplastics transport},
+  year   = {2026},
+  url    = {https://github.com/HydroCFD/microplastic_modeling},
+  note   = {GitHub repository}
+}</pre></details>
+        <div class="cite-actions"><button type="button" class="copy" data-copy="cite-t1">Copy reference</button><button type="button" class="copy" data-copy="cite-b1">Copy BibTeX</button></div>
+      </article>
+      <article class="cite-card">
+        <h3>Dataset 1, neutrally buoyant microplastics</h3>
+        <p class="cite-text" id="cite-t2">Stride, B., Abolfathi, S., Odara, M. G. N., Bending, G. D., &amp; Pearson, J. (2023). Modeling microplastic and solute transport in vegetated flows. Water Resources Research, 59, e2023WR034653. <a href="https://doi.org/10.1029/2023WR034653">https://doi.org/10.1029/2023WR034653</a></p>
+        <details><summary>BibTeX</summary><pre id="cite-b2">@article{stride2023modeling,
+  author  = {Stride, Ben and Abolfathi, Soroush and Odara, M. G. N. and Bending, Gary D. and Pearson, Jonathan},
+  title   = {Modeling microplastic and solute transport in vegetated flows},
+  journal = {Water Resources Research},
+  volume  = {59},
+  pages   = {e2023WR034653},
+  year    = {2023},
+  doi     = {10.1029/2023WR034653}
+}</pre></details>
+        <div class="cite-actions"><button type="button" class="copy" data-copy="cite-t2">Copy reference</button><button type="button" class="copy" data-copy="cite-b2">Copy BibTeX</button></div>
+      </article>
+      <article class="cite-card">
+        <h3>Dataset 2, buoyant and settling microplastics</h3>
+        <p class="cite-text" id="cite-t3">Stride, B., Abolfathi, S., Bending, G. D., &amp; Pearson, J. (2024). Quantifying microplastic dispersion due to density effects. Journal of Hazardous Materials, 466, 133440. <a href="https://doi.org/10.1016/j.jhazmat.2024.133440">https://doi.org/10.1016/j.jhazmat.2024.133440</a></p>
+        <details><summary>BibTeX</summary><pre id="cite-b3">@article{stride2024quantifying,
+  author  = {Stride, Ben and Abolfathi, Soroush and Bending, Gary D. and Pearson, Jonathan},
+  title   = {Quantifying microplastic dispersion due to density effects},
+  journal = {Journal of Hazardous Materials},
+  volume  = {466},
+  pages   = {133440},
+  year    = {2024},
+  doi     = {10.1016/j.jhazmat.2024.133440}
+}</pre></details>
+        <div class="cite-actions"><button type="button" class="copy" data-copy="cite-t3">Copy reference</button><button type="button" class="copy" data-copy="cite-b3">Copy BibTeX</button></div>
+      </article>
+      <article class="cite-card">
+        <h3>Dataset 3, settling of different shapes</h3>
+        <p class="cite-text" id="cite-t4">Goral, K. D., Guler, H. G., Larsen, B. E., Carstensen, S., Christensen, E. D., Kerpen, N. B., Schlurmann, T., &amp; Fuhrman, D. R. (2023). Settling velocity of microplastic particles having regular and irregular shapes. Environmental Research, 228, 115783. <a href="https://doi.org/10.1016/j.envres.2023.115783">https://doi.org/10.1016/j.envres.2023.115783</a></p>
+        <details><summary>BibTeX</summary><pre id="cite-b4">@article{goral2023settling,
+  author  = {Goral, Koray Deniz and Guler, Hasan Gokhan and Larsen, Bjarke Eltard and Carstensen, Stefan and Christensen, Erik Damgaard and Kerpen, Nils B. and Schlurmann, Torsten and Fuhrman, David R.},
+  title   = {Settling velocity of microplastic particles having regular and irregular shapes},
+  journal = {Environmental Research},
+  volume  = {228},
+  pages   = {115783},
+  year    = {2023},
+  doi     = {10.1016/j.envres.2023.115783}
+}</pre></details>
+        <div class="cite-actions"><button type="button" class="copy" data-copy="cite-t4">Copy reference</button><button type="button" class="copy" data-copy="cite-b4">Copy BibTeX</button></div>
+      </article>
+      <article class="cite-card">
+        <h3>Dataset 4, settling in turbulent flow</h3>
+        <p class="cite-text" id="cite-t5">Ijaz, U., Baki, A. B. M., Wu, W., &amp; Zhang, W. (2024). Settling velocity of microplastics in turbulent open-channel flow. Science of the Total Environment, 946, 174179. <a href="https://doi.org/10.1016/j.scitotenv.2024.174179">https://doi.org/10.1016/j.scitotenv.2024.174179</a></p>
+        <details><summary>BibTeX</summary><pre id="cite-b5">@article{ijaz2024settling,
+  author  = {Ijaz, Usama and Baki, Abul B. M. and Wu, Weiming and Zhang, Wenming},
+  title   = {Settling velocity of microplastics in turbulent open-channel flow},
+  journal = {Science of the Total Environment},
+  volume  = {946},
+  pages   = {174179},
+  year    = {2024},
+  doi     = {10.1016/j.scitotenv.2024.174179}
+}</pre></details>
+        <div class="cite-actions"><button type="button" class="copy" data-copy="cite-t5">Copy reference</button><button type="button" class="copy" data-copy="cite-b5">Copy BibTeX</button></div>
+      </article>
     </div>
   </div>
 </section>
@@ -658,6 +817,6 @@
 
 <noscript><style>.reveal{opacity:1!important;transform:none!important}</style></noscript>
 <script src="../js/site.js?v=20261017a"></script>
-<script type="module" src="main.js?v=20261104p"></script>
+<script type="module" src="main.js?v=20261105h"></script>
 </body>
 </html>

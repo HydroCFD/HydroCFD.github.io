@@ -13,10 +13,11 @@ Same print style as the rest of the site (`../css/site.css`): paper `#f2ede3`, i
 | File | What it does |
 |---|---|
 | `page.css` | Styles for this page only (figures, labels, integrator, authors) |
-| `main.js` | Motion toggle, integrator illustration, loads the figures |
+| `main.js` | Motion toggle, integrator illustration, copy buttons of the citation box, loads the figures |
 | `js/common.js` | Shared 3D helpers: lights, ink outlines, arrows, points, labels pinned to 3D points |
 | `js/channel.js` | Three.js flume with submerged stems: hero (particles rise, settle, deposit) and the section V view with streaks and the velocity profile |
 | `js/forces.js` | Three.js particle in a sheared flow with the drag, lift, body force, added mass shell and random path |
+| `js/story.js` | Three.js scroll story: the camera follows one microplastic from the release to the bed (section II); the path is drawn by hand |
 | `js/boundaries.js` | 2D canvas: deposition at the bed, rebound, trapping at the free surface |
 | `js/shapes.js` | Three.js nine particle shapes settling with the broadest face normal to the motion |
 | `../js/3d/loop.js` | Shared site helpers: animation loop that runs only on screen, resizing, pause state |

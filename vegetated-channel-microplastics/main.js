@@ -101,7 +101,7 @@ toggle.addEventListener('click', () => { setPaused(!motion.paused); showMotion()
 showMotion();
 
 // ---------- figures ----------
-import('./js/boundaries.js?v=20261104p').then(m => m.initBoundaries(document.getElementById('bnd-cv')));
+import('./js/boundaries.js?v=20261105a').then(m => m.initBoundaries(document.getElementById('bnd-cv')));
 
 function noWebGL(err) {
   if (err) console.warn('3D figure unavailable:', err);
@@ -112,10 +112,32 @@ function hasWebGL() {
   catch { return false; }
 }
 if (hasWebGL()) {
-  import('./js/channel.js?v=20261104p').then(m => {
+  import('./js/channel.js?v=20261105a').then(m => {
     m.initChannel(document.getElementById('hero-gl'), { mode: 'hero' });
     m.initChannel(document.getElementById('veg-gl'), { mode: 'profile' });
   }).catch(noWebGL);
-  import('./js/forces.js?v=20261104p').then(m => m.initForces(document.getElementById('forces-gl'))).catch(noWebGL);
-  import('./js/shapes.js?v=20261104p').then(m => m.initShapes(document.getElementById('shapes-gl'))).catch(noWebGL);
+  import('./js/forces.js?v=20261105a').then(m => m.initForces(document.getElementById('forces-gl'))).catch(noWebGL);
+  import('./js/story.js?v=20261105g').then(m => m.initStory(document.getElementById('story-gl'), document.getElementById('story-steps'))).catch(noWebGL);
+  import('./js/shapes.js?v=20261105a').then(m => m.initShapes(document.getElementById('shapes-gl'))).catch(noWebGL);
 } else noWebGL();
+
+// ---------- copy buttons of the citation box ----------
+document.querySelectorAll('.copy[data-copy]').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const el = document.getElementById(btn.dataset.copy);
+    const raw = el.textContent;
+    const text = el.tagName === 'PRE' ? raw.trim() : raw.replace(/\s+/g, ' ').trim();
+    let ok = false;
+    try { await navigator.clipboard.writeText(text); ok = true; }
+    catch {
+      const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      try { ok = document.execCommand('copy'); } catch { ok = false; }
+      ta.remove();
+    }
+    const old = btn.textContent;
+    btn.textContent = ok ? 'Copied' : 'Select and copy';
+    btn.classList.toggle('done', ok);
+    setTimeout(() => { btn.textContent = old; btn.classList.remove('done'); }, 1600);
+  });
+});

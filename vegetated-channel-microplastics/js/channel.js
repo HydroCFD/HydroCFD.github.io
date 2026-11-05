@@ -4,10 +4,10 @@
 // Illustrative motion only, not model output.
 import * as THREE from 'three';
 import { runWhenVisible, fitGL, isSmall, gauss, makeNoise, motion } from '../../js/3d/loop.js';
-import { COL, makeRenderer, addLights, inkEdges, makeArrow, makePoints, makeLabels } from './common.js?v=20261104p';
+import { COL, makeRenderer, addLights, inkEdges, makeArrow, makePoints, makeLabels } from './common.js?v=20261105a';
 
-const H = 3, HV = 1.3;     // flume length, width, water depth, vegetation height
-const U = 3.4;                              // surface velocity (scene units per second)
+export const H = 3, HV = 1.3;     // water depth and vegetation height
+export const U = 3.4;                              // surface velocity (scene units per second)
 
 export const uOf = y => {
   const s = 0.25 + 0.75 / (1 + Math.exp(-(y - HV - 0.12) / 0.22));
@@ -15,14 +15,8 @@ export const uOf = y => {
 };
 const dOf = y => 0.006 + 0.05 * Math.exp(-(((y - HV) / 0.32) ** 2)) + (y > HV ? 0.012 : 0);
 
-export function initChannel(canvas, opts = {}) {
-  const mode = opts.mode || 'hero';
-  const L = mode === 'hero' ? 14 : 13, W = mode === 'hero' ? 4.6 : 4.2;   // flume length and width
-  const small = isSmall();
-  const renderer = makeRenderer(canvas, small);
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(small && mode === 'hero' ? 46 : 32, 1, 0.1, 200);
-  addLights(scene);
+// Builds the flume (bed, walls, stems, water) into a scene; shared by the hero, section V and the story.
+export function makeFlume(scene, L, W, small) {
   const noise = makeNoise(11);
 
   // ---------- bed: a sand slab with a grained, slightly uneven surface ----------
@@ -112,6 +106,18 @@ export function initChannel(canvas, opts = {}) {
   surf.position.y = H;
   surf.renderOrder = 5;
   scene.add(surf);
+  return { surfMat, stems };
+}
+
+export function initChannel(canvas, opts = {}) {
+  const mode = opts.mode || 'hero';
+  const L = mode === 'hero' ? 14 : 13, W = mode === 'hero' ? 4.6 : 4.2;   // flume length and width
+  const small = isSmall();
+  const renderer = makeRenderer(canvas, small);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(small && mode === 'hero' ? 46 : 32, 1, 0.1, 200);
+  addLights(scene);
+  const { surfMat } = makeFlume(scene, L, W, small);
 
   // ---------- microplastics ----------
   const N = mode === 'hero' ? (small ? 700 : 1500) : (small ? 450 : 800);

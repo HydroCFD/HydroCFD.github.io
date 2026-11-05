@@ -2,7 +2,7 @@
 // normal to the direction of motion. The speeds are illustrative, not model output.
 import * as THREE from 'three';
 import { runWhenVisible, fitGL, isSmall, makeNoise, motion } from '../../js/3d/loop.js';
-import { COL, makeRenderer, addLights, inkEdges, makeLabels } from './common.js?v=20261104p';
+import { COL, makeRenderer, addLights, inkEdges, makeLabels } from './common.js?v=20261105a';
 
 function irregular() {
   const g = new THREE.IcosahedronGeometry(0.55, 1);

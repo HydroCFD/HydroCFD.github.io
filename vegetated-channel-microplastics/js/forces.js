@@ -2,7 +2,7 @@
 // and the unresolved turbulence moves it along a random path. Illustration, not model output.
 import * as THREE from 'three';
 import { runWhenVisible, fitGL, isSmall, motion } from '../../js/3d/loop.js';
-import { COL, makeRenderer, addLights, inkEdges, makeArrow, makeLabels } from './common.js?v=20261104p';
+import { COL, makeRenderer, addLights, inkEdges, makeArrow, makeLabels } from './common.js?v=20261105a';
 
 const A = 1;                 // particle radius
 const XB = 9, YB = -3.2, YT = 3.4, ZB = 2.6;

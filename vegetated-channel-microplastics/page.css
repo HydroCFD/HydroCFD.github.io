@@ -114,3 +114,74 @@ figure.schem + figure.schem { margin-top: 40px; }
   .hero-key, .motion-toggle { right: max(32px, calc((100% - var(--wrap)) / 2 + 32px)); }
 }
 @media (max-width: 1020px) { .repo-card { margin-left: 0; } }
+
+/* ---------- the journey of one microplastic (scroll story, same layout as the microplastic simulator page) ---------- */
+#journey { background: var(--paper-2); }
+.life { padding-bottom: 40px; }
+.life-body { position: relative; max-width: var(--wrap); margin: 0 auto; padding: 0 32px; display: grid; grid-template-columns: 7fr 5fr; gap: 56px; }
+.life-stage { position: sticky; top: 0; height: 100vh; display: flex; align-items: center; }
+.life .plate { position: relative; width: 100%; border: 1px solid var(--ink); background: var(--paper); padding: 10px; }
+.life .plate canvas { display: block; width: 100%; height: 72vh; background: #f7f3eb; }
+.film-hud { position: absolute; left: 22px; top: 22px; display: flex; pointer-events: none; background: var(--paper); border: 1px solid var(--ink); z-index: 2; }
+.film-hud > div { padding: 8px 14px; min-width: 112px; }
+.film-hud > div + div { border-left: 1px solid var(--rule); }
+.hud-label { display: block; margin-bottom: 6px; font-size: 0.66rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); }
+.film-hud strong { display: block; font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 1.12rem; line-height: 1.15; color: var(--ink); }
+.life-hud { position: absolute; left: 22px; right: 22px; bottom: 22px; display: flex; justify-content: flex-start; pointer-events: none; z-index: 2; }
+.gauge { width: 270px; background: var(--paper); border: 1px solid var(--ink); padding: 10px 14px; font-size: 0.74rem; color: var(--ink-2); }
+.ubar { height: 8px; border: 1px solid var(--ink); background: var(--paper-2); }
+.ubar i { display: block; height: 100%; width: 50%; background: var(--cobalt); transition: width .2s linear; }
+.gauge-ends { display: flex; justify-content: space-between; align-items: baseline; margin-top: 6px; font-family: var(--serif); font-style: italic; font-size: 0.85rem; }
+.gauge-ends strong { font-weight: 400; color: var(--cobalt); font-size: 1rem; }
+.life-dots { position: absolute; right: -28px; top: 50%; transform: translateY(-50%); list-style: none; display: flex; flex-direction: column; gap: 12px; }
+.life-dots li { width: 9px; height: 9px; border-radius: 50%; border: 1px solid var(--ink); transition: background .3s; }
+.life-dots li.on { background: var(--red); border-color: var(--red); }
+.life-steps { padding: 26vh 0 40vh; }
+.step { min-height: 72vh; display: flex; flex-direction: column; justify-content: center; opacity: .28; transition: opacity .5s var(--ease); }
+.step.on { opacity: 1; }
+.step-n { font-family: var(--serif); font-style: italic; font-size: 2.6rem; line-height: 1; color: var(--red); margin-bottom: 14px; }
+.step h3 { font-size: clamp(1.7rem, 2.7vw, 2.3rem); font-weight: 400; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--ink); }
+.step p { color: var(--ink-2); font-size: 1.06rem; max-width: 440px; }
+.life .scene-label { z-index: 1; }
+.no-webgl #story-gl { visibility: hidden; }
+.no-webgl .life-hud, .no-webgl .film-hud { display: none; }
+
+/* ---------- how to cite ---------- */
+.cite-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-top: 1px solid var(--ink); }
+.cite-card { padding: 26px 26px 28px 0; border-bottom: 1px solid var(--rule); min-width: 0; }
+.cite-card:nth-child(even) { padding-left: 26px; border-left: 1px solid var(--rule); }
+.cite-card h3 { font-size: 1.3rem; font-weight: 400; margin-bottom: 10px; }
+.cite-text { font-size: 0.95rem; color: var(--ink-2); line-height: 1.6; overflow-wrap: anywhere; }
+.cite-card details { margin-top: 12px; }
+.cite-card summary { cursor: pointer; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); }
+.cite-card pre { margin-top: 10px; padding: 12px 14px; background: var(--paper); border: 1px solid var(--rule); font: 0.78rem/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; color: var(--ink); white-space: pre-wrap; overflow-wrap: anywhere; }
+.cite-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.copy { font: 500 0.84rem var(--sans); padding: 7px 14px; border: 1px solid var(--ink); background: var(--paper); color: var(--ink); cursor: pointer; transition: background .2s, color .2s; }
+.copy:hover { background: var(--ink); color: var(--paper); }
+.copy.done { background: var(--red); border-color: var(--red); color: var(--paper); }
+
+@media (max-width: 1020px) {
+  .life-dots { display: none; }
+}
+@media (max-width: 820px) {
+  .life-body { grid-template-columns: 1fr; gap: 0; padding-left: 16px; padding-right: 16px; }
+  .life-stage { top: 50px; height: auto; z-index: 3; display: block; background: var(--paper-2); padding: 10px 0 12px; border-bottom: 1px solid var(--rule); }
+  .life .plate canvas { height: 40vh; }
+  .film-hud { left: 16px; right: 16px; top: 16px; }
+  .film-hud > div { flex: 1; min-width: 0; padding: 5px 7px; }
+  .film-hud .hud-label { font-size: 0.56rem; letter-spacing: 0.04em; }
+  .film-hud strong { font-size: 0.9rem; }
+  .life-hud { left: 16px; right: 16px; bottom: 16px; }
+  .gauge { width: 180px; padding: 7px 10px; }
+  .life-steps { position: relative; z-index: 1; padding: 8vh 0 45vh; }
+  .step { min-height: 52vh; justify-content: flex-start; }
+  .step p { max-width: none; }
+  .cite-grid { grid-template-columns: 1fr; }
+  .cite-card:nth-child(even) { padding-left: 0; border-left: 0; }
+}
+@media (max-width: 820px) {
+  .life .life-hud { display: none; }
+  .life .plate canvas { height: 46vh; }
+  .film-hud { left: 10px; right: 10px; top: 10px; }
+  .film-hud strong { font-size: 0.82rem; }
+}
