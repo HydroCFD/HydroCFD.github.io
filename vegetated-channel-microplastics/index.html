@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>GPU Eulerian-Lagrangian Microplastic Transport | Danial Goodarzi</title>
+<meta name="description" content="A GPU accelerated Eulerian-Lagrangian model that resolves the force balance on each microplastic in vegetated and non-vegetated channels, with an exponential drag integrator, shape-dependent drag, bed deposition and free-surface trapping.">
+<meta name="theme-color" content="#f2ede3">
+<link rel="canonical" href="https://hydrocfd.github.io/vegetated-channel-microplastics/index.html">
+<link rel="icon" href="../favicon.ico">
+<meta property="og:title" content="A GPU accelerated Eulerian-Lagrangian model for microplastic transport in water systems">
+<meta property="og:description" content="The force balance on each microplastic, calculated on a GPU in the flow fields of vegetated and non-vegetated channels.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/site.css?v=20261104a">
+<link rel="stylesheet" href="page.css?v=20261104p">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="brand" href="../index.html">Danial Goodarzi</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-links">Menu</button>
+    <nav id="site-links" aria-label="Main navigation">
+      <a href="../index.html#research">Research</a>
+      <a href="../publications.html">Publications</a>
+      <a href="../index.html#software">Software</a>
+      <a href="../constructed-wetland-surrogate/index.html">Wetland AI</a>
+      <a href="../dense-jet-simulator/index.html">Dense Jet</a>
+      <a href="../microplastic-simulator/index.html">Microplastics</a>
+      <a href="../vegetated-channel-microplastics/index.html" class="active" aria-current="page">Vegetated Channels</a>
+      <a href="../index.html#contact">Contact</a>
+    </nav>
+  </div>
+  <div class="nav-progress" aria-hidden="true"></div>
+</header>
+
+<main id="main">
+
+<!-- ================= HERO ================= -->
+<section class="hero" id="top">
+  <canvas class="hero-gl" id="hero-gl" aria-hidden="true"></canvas>
+  <div class="hero-veil" aria-hidden="true"></div>
+  <div class="hero-content">
+    <p class="overline">Research project <span>on microplastics in vegetated channels</span></p>
+    <h1>The forces on every <em>microplastic</em>, at the speed of a GPU.</h1>
+    <hr>
+    <p class="hero-title">A GPU accelerated Eulerian-Lagrangian model for microplastics transport in water systems</p>
+    <p class="hero-authors">Danial Goodarzi, Abdolmajid Mohammadian, Abolghasem Pilechi and Soroush Abolfathi</p>
+    <div class="actions">
+      <a class="btn" href="#overview">Explore the model <span aria-hidden="true">→</span></a>
+      <a class="textlink" href="#integrator">See the exponential integrator</a>
+    </div>
+  </div>
+  <figure class="hero-key" aria-hidden="true">
+    <span class="key-dot ink"></span> neutrally buoyant
+    <span class="key-dot blue"></span> lighter than the water
+    <span class="key-dot red"></span> denser than the water
+    <span class="key-dot bed"></span> deposited
+  </figure>
+  <p class="hero-caption">A schematic channel with submerged vegetation, in which the microplastics are carried by the slow flow within the stems and the faster flow above them, rise to the surface or settle to the bed.</p>
+  <button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">Pause motion</button>
+</section>
+
+<!-- ================= OVERVIEW ================= -->
+<section class="sec" id="overview">
+  <div class="wrap">
+    <header class="sec-head reveal">
+      <span class="numeral">I</span>
+      <div><h2>Between tracer models and particle-resolved simulations</h2></div>
+    </header>
+    <div class="cols reveal">
+      <p class="dropcap">Aquatic vegetation modifies the velocity distribution in open channels and affects the longitudinal dispersion and the fate of microplastics, whose transport also depends on their size, density and shape. Existing models either treat microplastics as dissolved tracers with a prescribed settling velocity, or resolve the forces on individual particles with methods such as CFD-DEM, at a computational cost that restricts them to small domains and short durations.</p>
+      <p>This study develops a GPU accelerated Eulerian-Lagrangian model that occupies the middle ground. The flow in vegetated and non-vegetated channels is computed in OpenFOAM, and every microplastic is then tracked on a graphics processing unit with its own force balance, including drag, buoyancy, added mass, shear induced lift and turbulent dispersion, together with deposition at the bed and trapping at the free surface. An exponential drag integrator removes the time step limit that the short relaxation time of microplastics imposes on conventional particle solvers.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= WORKFLOW ================= -->
+<section class="sec" id="workflow">
+  <div class="wrap">
+    <header class="sec-head reveal">
+      <span class="numeral">II</span>
+      <div>
+        <h2>From the flow field to every particle</h2>
+        <p class="lede">The flow is computed once, mapped once onto a structured grid on the GPU, and the particles are then tracked through this frozen flow field, which is appropriate for the dilute suspensions of microplastics in water systems.</p>
+      </div>
+    </header>
+    <figure class="schem reveal">
+      <svg class="wide" viewBox="0 0 1100 350" role="img" aria-label="Workflow in four stages: flow computed in OpenFOAM, mapping to a graded lookup grid on the GPU, one GPU thread per particle, and virtual monitoring stations">
+        <g class="iso">
+        <text class="tn" x="2.5" y="34.0">I</text>
+        <text class="head" x="28.5" y="33.0">Flow in OpenFOAM</text>
+        <text class="ts" x="2.5" y="298.0">RANS with the RNG k-ε model,</text>
+        <text class="ts" x="2.5" y="320.0">vegetation drag and wake</text>
+        <text class="ts" x="2.5" y="342.0">dissipation as source terms</text>
+        <text class="tn" x="285.5" y="34.0">II</text>
+        <text class="head" x="323.5" y="33.0">Lookup grid</text>
+        <text class="ts" x="285.5" y="298.0">velocity, eddy viscosity and</text>
+        <text class="ts" x="285.5" y="320.0">diffusivity gradient, mapped</text>
+        <text class="ts" x="285.5" y="342.0">once onto a graded grid</text>
+        <text class="tn" x="568.5" y="34.0">III</text>
+        <text class="head" x="618.5" y="33.0">GPU particles</text>
+        <text class="ts" x="568.5" y="298.0">force balance, exponential</text>
+        <text class="ts" x="568.5" y="320.0">update, random walk, bed,</text>
+        <text class="ts" x="568.5" y="342.0">walls and free surface</text>
+        <text class="tn" x="851.5" y="34.0">IV</text>
+        <text class="head" x="889.5" y="33.0">Virtual stations</text>
+        <text class="ts" x="851.5" y="298.0">crossings at the instrument</text>
+        <text class="ts" x="851.5" y="320.0">locations give the response</text>
+        <text class="ts" x="851.5" y="342.0">curves and the dispersion</text>
+        <polygon points="29.1,178.5 160.8,254.5 160.8,243.7 29.1,167.7" fill="#2f5ea8"/>
+        <polygon points="160.8,254.5 210.1,226.0 210.1,215.2 160.8,243.7" fill="#2f5ea8" fill-opacity="0.78"/>
+        <polygon points="29.1,167.7 160.8,243.7 160.8,233.0 29.1,157.0" fill="#6f98cf"/>
+        <polygon points="160.8,243.7 210.1,215.2 210.1,204.5 160.8,233.0" fill="#6f98cf" fill-opacity="0.78"/>
+        <polygon points="29.1,157.0 160.8,233.0 160.8,222.2 29.1,146.2" fill="#b9cde8"/>
+        <polygon points="160.8,233.0 210.1,204.5 210.1,193.7 160.8,222.2" fill="#b9cde8" fill-opacity="0.78"/>
+        <polygon points="29.1,146.2 160.8,222.2 160.8,211.4 29.1,135.4" fill="#ecd2c2"/>
+        <polygon points="160.8,222.2 210.1,193.7 210.1,182.9 160.8,211.4" fill="#ecd2c2" fill-opacity="0.78"/>
+        <polygon points="29.1,135.4 160.8,211.4 160.8,200.7 29.1,124.7" fill="#e79b7b"/>
+        <polygon points="160.8,211.4 210.1,182.9 210.1,172.2 160.8,200.7" fill="#e79b7b" fill-opacity="0.78"/>
+        <polygon points="29.1,124.7 160.8,200.7 160.8,189.9 29.1,113.9" fill="#d0532f"/>
+        <polygon points="160.8,200.7 210.1,172.2 210.1,161.4 160.8,189.9" fill="#d0532f" fill-opacity="0.78"/>
+        <line x1="40.1" y1="184.8" x2="40.1" y2="120.2" stroke="#ffffff" stroke-width="0.6" stroke-opacity="0.7"/>
+        <line x1="51.1" y1="191.2" x2="51.1" y2="126.6" stroke="#ffffff" stroke-width="0.6" stroke-opacity="0.7"/>
+        <line x1="62.0" y1="197.5" x2="62.0" y2="132.9" stroke="#ffffff" stroke-width="0.6" stroke-opacity="0.7"/>
+        <line x1="73.0" y1="203.8" x2="73.0" y2="139.2" stroke="#ffffff" stroke-width="0.6" stroke-opacity="0.7"/>
+        <line x1="84.0" y1="210.2" x2="84.0" y2="145.6" stroke="#ffffff" stroke-width="0.6" stroke-opacity="0.7"/>
+        <line x1="95.0" y1="216.5" x2="95.0" y2="151.9" stroke="#ffffff" stroke-width="0.6" stroke-opacity="0.7"/>
+        <line x1="105.9" y1="222.8" x2="105.9" y2="158.2" stroke="#ffffff" stroke-width="0.6" stroke-opacity="0.7"/>
+        <line x1="116.9" y1="229.2" x2="116.9" y2="164.6" stroke="#ffffff" stroke-width="0.6" stroke-opacity="0.7"/>
+        <line x1="127.9" y1="235.5" x2="127.9" y2="170.9" stroke="#ffffff" stroke-width="0.6" stroke-opacity="0.7"/>
+        <line x1="138.8" y1="241.8" x2="138.8" y2="177.2" stroke="#ffffff" stroke-width="0.6" stroke-opacity="0.7"/>
+        <line x1="149.8" y1="248.2" x2="149.8" y2="183.6" stroke="#ffffff" stroke-width="0.6" stroke-opacity="0.7"/>
+        <line x1="29.1" y1="167.7" x2="160.8" y2="243.7" stroke="#ffffff" stroke-width="0.6" stroke-opacity="0.7"/>
+        <line x1="160.8" y1="243.7" x2="210.1" y2="215.2" stroke="#ffffff" stroke-width="0.6" stroke-opacity="0.7"/>
+        <line x1="29.1" y1="157.0" x2="160.8" y2="233.0" stroke="#ffffff" stroke-width="0.6" stroke-opacity="0.7"/>
+        <line x1="160.8" y1="233.0" x2="210.1" y2="204.5" stroke="#ffffff" stroke-width="0.6" stroke-opacity="0.7"/>
+        <line x1="29.1" y1="146.2" x2="160.8" y2="222.2" stroke="#ffffff" stroke-width="0.6" stroke-opacity="0.7"/>
+        <line x1="160.8" y1="222.2" x2="210.1" y2="193.7" stroke="#ffffff" stroke-width="0.6" stroke-opacity="0.7"/>
+        <line x1="29.1" y1="135.4" x2="160.8" y2="211.4" stroke="#ffffff" stroke-width="0.6" stroke-opacity="0.7"/>
+        <line x1="160.8" y1="211.4" x2="210.1" y2="182.9" stroke="#ffffff" stroke-width="0.6" stroke-opacity="0.7"/>
+        <line x1="29.1" y1="124.7" x2="160.8" y2="200.7" stroke="#ffffff" stroke-width="0.6" stroke-opacity="0.7"/>
+        <line x1="160.8" y1="200.7" x2="210.1" y2="172.2" stroke="#ffffff" stroke-width="0.6" stroke-opacity="0.7"/>
+        <line x1="197.8" y1="233.1" x2="197.8" y2="168.5" stroke="#ffffff" stroke-width="0.6" stroke-opacity="0.7"/>
+        <line x1="185.5" y1="240.2" x2="185.5" y2="175.7" stroke="#ffffff" stroke-width="0.6" stroke-opacity="0.7"/>
+        <line x1="173.1" y1="247.4" x2="173.1" y2="182.8" stroke="#ffffff" stroke-width="0.6" stroke-opacity="0.7"/>
+        <line x1="33.4" y1="181.7" x2="33.4" y2="153.2" stroke="#66772a" stroke-width="2.2"/>
+        <line x1="42.6" y1="187.1" x2="42.6" y2="158.6" stroke="#66772a" stroke-width="2.2"/>
+        <line x1="51.8" y1="192.4" x2="51.8" y2="163.9" stroke="#66772a" stroke-width="2.2"/>
+        <line x1="61.1" y1="197.7" x2="61.1" y2="169.2" stroke="#66772a" stroke-width="2.2"/>
+        <line x1="70.3" y1="203.0" x2="70.3" y2="174.5" stroke="#66772a" stroke-width="2.2"/>
+        <line x1="79.5" y1="208.3" x2="79.5" y2="179.8" stroke="#66772a" stroke-width="2.2"/>
+        <line x1="88.7" y1="213.7" x2="88.7" y2="185.2" stroke="#66772a" stroke-width="2.2"/>
+        <line x1="97.9" y1="219.0" x2="97.9" y2="190.5" stroke="#66772a" stroke-width="2.2"/>
+        <line x1="107.1" y1="224.3" x2="107.1" y2="195.8" stroke="#66772a" stroke-width="2.2"/>
+        <line x1="116.3" y1="229.6" x2="116.3" y2="201.1" stroke="#66772a" stroke-width="2.2"/>
+        <line x1="125.6" y1="234.9" x2="125.6" y2="206.4" stroke="#66772a" stroke-width="2.2"/>
+        <line x1="134.8" y1="240.2" x2="134.8" y2="211.8" stroke="#66772a" stroke-width="2.2"/>
+        <line x1="144.0" y1="245.6" x2="144.0" y2="217.1" stroke="#66772a" stroke-width="2.2"/>
+        <line x1="153.2" y1="250.9" x2="153.2" y2="222.4" stroke="#66772a" stroke-width="2.2"/>
+        <polygon points="78.5,85.4 210.1,161.4 160.8,189.9 29.1,113.9" fill="#dfe5f3"/>
+        <polyline points="70.3,91.5 75.8,94.7 81.2,96.4 86.7,98.2 92.2,101.6 97.7,106.3 103.2,110.7 108.7,113.4 114.2,114.9 119.6,117.1 125.1,121.0 130.6,125.8 136.1,129.7 141.6,132.0 147.1,133.5 152.5,136.1 158.0,140.4 163.5,145.2 169.0,148.6 174.5,150.5 180.0,152.1 185.5,155.3 190.9,159.9 196.4,164.5 201.9,167.4" fill="none" stroke="#2643b8" stroke-opacity="0.35" stroke-width="0.8"/>
+        <polyline points="62.0,96.4 67.5,98.1 73.0,99.8 78.5,103.1 84.0,107.8 89.5,112.2 95.0,115.1 100.4,116.6 105.9,118.7 111.4,122.4 116.9,127.2 122.4,131.3 127.9,133.7 133.3,135.2 138.8,137.6 144.3,141.9 149.8,146.7 155.3,150.3 160.8,152.2 166.3,153.8 171.7,156.8 177.2,161.3 182.7,166.0 188.2,169.1 193.7,170.7" fill="none" stroke="#2643b8" stroke-opacity="0.35" stroke-width="0.8"/>
+        <polyline points="53.8,99.9 59.3,101.5 64.8,104.6 70.3,109.2 75.8,113.8 81.2,116.8 86.7,118.4 92.2,120.3 97.7,123.9 103.2,128.7 108.7,132.9 114.2,135.4 119.6,136.9 125.1,139.2 130.6,143.3 136.1,148.1 141.6,151.9 147.1,153.9 152.5,155.5 158.0,158.3 163.5,162.8 169.0,167.5 174.5,170.7 180.0,172.4 185.5,174.2" fill="none" stroke="#2643b8" stroke-opacity="0.35" stroke-width="0.8"/>
+        <polyline points="45.6,103.2 51.1,106.1 56.6,110.6 62.0,115.3 67.5,118.4 73.0,120.1 78.5,121.9 84.0,125.3 89.5,130.1 95.0,134.5 100.4,137.1 105.9,138.6 111.4,140.8 116.9,144.7 122.4,149.6 127.9,153.5 133.3,155.7 138.8,157.2 144.3,159.8 149.8,164.2 155.3,169.0 160.8,172.4 166.3,174.2 171.7,175.9 177.2,179.0" fill="none" stroke="#2643b8" stroke-opacity="0.35" stroke-width="0.8"/>
+        <polyline points="37.4,107.6 42.8,112.0 48.3,116.8 53.8,120.1 59.3,121.9 64.8,123.6 70.3,126.8 75.8,131.5 81.2,136.0 86.7,138.8 92.2,140.4 97.7,142.4 103.2,146.2 108.7,151.0 114.2,155.1 119.6,157.4 125.1,158.9 130.6,161.4 136.1,165.6 141.6,170.4 147.1,174.0 152.5,175.9 158.0,177.5 163.5,180.5 169.0,185.1" fill="none" stroke="#2643b8" stroke-opacity="0.35" stroke-width="0.8"/>
+        <line x1="29.1" y1="178.5" x2="160.8" y2="254.5" stroke="#141414" stroke-width="1.3"/>
+        <line x1="160.8" y1="254.5" x2="210.1" y2="226.0" stroke="#141414" stroke-width="1.3"/>
+        <line x1="29.1" y1="178.5" x2="29.1" y2="113.9" stroke="#141414" stroke-width="1.3"/>
+        <line x1="160.8" y1="254.5" x2="160.8" y2="189.9" stroke="#141414" stroke-width="1.3"/>
+        <line x1="210.1" y1="226.0" x2="210.1" y2="161.4" stroke="#141414" stroke-width="1.3"/>
+        <line x1="78.5" y1="85.4" x2="210.1" y2="161.4" stroke="#141414" stroke-width="1.3"/>
+        <line x1="210.1" y1="161.4" x2="160.8" y2="189.9" stroke="#141414" stroke-width="1.3"/>
+        <line x1="160.8" y1="189.9" x2="29.1" y2="113.9" stroke="#141414" stroke-width="1.3"/>
+        <line x1="29.1" y1="113.9" x2="78.5" y2="85.4" stroke="#141414" stroke-width="1.3"/>
+        <rect x="6.5" y="254" width="16" height="8" fill="#2f5ea8"/>
+        <rect x="22.5" y="254" width="16" height="8" fill="#6f98cf"/>
+        <rect x="38.5" y="254" width="16" height="8" fill="#b9cde8"/>
+        <rect x="54.5" y="254" width="16" height="8" fill="#ecd2c2"/>
+        <rect x="70.5" y="254" width="16" height="8" fill="#e79b7b"/>
+        <rect x="86.5" y="254" width="16" height="8" fill="#d0532f"/>
+        <rect x="6.5" y="254" width="96" height="8" fill="none" stroke="#141414" stroke-width="0.8"/>
+        <text class="tk" x="6.5" y="278.0">slow</text>
+        <text class="tk" x="102.5" y="278.0" text-anchor="end">fast</text>
+        <polygon points="387.5,74.5 478.7,127.2 411.1,166.1 320.0,113.5" fill="#f7f3eb"/>
+        <polygon points="320.0,211.0 411.1,263.6 411.1,166.1 320.0,113.5" fill="#e9e2d4"/>
+        <polygon points="411.1,263.6 478.7,224.7 478.7,127.2 411.1,166.1" fill="#d9cfbb"/>
+        <polygon points="375.7,224.8 394.0,235.4 394.0,215.8 375.7,205.3" fill="#e4572e" fill-opacity="0.85"/>
+        <line x1="324.5" y1="213.6" x2="324.5" y2="116.1" stroke="#141414" stroke-width="0.6"/>
+        <line x1="392.0" y1="77.1" x2="324.5" y2="116.1" stroke="#141414" stroke-width="0.6"/>
+        <line x1="320.0" y1="206.2" x2="411.1" y2="258.8" stroke="#141414" stroke-width="0.6"/>
+        <line x1="411.1" y1="258.8" x2="478.7" y2="219.8" stroke="#141414" stroke-width="0.6"/>
+        <line x1="475.3" y1="226.6" x2="475.3" y2="129.1" stroke="#141414" stroke-width="0.6"/>
+        <line x1="384.2" y1="76.4" x2="475.3" y2="129.1" stroke="#141414" stroke-width="0.6"/>
+        <line x1="337.1" y1="220.9" x2="337.1" y2="123.4" stroke="#141414" stroke-width="0.6"/>
+        <line x1="404.7" y1="84.4" x2="337.1" y2="123.4" stroke="#141414" stroke-width="0.6"/>
+        <line x1="320.0" y1="192.6" x2="411.1" y2="245.3" stroke="#141414" stroke-width="0.6"/>
+        <line x1="411.1" y1="245.3" x2="478.7" y2="206.3" stroke="#141414" stroke-width="0.6"/>
+        <line x1="466.0" y1="232.0" x2="466.0" y2="134.5" stroke="#141414" stroke-width="0.6"/>
+        <line x1="374.8" y1="81.8" x2="466.0" y2="134.5" stroke="#141414" stroke-width="0.6"/>
+        <line x1="355.4" y1="231.5" x2="355.4" y2="134.0" stroke="#141414" stroke-width="0.6"/>
+        <line x1="423.0" y1="95.0" x2="355.4" y2="134.0" stroke="#141414" stroke-width="0.6"/>
+        <line x1="320.0" y1="173.1" x2="411.1" y2="225.7" stroke="#141414" stroke-width="0.6"/>
+        <line x1="411.1" y1="225.7" x2="478.7" y2="186.7" stroke="#141414" stroke-width="0.6"/>
+        <line x1="452.4" y1="239.8" x2="452.4" y2="142.3" stroke="#141414" stroke-width="0.6"/>
+        <line x1="361.2" y1="89.7" x2="452.4" y2="142.3" stroke="#141414" stroke-width="0.6"/>
+        <line x1="375.7" y1="243.2" x2="375.7" y2="145.7" stroke="#141414" stroke-width="0.6"/>
+        <line x1="443.2" y1="106.7" x2="375.7" y2="145.7" stroke="#141414" stroke-width="0.6"/>
+        <line x1="320.0" y1="151.4" x2="411.1" y2="204.1" stroke="#141414" stroke-width="0.6"/>
+        <line x1="411.1" y1="204.1" x2="478.7" y2="165.1" stroke="#141414" stroke-width="0.6"/>
+        <line x1="437.4" y1="248.5" x2="437.4" y2="151.0" stroke="#141414" stroke-width="0.6"/>
+        <line x1="346.2" y1="98.3" x2="437.4" y2="151.0" stroke="#141414" stroke-width="0.6"/>
+        <line x1="394.0" y1="253.7" x2="394.0" y2="156.2" stroke="#141414" stroke-width="0.6"/>
+        <line x1="461.5" y1="117.2" x2="394.0" y2="156.2" stroke="#141414" stroke-width="0.6"/>
+        <line x1="320.0" y1="131.9" x2="411.1" y2="184.5" stroke="#141414" stroke-width="0.6"/>
+        <line x1="411.1" y1="184.5" x2="478.7" y2="145.5" stroke="#141414" stroke-width="0.6"/>
+        <line x1="423.9" y1="256.3" x2="423.9" y2="158.8" stroke="#141414" stroke-width="0.6"/>
+        <line x1="332.7" y1="106.2" x2="423.9" y2="158.8" stroke="#141414" stroke-width="0.6"/>
+        <line x1="406.6" y1="261.0" x2="406.6" y2="163.5" stroke="#141414" stroke-width="0.6"/>
+        <line x1="474.2" y1="124.5" x2="406.6" y2="163.5" stroke="#141414" stroke-width="0.6"/>
+        <line x1="320.0" y1="118.3" x2="411.1" y2="171.0" stroke="#141414" stroke-width="0.6"/>
+        <line x1="411.1" y1="171.0" x2="478.7" y2="132.0" stroke="#141414" stroke-width="0.6"/>
+        <line x1="414.5" y1="261.7" x2="414.5" y2="164.2" stroke="#141414" stroke-width="0.6"/>
+        <line x1="323.3" y1="111.6" x2="414.5" y2="164.2" stroke="#141414" stroke-width="0.6"/>
+        <line x1="320.0" y1="211.0" x2="411.1" y2="263.6" stroke="#141414" stroke-width="1.3"/>
+        <line x1="411.1" y1="263.6" x2="478.7" y2="224.7" stroke="#141414" stroke-width="1.3"/>
+        <line x1="320.0" y1="211.0" x2="320.0" y2="113.5" stroke="#141414" stroke-width="1.3"/>
+        <line x1="411.1" y1="263.6" x2="411.1" y2="166.1" stroke="#141414" stroke-width="1.3"/>
+        <line x1="478.7" y1="224.7" x2="478.7" y2="127.2" stroke="#141414" stroke-width="1.3"/>
+        <line x1="387.5" y1="74.5" x2="478.7" y2="127.2" stroke="#141414" stroke-width="1.3"/>
+        <line x1="478.7" y1="127.2" x2="411.1" y2="166.1" stroke="#141414" stroke-width="1.3"/>
+        <line x1="411.1" y1="166.1" x2="320.0" y2="113.5" stroke="#141414" stroke-width="1.3"/>
+        <line x1="320.0" y1="113.5" x2="387.5" y2="74.5" stroke="#141414" stroke-width="1.3"/>
+        <circle cx="384.8" cy="220.3" r="4.5" fill="#141414"/>
+        <line x1="384.8" y1="220.3" x2="519.5" y2="252.0" stroke="#141414" stroke-width="0.8" stroke-dasharray="3 3"/>
+        <text class="ti" x="531.5" y="272.0" text-anchor="end">cell i, j, k</text>
+        <polygon points="603.9,200.0 691.5,250.6 691.5,240.9 603.9,190.3" fill="#3a3833"/>
+        <polygon points="691.5,250.6 779.1,200.0 779.1,190.3 691.5,240.9" fill="#2a2925"/>
+        <polygon points="691.5,139.7 779.1,190.3 691.5,240.9 603.9,190.3" fill="#45413b"/>
+        <line x1="607.7" y1="200.0" x2="600.8" y2="204.0" stroke="#7a746a" stroke-width="1.6"/>
+        <line x1="775.3" y1="200.0" x2="782.2" y2="204.0" stroke="#7a746a" stroke-width="1.6"/>
+        <line x1="614.9" y1="204.2" x2="608.1" y2="208.2" stroke="#7a746a" stroke-width="1.6"/>
+        <line x1="768.1" y1="204.2" x2="774.9" y2="208.2" stroke="#7a746a" stroke-width="1.6"/>
+        <line x1="622.2" y1="208.4" x2="615.4" y2="212.4" stroke="#7a746a" stroke-width="1.6"/>
+        <line x1="760.8" y1="208.4" x2="767.6" y2="212.4" stroke="#7a746a" stroke-width="1.6"/>
+        <line x1="629.5" y1="212.6" x2="622.6" y2="216.6" stroke="#7a746a" stroke-width="1.6"/>
+        <line x1="753.5" y1="212.6" x2="760.4" y2="216.6" stroke="#7a746a" stroke-width="1.6"/>
+        <line x1="636.8" y1="216.8" x2="629.9" y2="220.8" stroke="#7a746a" stroke-width="1.6"/>
+        <line x1="746.2" y1="216.8" x2="753.1" y2="220.8" stroke="#7a746a" stroke-width="1.6"/>
+        <line x1="644.0" y1="221.0" x2="637.2" y2="225.0" stroke="#7a746a" stroke-width="1.6"/>
+        <line x1="739.0" y1="221.0" x2="745.8" y2="225.0" stroke="#7a746a" stroke-width="1.6"/>
+        <line x1="651.3" y1="225.2" x2="644.5" y2="229.2" stroke="#7a746a" stroke-width="1.6"/>
+        <line x1="731.7" y1="225.2" x2="738.5" y2="229.2" stroke="#7a746a" stroke-width="1.6"/>
+        <line x1="658.6" y1="229.4" x2="651.7" y2="233.4" stroke="#7a746a" stroke-width="1.6"/>
+        <line x1="724.4" y1="229.4" x2="731.3" y2="233.4" stroke="#7a746a" stroke-width="1.6"/>
+        <line x1="665.9" y1="233.6" x2="659.0" y2="237.6" stroke="#7a746a" stroke-width="1.6"/>
+        <line x1="717.1" y1="233.6" x2="724.0" y2="237.6" stroke="#7a746a" stroke-width="1.6"/>
+        <line x1="673.1" y1="237.8" x2="666.3" y2="241.8" stroke="#7a746a" stroke-width="1.6"/>
+        <line x1="709.9" y1="237.8" x2="716.7" y2="241.8" stroke="#7a746a" stroke-width="1.6"/>
+        <line x1="680.4" y1="242.0" x2="673.6" y2="246.0" stroke="#7a746a" stroke-width="1.6"/>
+        <line x1="702.6" y1="242.0" x2="709.4" y2="246.0" stroke="#7a746a" stroke-width="1.6"/>
+        <line x1="687.7" y1="246.2" x2="680.8" y2="250.2" stroke="#7a746a" stroke-width="1.6"/>
+        <line x1="695.3" y1="246.2" x2="702.2" y2="250.2" stroke="#7a746a" stroke-width="1.6"/>
+        <polygon points="691.5,147.6 698.7,151.8 691.5,156.0 684.3,151.8" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="682.0,153.1 689.2,157.3 682.0,161.5 674.7,157.3" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="672.4,158.6 679.7,162.8 672.4,167.0 665.2,162.8" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="662.9,164.1 670.2,168.3 662.9,172.5 655.7,168.3" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="653.4,169.6 660.6,173.8 653.4,178.0 646.2,173.8" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="643.9,175.1 651.1,179.3 643.9,183.5 636.6,179.3" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="634.3,180.6 641.6,184.8 634.3,189.0 627.1,184.8" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="624.8,186.1 632.1,190.3 624.8,194.5 617.6,190.3" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="701.0,153.1 708.3,157.3 701.0,161.5 693.8,157.3" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="691.5,158.6 698.7,162.8 691.5,167.0 684.3,162.8" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="682.0,164.1 689.2,168.3 682.0,172.5 674.7,168.3" fill="#e4572e" fill-opacity="0.9"/>
+        <polygon points="672.4,169.6 679.7,173.8 672.4,178.0 665.2,173.8" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="662.9,175.1 670.2,179.3 662.9,183.5 655.7,179.3" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="653.4,180.6 660.6,184.8 653.4,189.0 646.2,184.8" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="643.9,186.1 651.1,190.3 643.9,194.5 636.6,190.3" fill="#e4572e" fill-opacity="0.9"/>
+        <polygon points="634.3,191.6 641.6,195.8 634.3,200.0 627.1,195.8" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="710.6,158.6 717.8,162.8 710.6,167.0 703.3,162.8" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="701.0,164.1 708.3,168.3 701.0,172.5 693.8,168.3" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="691.5,169.6 698.7,173.8 691.5,178.0 684.3,173.8" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="682.0,175.1 689.2,179.3 682.0,183.5 674.7,179.3" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="672.4,180.6 679.7,184.8 672.4,189.0 665.2,184.8" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="662.9,186.1 670.2,190.3 662.9,194.5 655.7,190.3" fill="#e4572e" fill-opacity="0.9"/>
+        <polygon points="653.4,191.6 660.6,195.8 653.4,200.0 646.2,195.8" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="643.9,197.1 651.1,201.3 643.9,205.5 636.6,201.3" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="720.1,164.1 727.3,168.3 720.1,172.5 712.8,168.3" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="710.6,169.6 717.8,173.8 710.6,178.0 703.3,173.8" fill="#e4572e" fill-opacity="0.9"/>
+        <polygon points="701.0,175.1 708.3,179.3 701.0,183.5 693.8,179.3" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="691.5,180.6 698.7,184.8 691.5,189.0 684.3,184.8" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="682.0,186.1 689.2,190.3 682.0,194.5 674.7,190.3" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="672.4,191.6 679.7,195.8 672.4,200.0 665.2,195.8" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="662.9,197.1 670.2,201.3 662.9,205.5 655.7,201.3" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="653.4,202.6 660.6,206.8 653.4,211.0 646.2,206.8" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="729.6,169.6 736.8,173.8 729.6,178.0 722.4,173.8" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="720.1,175.1 727.3,179.3 720.1,183.5 712.8,179.3" fill="#e4572e" fill-opacity="0.9"/>
+        <polygon points="710.6,180.6 717.8,184.8 710.6,189.0 703.3,184.8" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="701.0,186.1 708.3,190.3 701.0,194.5 693.8,190.3" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="691.5,191.6 698.7,195.8 691.5,200.0 684.3,195.8" fill="#e4572e" fill-opacity="0.9"/>
+        <polygon points="682.0,197.1 689.2,201.3 682.0,205.5 674.7,201.3" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="672.4,202.6 679.7,206.8 672.4,211.0 665.2,206.8" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="662.9,208.1 670.2,212.3 662.9,216.5 655.7,212.3" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="739.1,175.1 746.4,179.3 739.1,183.5 731.9,179.3" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="729.6,180.6 736.8,184.8 729.6,189.0 722.4,184.8" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="720.1,186.1 727.3,190.3 720.1,194.5 712.8,190.3" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="710.6,191.6 717.8,195.8 710.6,200.0 703.3,195.8" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="701.0,197.1 708.3,201.3 701.0,205.5 693.8,201.3" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="691.5,202.6 698.7,206.8 691.5,211.0 684.3,206.8" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="682.0,208.1 689.2,212.3 682.0,216.5 674.7,212.3" fill="#e4572e" fill-opacity="0.9"/>
+        <polygon points="672.4,213.6 679.7,217.8 672.4,222.0 665.2,217.8" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="748.7,180.6 755.9,184.8 748.7,189.0 741.4,184.8" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="739.1,186.1 746.4,190.3 739.1,194.5 731.9,190.3" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="729.6,191.6 736.8,195.8 729.6,200.0 722.4,195.8" fill="#e4572e" fill-opacity="0.9"/>
+        <polygon points="720.1,197.1 727.3,201.3 720.1,205.5 712.8,201.3" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="710.6,202.6 717.8,206.8 710.6,211.0 703.3,206.8" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="701.0,208.1 708.3,212.3 701.0,216.5 693.8,212.3" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="691.5,213.6 698.7,217.8 691.5,222.0 684.3,217.8" fill="#e4572e" fill-opacity="0.9"/>
+        <polygon points="682.0,219.1 689.2,223.3 682.0,227.5 674.7,223.3" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="758.2,186.1 765.4,190.3 758.2,194.5 750.9,190.3" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="748.7,191.6 755.9,195.8 748.7,200.0 741.4,195.8" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="739.1,197.1 746.4,201.3 739.1,205.5 731.9,201.3" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="729.6,202.6 736.8,206.8 729.6,211.0 722.4,206.8" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="720.1,208.1 727.3,212.3 720.1,216.5 712.8,212.3" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="710.6,213.6 717.8,217.8 710.6,222.0 703.3,217.8" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="701.0,219.1 708.3,223.3 701.0,227.5 693.8,223.3" fill="#f7f3eb" fill-opacity="0.9"/>
+        <polygon points="691.5,224.6 698.7,228.8 691.5,233.0 684.3,228.8" fill="#f7f3eb" fill-opacity="0.9"/>
+        <line x1="682.0" y1="168.3" x2="682.0" y2="107.0" stroke="#141414" stroke-width="0.9" stroke-dasharray="2 3"/>
+        <circle cx="682.0" cy="107.0" r="5" fill="#141414"/>
+        <line x1="662.9" y1="190.3" x2="662.9" y2="125.2" stroke="#e4572e" stroke-width="0.9" stroke-dasharray="2 3"/>
+        <circle cx="662.9" cy="125.2" r="5" fill="#e4572e"/>
+        <line x1="710.6" y1="173.8" x2="710.6" y2="108.7" stroke="#2643b8" stroke-width="0.9" stroke-dasharray="2 3"/>
+        <circle cx="710.6" cy="108.7" r="5" fill="#2643b8"/>
+        <line x1="691.5" y1="195.8" x2="691.5" y2="146.1" stroke="#141414" stroke-width="0.9" stroke-dasharray="2 3"/>
+        <circle cx="691.5" cy="146.1" r="5" fill="#141414"/>
+        <line x1="682.0" y1="212.3" x2="682.0" y2="151.1" stroke="#e4572e" stroke-width="0.9" stroke-dasharray="2 3"/>
+        <circle cx="682.0" cy="151.1" r="5" fill="#e4572e"/>
+        <line x1="729.6" y1="195.8" x2="729.6" y2="134.6" stroke="#141414" stroke-width="0.9" stroke-dasharray="2 3"/>
+        <circle cx="729.6" cy="134.6" r="5" fill="#141414"/>
+        <line x1="691.5" y1="217.8" x2="691.5" y2="168.1" stroke="#2643b8" stroke-width="0.9" stroke-dasharray="2 3"/>
+        <circle cx="691.5" cy="168.1" r="5" fill="#2643b8"/>
+        <line x1="643.9" y1="190.3" x2="643.9" y2="140.6" stroke="#141414" stroke-width="0.9" stroke-dasharray="2 3"/>
+        <circle cx="643.9" cy="140.6" r="5" fill="#141414"/>
+        <line x1="720.1" y1="179.3" x2="720.1" y2="125.8" stroke="#e4572e" stroke-width="0.9" stroke-dasharray="2 3"/>
+        <circle cx="720.1" cy="125.8" r="5" fill="#e4572e"/>
+        <line x1="603.9" y1="190.3" x2="691.5" y2="240.9" stroke="#141414" stroke-width="1.2"/>
+        <line x1="691.5" y1="240.9" x2="779.1" y2="190.3" stroke="#141414" stroke-width="1.2"/>
+        <line x1="603.9" y1="200.0" x2="691.5" y2="250.6" stroke="#141414" stroke-width="1.2"/>
+        <line x1="691.5" y1="250.6" x2="779.1" y2="200.0" stroke="#141414" stroke-width="1.2"/>
+        <line x1="603.9" y1="200.0" x2="603.9" y2="190.3" stroke="#141414" stroke-width="1.2"/>
+        <line x1="691.5" y1="250.6" x2="691.5" y2="240.9" stroke="#141414" stroke-width="1.2"/>
+        <line x1="779.1" y1="200.0" x2="779.1" y2="190.3" stroke="#141414" stroke-width="1.2"/>
+        <line x1="691.5" y1="139.7" x2="779.1" y2="190.3" stroke="#141414" stroke-width="1.2"/>
+        <line x1="691.5" y1="139.7" x2="603.9" y2="190.3" stroke="#141414" stroke-width="1.2"/>
+        <polygon points="877.3,186.0 988.8,250.4 988.8,255.4 877.3,191.0" fill="#a88b5a"/>
+        <polygon points="988.8,250.4 1013.0,236.4 1013.0,241.4 988.8,255.4" fill="#8d7046"/>
+        <polygon points="901.5,172.0 1013.0,236.4 988.8,250.4 877.3,186.0" fill="#cdb68f" stroke="#141414" stroke-width="1.2"/>
+        <polygon points="901.5,149.6 1013.0,214.0 988.8,228.0 877.3,163.6" fill="#dfe5f3" stroke="#2643b8" stroke-width="0.6" fill-opacity="0.6"/>
+        <polygon points="925.7,186.0 901.5,200.0 901.5,177.6 925.7,163.6" fill="#e4572e" stroke="#e4572e" stroke-width="1.2" fill-opacity="0.22"/>
+        <polygon points="959.7,205.6 935.4,219.6 935.4,197.2 959.7,183.2" fill="#e4572e" stroke="#e4572e" stroke-width="1.2" fill-opacity="0.22"/>
+        <polygon points="993.6,225.2 969.4,239.2 969.4,216.8 993.6,202.8" fill="#e4572e" stroke="#e4572e" stroke-width="1.2" fill-opacity="0.22"/>
+        <circle cx="902.4" cy="178.8" r="2.6" fill="#141414"/>
+        <circle cx="910.0" cy="171.7" r="2.6" fill="#141414"/>
+        <circle cx="899.7" cy="184.4" r="2.6" fill="#141414"/>
+        <circle cx="897.0" cy="176.8" r="2.6" fill="#141414"/>
+        <circle cx="906.5" cy="164.1" r="2.6" fill="#141414"/>
+        <circle cx="895.1" cy="173.3" r="2.6" fill="#141414"/>
+        <circle cx="904.6" cy="170.2" r="2.6" fill="#141414"/>
+        <circle cx="894.0" cy="169.7" r="2.6" fill="#141414"/>
+        <circle cx="899.1" cy="172.9" r="2.6" fill="#141414"/>
+        <circle cx="928.4" cy="195.9" r="2.6" fill="#141414"/>
+        <circle cx="919.1" cy="188.5" r="2.6" fill="#141414"/>
+        <circle cx="930.2" cy="195.8" r="2.6" fill="#141414"/>
+        <circle cx="931.2" cy="194.6" r="2.6" fill="#141414"/>
+        <circle cx="925.3" cy="190.2" r="2.6" fill="#141414"/>
+        <circle cx="930.9" cy="187.5" r="2.6" fill="#141414"/>
+        <circle cx="920.0" cy="200.2" r="2.6" fill="#141414"/>
+        <circle cx="944.6" cy="194.2" r="2.6" fill="#141414"/>
+        <circle cx="934.1" cy="195.6" r="2.6" fill="#141414"/>
+        <circle cx="973.9" cy="219.7" r="2.6" fill="#141414"/>
+        <circle cx="961.8" cy="216.4" r="2.6" fill="#141414"/>
+        <circle cx="956.1" cy="201.3" r="2.6" fill="#141414"/>
+        <circle cx="971.9" cy="231.2" r="2.6" fill="#141414"/>
+        <circle cx="967.2" cy="216.7" r="2.6" fill="#141414"/>
+        <circle cx="972.8" cy="212.9" r="2.6" fill="#141414"/>
+        <circle cx="979.1" cy="206.0" r="2.6" fill="#141414"/>
+        <circle cx="968.5" cy="214.7" r="2.6" fill="#141414"/>
+        <circle cx="971.1" cy="207.7" r="2.6" fill="#141414"/>
+        <line x1="867.5" y1="118.0" x2="1081.5" y2="118.0" stroke="#141414" stroke-width="1.1"/>
+        <line x1="867.5" y1="54.0" x2="867.5" y2="118.0" stroke="#141414" stroke-width="1.1"/>
+        <polyline points="867.5,118.0 869.3,118.0 871.1,117.9 872.9,117.9 874.6,117.7 876.4,117.5 878.2,117.1 880.0,116.6 881.8,115.7 883.5,114.3 885.3,112.4 887.1,109.8 888.9,106.5 890.7,102.2 892.5,97.2 894.2,91.5 896.0,85.3 897.8,79.0 899.6,73.2 901.4,68.1 903.2,64.4 905.0,62.3 906.7,62.2 908.5,63.9 910.3,67.3 912.1,72.1 913.9,77.8 915.6,84.0 917.4,90.3 919.2,96.1 921.0,101.3 922.8,105.7 924.6,109.2 926.4,112.0 928.1,114.0 929.9,115.4 931.7,116.4 933.5,117.0 935.3,117.4 937.0,117.7 938.8,117.8 940.6,117.9 942.4,118.0 944.2,118.0 946.0,118.0 947.8,118.0 949.5,118.0 951.3,118.0 953.1,118.0 954.9,118.0 956.7,118.0 958.5,118.0 960.2,118.0 962.0,118.0 963.8,118.0 965.6,118.0 967.4,118.0 969.1,118.0 970.9,118.0 972.7,118.0 974.5,118.0 976.3,118.0 978.1,118.0 979.9,118.0 981.6,118.0 983.4,118.0 985.2,118.0 987.0,118.0 988.8,118.0 990.5,118.0 992.3,118.0 994.1,118.0 995.9,118.0 997.7,118.0 999.5,118.0 1001.2,118.0 1003.0,118.0 1004.8,118.0 1006.6,118.0 1008.4,118.0 1010.2,118.0 1012.0,118.0 1013.7,118.0 1015.5,118.0 1017.3,118.0 1019.1,118.0 1020.9,118.0 1022.6,118.0 1024.4,118.0 1026.2,118.0 1028.0,118.0 1029.8,118.0 1031.6,118.0 1033.3,118.0 1035.1,118.0 1036.9,118.0 1038.7,118.0 1040.5,118.0 1042.3,118.0 1044.0,118.0 1045.8,118.0 1047.6,118.0 1049.4,118.0 1051.2,118.0 1053.0,118.0 1054.8,118.0 1056.5,118.0 1058.3,118.0 1060.1,118.0 1061.9,118.0 1063.7,118.0 1065.5,118.0 1067.2,118.0 1069.0,118.0 1070.8,118.0 1072.6,118.0 1074.4,118.0 1076.2,118.0 1077.9,118.0 1079.7,118.0 1081.5,118.0" fill="none" stroke="#2643b8" stroke-width="1.8"/>
+        <line x1="906.0" y1="118.0" x2="906.0" y2="124.0" stroke="#e4572e" stroke-width="1.4"/>
+        <polyline points="867.5,118.0 869.3,118.0 871.1,118.0 872.9,118.0 874.6,118.0 876.4,118.0 878.2,118.0 880.0,118.0 881.8,118.0 883.5,118.0 885.3,118.0 887.1,118.0 888.9,118.0 890.7,118.0 892.5,118.0 894.2,118.0 896.0,118.0 897.8,118.0 899.6,118.0 901.4,118.0 903.2,117.9 905.0,117.9 906.7,117.9 908.5,117.8 910.3,117.7 912.1,117.6 913.9,117.5 915.6,117.3 917.4,117.1 919.2,116.8 921.0,116.5 922.8,116.0 924.6,115.5 926.4,114.8 928.1,114.0 929.9,113.1 931.7,112.0 933.5,110.8 935.3,109.3 937.0,107.8 938.8,106.0 940.6,104.1 942.4,102.1 944.2,100.0 946.0,97.8 947.8,95.6 949.5,93.5 951.3,91.4 953.1,89.4 954.9,87.7 956.7,86.2 958.5,84.9 960.2,84.0 962.0,83.5 963.8,83.3 965.6,83.5 967.4,84.0 969.1,84.9 970.9,86.2 972.7,87.7 974.5,89.4 976.3,91.4 978.1,93.5 979.9,95.6 981.6,97.8 983.4,100.0 985.2,102.1 987.0,104.1 988.8,106.0 990.5,107.8 992.3,109.3 994.1,110.8 995.9,112.0 997.7,113.1 999.5,114.0 1001.2,114.8 1003.0,115.5 1004.8,116.0 1006.6,116.5 1008.4,116.8 1010.2,117.1 1012.0,117.3 1013.7,117.5 1015.5,117.6 1017.3,117.7 1019.1,117.8 1020.9,117.9 1022.6,117.9 1024.4,117.9 1026.2,118.0 1028.0,118.0 1029.8,118.0 1031.6,118.0 1033.3,118.0 1035.1,118.0 1036.9,118.0 1038.7,118.0 1040.5,118.0 1042.3,118.0 1044.0,118.0 1045.8,118.0 1047.6,118.0 1049.4,118.0 1051.2,118.0 1053.0,118.0 1054.8,118.0 1056.5,118.0 1058.3,118.0 1060.1,118.0 1061.9,118.0 1063.7,118.0 1065.5,118.0 1067.2,118.0 1069.0,118.0 1070.8,118.0 1072.6,118.0 1074.4,118.0 1076.2,118.0 1077.9,118.0 1079.7,118.0 1081.5,118.0" fill="none" stroke="#2643b8" stroke-width="1.8"/>
+        <line x1="963.8" y1="118.0" x2="963.8" y2="124.0" stroke="#e4572e" stroke-width="1.4"/>
+        <polyline points="867.5,118.0 869.3,118.0 871.1,118.0 872.9,118.0 874.6,118.0 876.4,118.0 878.2,118.0 880.0,118.0 881.8,118.0 883.5,118.0 885.3,118.0 887.1,118.0 888.9,118.0 890.7,118.0 892.5,118.0 894.2,118.0 896.0,118.0 897.8,118.0 899.6,118.0 901.4,118.0 903.2,118.0 905.0,118.0 906.7,118.0 908.5,118.0 910.3,118.0 912.1,118.0 913.9,118.0 915.6,118.0 917.4,118.0 919.2,118.0 921.0,118.0 922.8,118.0 924.6,118.0 926.4,118.0 928.1,118.0 929.9,118.0 931.7,118.0 933.5,118.0 935.3,118.0 937.0,118.0 938.8,117.9 940.6,117.9 942.4,117.9 944.2,117.9 946.0,117.9 947.8,117.8 949.5,117.8 951.3,117.7 953.1,117.6 954.9,117.5 956.7,117.4 958.5,117.3 960.2,117.1 962.0,117.0 963.8,116.7 965.6,116.5 967.4,116.2 969.1,115.8 970.9,115.5 972.7,115.0 974.5,114.5 976.3,114.0 978.1,113.3 979.9,112.6 981.6,111.9 983.4,111.1 985.2,110.2 987.0,109.3 988.8,108.2 990.5,107.2 992.3,106.1 994.1,105.0 995.9,103.8 997.7,102.6 999.5,101.4 1001.2,100.3 1003.0,99.1 1004.8,98.0 1006.6,97.0 1008.4,96.0 1010.2,95.1 1012.0,94.3 1013.7,93.6 1015.5,93.1 1017.3,92.7 1019.1,92.4 1020.9,92.3 1022.6,92.3 1024.4,92.4 1026.2,92.7 1028.0,93.2 1029.8,93.8 1031.6,94.5 1033.3,95.3 1035.1,96.2 1036.9,97.2 1038.7,98.2 1040.5,99.3 1042.3,100.5 1044.0,101.7 1045.8,102.8 1047.6,104.0 1049.4,105.2 1051.2,106.3 1053.0,107.4 1054.8,108.5 1056.5,109.4 1058.3,110.4 1060.1,111.2 1061.9,112.1 1063.7,112.8 1065.5,113.5 1067.2,114.1 1069.0,114.6 1070.8,115.1 1072.6,115.5 1074.4,115.9 1076.2,116.2 1077.9,116.5 1079.7,116.8 1081.5,117.0" fill="none" stroke="#2643b8" stroke-width="1.8"/>
+        <line x1="1021.6" y1="118.0" x2="1021.6" y2="124.0" stroke="#e4572e" stroke-width="1.4"/>
+        <text class="tk" x="1081.5" y="140.0" text-anchor="end">time</text>
+        <text class="tk" x="1081.5" y="52.0" text-anchor="end">concentration</text>
+        <path class="red" d="M240.5 150H287.5m-8-6 8 6-8 6"/>
+        <circle r="3.2" fill="#e4572e"><animateMotion dur="1.6s" repeatCount="indefinite" begin="0.0s" path="M240.5 150H281.5"/></circle>
+        <path class="red" d="M523.5 150H570.5m-8-6 8 6-8 6"/>
+        <circle r="3.2" fill="#e4572e"><animateMotion dur="1.6s" repeatCount="indefinite" begin="0.5s" path="M523.5 150H564.5"/></circle>
+        <path class="red" d="M806.5 150H853.5m-8-6 8 6-8 6"/>
+        <circle r="3.2" fill="#e4572e"><animateMotion dur="1.6s" repeatCount="indefinite" begin="1.0s" path="M806.5 150H847.5"/></circle>
+        </g>
+      </svg>
+      <figcaption><span>Schematic</span> Workflow of the model: the flow computed in OpenFOAM, the fields mapped once onto a lookup grid on the GPU, the particle tracking on the GPU, and the virtual monitoring stations placed at the locations of the laboratory instruments.</figcaption>
+    </figure>
+    <div class="split reveal" style="margin-top:64px">
+      <div class="prose">
+        <p>Each particle finds its local fluid values in a structured grid that is stretched toward the bed and the side walls, so that the search for the hosting cell is replaced by a closed form index and a single read of the stored fields. The fluid fields and the complete particle state remain in the memory of the GPU for the whole simulation.</p>
+      </div>
+      <ul class="ticks">
+        <li>The flow is computed once in OpenFOAM and held fixed during particle tracking.</li>
+        <li>Vegetation enters the flow as a distributed drag force and as an additional source of turbulence dissipation from the stem wakes.</li>
+        <li>The virtual stations are placed at the locations of the laboratory fluorometers, and the dispersion coefficients are calculated with the same method of moments as the measurements.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FORCES ================= -->
+<section class="sec" id="forces">
+  <div class="wrap">
+    <header class="sec-head reveal">
+      <span class="numeral">III</span>
+      <div>
+        <h2>The force balance on one microplastic</h2>
+        <p class="lede">Each microplastic is a rigid particle with its own density, volume and shape, accelerated by the sum of the forces that act on it, and moved by the turbulence through a random displacement.</p>
+      </div>
+    </header>
+    <figure class="scene reveal">
+      <div class="scroller"><div class="stage"><canvas class="gl" id="forces-gl" style="height:480px" aria-label="A microplastic in a sheared flow with the forces acting on it"></canvas></div></div>
+      <figcaption><span>Illustration</span> Forces on a microplastic in a sheared flow. The water streams around the particle, the drag acts along the velocity of the water relative to the particle, u &minus; v, which points downstream for a particle that lags the flow and upward for a particle that settles, the body force makes it settle or rise, the lift acts across the shear, and the unresolved turbulence moves it along a random path.</figcaption>
+    </figure>
+    <div class="split reveal" style="margin-top:56px">
+      <div class="prose">
+        <p>The particle velocity changes with the drag force, the body force of gravity and buoyancy, and the Saffman lift in the sheared flow near the bed and at the top of the vegetation. The added mass of the surrounding water is included in the inertia of the particle.</p>
+        <p>Because a RANS flow field provides only the mean velocity, the turbulent velocity fluctuations are represented by a random displacement scaled by the eddy diffusivity, and a drift correction removes the artificial accumulation of particles in regions of low diffusivity near the walls and within the vegetation.</p>
+      </div>
+      <div>
+        <ul class="ticks">
+          <li>Drag of spheres from the Schiller-Naumann law, and of other shapes from a shape-dependent drag.</li>
+          <li>A drag coefficient that depends on the turbulence, for particles of millimetre size.</li>
+          <li>Each sub-model verified against an analytical solution.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= INTEGRATOR ================= -->
+<section class="sec" id="integrator">
+  <div class="wrap">
+    <header class="sec-head reveal">
+      <span class="numeral">IV</span>
+      <div>
+        <h2>An exponential drag integrator</h2>
+        <p class="lede">A microplastic adjusts to the surrounding flow in a fraction of a millisecond, and an explicit integrator must resolve this relaxation time to remain stable. The exponential update treats the linearized drag exactly, so the time step is set by the flow rather than by the particle.</p>
+      </div>
+    </header>
+    <figure class="integ reveal">
+      <div class="integ-bar">
+        <label>Time step relative to the relaxation time <input type="range" id="dt-range" min="0" max="100" value="73" aria-label="Time step relative to the relaxation time"></label>
+        <output id="dt-out">Δt = 1.5 τ</output>
+        <span id="dt-status" class="integ-status">explicit update oscillates</span>
+        <span class="integ-key"><span class="k-exp">exact solution</span><span class="k-exp2">exponential update</span><span class="k-heun">explicit update</span></span>
+      </div>
+      <canvas id="integ-cv" aria-label="Velocity of a particle released from rest relaxing to the fluid velocity, with the exponential and explicit updates at the chosen time step"></canvas>
+      <figcaption><span>Illustration</span> A particle released from rest relaxes to the velocity of the surrounding water. The exponential update lies on the exact solution for any time step, whereas the explicit update departs from it and becomes unstable once the time step exceeds twice the relaxation time. Move the slider to change the time step.</figcaption>
+    </figure>
+    <div class="split reveal" style="margin-top:56px">
+      <p class="prose">Over each time step, the drag coefficient and the forces other than drag are held constant, and the velocity equation is then solved analytically. The update is exact for the linearized drag and unconditionally stable, so the particles can be advanced with time steps many times larger than their relaxation time, while the trapezoidal position update keeps the advection consistent with the old and new velocities.</p>
+      <p class="eq">v<sup>n+1</sup> = u + (v<sup>n</sup> &minus; u) e<sup>&minus;Δt/τ</sup> + (F/m) τ (1 &minus; e<sup>&minus;Δt/τ</sup>)</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= VEGETATION ================= -->
+<section class="sec" id="vegetation">
+  <div class="wrap">
+    <header class="sec-head reveal">
+      <span class="numeral">V</span>
+      <div>
+        <h2>Vegetation and the dispersion of microplastics</h2>
+        <p class="lede">Submerged vegetation divides the flow into a slow layer within the stems and a faster layer above them, and the exchange between the two layers spreads the microplastics along the channel.</p>
+      </div>
+    </header>
+    <figure class="scene reveal">
+      <div class="scroller"><div class="stage"><canvas class="gl" id="veg-gl" style="height:500px" aria-label="Flume with submerged vegetation, streaks of microplastics and the velocity profile"></canvas></div></div>
+      <figcaption><span>Illustration</span> A flume with submerged rigid vegetation. Microplastics within the stems lag behind those in the overflow layer, and the turbulent exchange across the shear layer at the top of the vegetation exposes each particle to different streamwise velocities, which increases the longitudinal dispersion.</figcaption>
+    </figure>
+    <div class="split reveal" style="margin-top:56px">
+      <p class="prose">The stems are not resolved individually. Their effect on the flow is applied through a drag force in the cells occupied by vegetation, proportional to the stem drag coefficient and the frontal area of the stems per unit volume, and through an additional dissipation of turbulence generated by the stem wakes. This representation captures the momentum loss and the shear layer at the top of the vegetation that control dispersion at the scale of the channel, at a cost that allows many configurations of vegetation and discharge to be simulated.</p>
+      <p class="prose">The model predicts the dispersion from the computed flow field and the force balance on each particle, rather than from measured velocity profiles, so it can be applied to vegetation configurations and discharges for which no measurements are available.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= BOUNDARIES ================= -->
+<section class="sec" id="boundaries">
+  <div class="wrap">
+    <header class="sec-head reveal">
+      <span class="numeral">VI</span>
+      <div>
+        <h2>Buoyant and settling microplastics</h2>
+        <p class="lede">Microplastics lighter than the water rise toward the surface and microplastics denser than the water settle toward the bed, and three boundary rules decide what happens when they arrive.</p>
+      </div>
+    </header>
+    <figure class="scene reveal">
+      <canvas class="cv2d" id="bnd-cv" aria-label="Animated boundary rules: deposition at the bed, rebound at the walls and bed, trapping at the free surface"></canvas>
+      <figcaption><span>Illustration</span> Boundary rules of the particle solver. A particle that reaches the bed is deposited according to the Shields criterion and re-entrained when the bed shear velocity exceeds the same threshold; otherwise it rebounds. A particle lighter than the water is held at the free surface.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ================= SHAPES ================= -->
+<section class="sec" id="shapes">
+  <div class="wrap">
+    <header class="sec-head reveal">
+      <span class="numeral">VII</span>
+      <div>
+        <h2>Particles of different shapes</h2>
+        <p class="lede">Microplastics in water systems occur as spheres, fibres, flat fragments and irregular grains, and their drag depends on the shape and on the orientation during settling.</p>
+      </div>
+    </header>
+    <figure class="scene reveal">
+      <canvas class="gl" id="shapes-gl" style="height:420px" aria-label="Nine particle shapes settling through still water"></canvas>
+      <figcaption><span>Illustration</span> Particle shapes of the shape-dependent drag, each settling with its broadest face normal to the direction of motion.</figcaption>
+    </figure>
+    <div class="split reveal" style="margin-top:56px">
+      <p class="prose">For a non-spherical particle, the drag is calculated from the projected area of its broadest face and from a drag coefficient that depends on the shape, while the mass, the added mass and the body force follow from the particle volume. The settling velocity is therefore obtained from the three dimensions of the particle, without calibration.</p>
+      <p class="prose">For particles of millimetre size, the settling velocity in a turbulent flow differs from the settling velocity in still water, and the model provides a drag coefficient that increases with the ratio of the bed shear velocity to the settling velocity for this range of particle sizes.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TESTS ================= -->
+<section class="sec" id="tests">
+  <div class="wrap">
+    <header class="sec-head reveal">
+      <span class="numeral">VIII</span>
+      <div>
+        <h2>Tested against laboratory experiments</h2>
+        <p class="lede">After verification of each sub-model against analytical solutions, the coupled model is compared without calibration with four groups of laboratory measurements.</p>
+      </div>
+    </header>
+    <ul class="entries reveal">
+      <li><span class="n">1</span><h3>Neutrally buoyant microplastics</h3><p>Longitudinal dispersion in non-vegetated channels and in channels with low and high submerged vegetation at several discharges, measured at the University of Warwick.</p><p class="ref">Stride et al. (2023), <i>Water Resources Research</i>, 59, e2023WR034653. <a href="https://doi.org/10.1029/2023WR034653">doi:10.1029/2023WR034653</a></p></li>
+      <li><span class="n">2</span><h3>Buoyant and settling microplastics</h3><p>Longitudinal dispersion of microplastics lighter and denser than the water over a range of flow velocities in a non-vegetated flume at the University of Warwick.</p><p class="ref">Stride et al. (2024), <i>Journal of Hazardous Materials</i>, 466, 133440. <a href="https://doi.org/10.1016/j.jhazmat.2024.133440">doi:10.1016/j.jhazmat.2024.133440</a></p></li>
+      <li><span class="n">3</span><h3>Settling of different shapes</h3><p>Settling velocities of spheres, cylinders, fibres, flat and irregular particles in still water.</p><p class="ref">Goral et al. (2023), <i>Environmental Research</i>, 228, 115783. <a href="https://doi.org/10.1016/j.envres.2023.115783">doi:10.1016/j.envres.2023.115783</a></p></li>
+      <li><span class="n">4</span><h3>Settling in turbulent flow</h3><p>Settling of millimetre spheres tracked through a turbulent open channel.</p><p class="ref">Ijaz et al. (2024), <i>Science of the Total Environment</i>, 946, 174179. <a href="https://doi.org/10.1016/j.scitotenv.2024.174179">doi:10.1016/j.scitotenv.2024.174179</a></p></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= TEAM ================= -->
+<section class="sec" id="team">
+  <div class="wrap">
+    <header class="sec-head reveal">
+      <span class="numeral">IX</span>
+      <div><h2>Authors</h2></div>
+    </header>
+    <ul class="team">
+      <li class="reveal"><h3>Danial Goodarzi</h3><p>Department of Civil Engineering, University of Ottawa</p></li>
+      <li class="reveal"><h3>Abdolmajid Mohammadian</h3><p>Department of Civil Engineering, University of Ottawa</p></li>
+      <li class="reveal"><h3>Abolghasem Pilechi</h3><p>University of Ottawa, and Ocean, Coastal &amp; River Engineering Research Centre, National Research Council Canada</p></li>
+      <li class="reveal"><h3>Soroush Abolfathi</h3><p>School of Engineering, University of Warwick, United Kingdom</p></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= CODE ================= -->
+<section class="sec" id="code">
+  <div class="wrap">
+    <header class="sec-head reveal">
+      <span class="numeral">X</span>
+      <div>
+        <h2>Source code</h2>
+        <p class="lede">The model, its documentation and the scripts that accompany the paper are kept in the microplastic_modeling repository on GitHub.</p>
+      </div>
+    </header>
+    <div class="repo reveal">
+      <a class="repo-card" href="https://github.com/HydroCFD/microplastic_modeling">
+        <span class="kind">GitHub repository</span>
+        <strong>HydroCFD / microplastic_modeling</strong>
+        <span class="go">github.com/HydroCFD/microplastic_modeling <span aria-hidden="true">&rarr;</span></span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="more" aria-labelledby="more-title">
+  <div class="wrap">
+    <header class="sec-head"><span class="numeral">&rarr;</span><div><h2 id="more-title">More projects</h2></div></header>
+    <ul class="project-list">
+      <li class="here"><a href="../vegetated-channel-microplastics/index.html" aria-current="page"><span class="kind">You are here</span><h3>Microplastics in vegetated channels</h3><p>The force balance on every microplastic, calculated on a GPU in the flow of vegetated and non-vegetated channels.</p></a></li>
+      <li><a href="../microplastic-simulator/index.html"><span class="kind">GPU Lagrangian model</span><h3>GPU microplastic transport</h3><p>Following every microplastic through the water, with biofilm growth and mass-conserving fragmentation.</p><span class="go">Open the project</span></a></li>
+      <li><a href="../constructed-wetland-surrogate/index.html"><span class="kind">CFD and machine learning</span><h3>Constructed wetland surrogate</h3><p>Rapid prediction of hydraulic efficiency and residence time in wetlands and ponds.</p><span class="go">Open the project</span></a></li>
+      <li><a href="../dense-jet-simulator/index.html"><span class="kind">Interactive simulator</span><h3>Dense jet simulator</h3><p>An inclined brine jet rises, falls back and spreads along the bed.</p><span class="go">Open the simulator</span></a></li>
+      <li><a href="../ariake-instrument/index.html"><span class="kind">Bayesian instrument</span><h3>Ariake survey instrument</h3><p>A few samples give the whole suspended field of the bay, with its uncertainty.</p><span class="go">Open the instrument</span></a></li>
+      <li><a href="../publications.html"><span class="kind">Publications</span><h3>Journal articles and theses</h3><p>Microplastic transport, environmental hydraulics, dense jets and turbulence.</p><span class="go">See the list</span></a></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= CONTACT ================= -->
+<section class="contact" id="contact">
+  <div class="wrap contact-inner reveal">
+    <h2>Interested in the model?</h2>
+    <p>The manuscript is in preparation. Publication details will be added here when they are available. For questions about the model or collaboration, get in touch.</p>
+    <div class="actions">
+      <a class="btn btn-light" href="mailto:dgood006@uottawa.ca">dgood006@uottawa.ca <span aria-hidden="true">→</span></a>
+      <a class="textlink" href="https://github.com/HydroCFD/microplastic_modeling">Code on GitHub</a>
+      <a class="textlink" href="../index.html">Main site</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-grid">
+    <div>
+      <p class="foot-name"><a href="../index.html">Danial Goodarzi, Ph.D.</a></p>
+      <p>Postdoctoral researcher, Department of Civil Engineering, University of Ottawa, Ottawa, Canada</p>
+      <p><a href="mailto:dgood006@uottawa.ca">dgood006@uottawa.ca</a></p>
+    </div>
+    <div>
+      <h4>Projects</h4>
+      <ul>
+        <li><a href="../vegetated-channel-microplastics/index.html">Microplastics in vegetated channels</a></li>
+        <li><a href="../microplastic-simulator/index.html">GPU microplastic transport</a></li>
+        <li><a href="../constructed-wetland-surrogate/index.html">Constructed wetland surrogate</a></li>
+        <li><a href="../dense-jet-simulator/index.html">Dense jet simulator</a></li>
+        <li><a href="../ariake-instrument/index.html">Ariake survey instrument</a></li>
+        <li><a href="../publications.html">Publications</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Elsewhere</h4>
+      <ul>
+        <li><a href="https://scholar.google.com/citations?user=inKDJywAAAAJ&amp;hl=en">Google Scholar</a></li>
+        <li><a href="https://orcid.org/0000-0002-1621-5052">ORCID</a></li>
+        <li><a href="https://www.researchgate.net/profile/Danial-Goodarzi">ResearchGate</a></li>
+        <li><a href="https://github.com/HydroCFD">GitHub</a></li>
+        <li><a href="https://www.linkedin.com/in/danial-goodarzi-59243a99">LinkedIn</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="wrap foot-base"><span>&copy; 2026 Danial Goodarzi</span><a href="https://github.com/HydroCFD/HydroCFD.github.io">Site source on GitHub</a></div>
+</footer>
+
+<noscript><style>.reveal{opacity:1!important;transform:none!important}</style></noscript>
+<script src="../js/site.js?v=20261017a"></script>
+<script type="module" src="main.js?v=20261104p"></script>
+</body>
+</html>

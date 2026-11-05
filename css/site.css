@@ -264,7 +264,7 @@ input[type=range] { width: 100%; accent-color: var(--red); }
   .foot-grid { grid-template-columns: 1fr 1fr; }
   .foot-grid > :first-child { grid-column: 1 / -1; }
 }
-@media (max-width: 900px) {
+@media (max-width: 940px) {
   .nav-toggle { display: inline-block; }
   .nav nav { display: none; position: absolute; left: 0; right: 0; top: 100%; flex-direction: column; gap: 0; background: var(--paper); border-bottom: 1px solid var(--ink); padding: 6px 16px 14px; }
   .nav.open nav { display: flex; }
