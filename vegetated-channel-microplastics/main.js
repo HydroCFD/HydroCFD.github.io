@@ -118,6 +118,7 @@ if (hasWebGL()) {
   }).catch(noWebGL);
   import('./js/forces.js?v=20261105a').then(m => m.initForces(document.getElementById('forces-gl'))).catch(noWebGL);
   import('./js/story.js?v=20261105g').then(m => m.initStory(document.getElementById('story-gl'), document.getElementById('story-steps'))).catch(noWebGL);
+  import('./js/build.js?v=20261105d').then(m => m.initBuild(document.getElementById('build'))).catch(noWebGL);
   import('./js/shapes.js?v=20261105a').then(m => m.initShapes(document.getElementById('shapes-gl'))).catch(noWebGL);
 } else noWebGL();
 
