@@ -14,8 +14,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/site.css?v=20261104a">
-<link rel="stylesheet" href="page.css?v=20261105g">
+<link rel="stylesheet" href="../css/site.css?v=20261106a">
+<link rel="stylesheet" href="page.css?v=20261106h">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
 </head>
 <body>
@@ -520,15 +520,30 @@
         <p class="lede">A microplastic adjusts to the surrounding flow in a fraction of a millisecond, and an explicit integrator must resolve this relaxation time to remain stable. The exponential update treats the linearized drag exactly, so the time step is set by the flow rather than by the particle.</p>
       </div>
     </header>
-    <figure class="integ reveal">
+    <figure class="integ reveal" id="integ">
       <div class="integ-bar">
-        <label>Time step relative to the relaxation time <input type="range" id="dt-range" min="0" max="100" value="73" aria-label="Time step relative to the relaxation time"></label>
-        <output id="dt-out">Δt = 1.5 τ</output>
-        <span id="dt-status" class="integ-status">explicit update oscillates</span>
-        <span class="integ-key"><span class="k-exp">exact solution</span><span class="k-exp2">exponential update</span><span class="k-heun">explicit update</span></span>
+        <label>Time step relative to the relaxation time <input type="range" id="dt-range" min="0" max="100" value="69" aria-label="Time step relative to the relaxation time"></label>
+        <output id="dt-out">&Delta;t = 1.2 &tau;</output>
+        <span id="dt-status" class="integ-status">explicit updates oscillate</span>
+        <span class="integ-key">
+          <span class="k-exp">exact solution</span>
+          <span class="k-exp2">exponential update</span>
+          <button type="button" class="k-btn k-euler" data-method="euler" aria-pressed="true">forward Euler</button>
+          <button type="button" class="k-btn k-heun2" data-method="heun" aria-pressed="true">Heun</button>
+        </span>
       </div>
-      <canvas id="integ-cv" aria-label="Velocity of a particle released from rest relaxing to the fluid velocity, with the exponential and explicit updates at the chosen time step"></canvas>
-      <figcaption><span>Illustration</span> A particle released from rest relaxes to the velocity of the surrounding water. The exponential update lies on the exact solution for any time step, whereas the explicit update departs from it and becomes unstable once the time step exceeds twice the relaxation time. Move the slider to change the time step.</figcaption>
+      <canvas id="race-cv" class="integ-race" aria-label="Velocity after each step for the exponential update, forward Euler and Heun, against the exact value"></canvas>
+      <div class="integ-panels">
+        <canvas id="integ-cv" aria-label="Velocity of a particle released from rest relaxing to the fluid velocity, with the three updates at the chosen time step"></canvas>
+        <canvas id="err-cv" aria-label="Largest error of each update against the time step"></canvas>
+      </div>
+      <dl class="integ-stats">
+        <div><dt>Steps per relaxation time</dt><dd id="s-steps"></dd></div>
+        <div><dt>Largest error, forward Euler</dt><dd id="s-euler"></dd></div>
+        <div><dt>Largest error, Heun</dt><dd id="s-heun"></dd></div>
+        <div><dt>Fewer steps than forward Euler and Heun at 1 % accuracy</dt><dd id="s-ratio"></dd><span class="s-note">they need <span id="s-h1"></span></span></div>
+      </dl>
+      <figcaption><span>Illustration</span> A particle released from rest relaxes to the velocity of the surrounding water, dv/dt = (u &minus; v)/&tau;. Top: the velocity given by each update after every step, with a trail of the earlier steps, against the exact value. Left: the velocity of each update against the exact solution. Right: the largest error of each update against the time step. The exponential update is exact for this linearized drag at any time step, whereas forward Euler and Heun lose accuracy as the time step grows and become unstable once it exceeds twice the relaxation time. Move the slider, or switch a method off with its button.</figcaption>
     </figure>
     <div class="split reveal" style="margin-top:56px">
       <p class="prose">Over each time step, the drag coefficient and the forces other than drag are held constant, and the velocity equation is then solved analytically. The update is exact for the linearized drag and unconditionally stable, so the particles can be advanced with time steps many times larger than their relaxation time, while the trapezoidal position update keeps the advection consistent with the old and new velocities.</p>
@@ -547,14 +562,24 @@
         <p class="lede">Submerged vegetation divides the flow into a slow layer within the stems and a faster layer above them, and the exchange between the two layers spreads the microplastics along the channel.</p>
       </div>
     </header>
-    <figure class="scene reveal">
-      <div class="scroller"><div class="stage"><canvas class="gl" id="veg-gl" style="height:500px" aria-label="Flume with submerged vegetation, streaks of microplastics and the velocity profile"></canvas></div></div>
-      <figcaption><span>Illustration</span> A flume with submerged rigid vegetation, with streaks of microplastics and the velocity profile drawn on the glass.</figcaption>
-    </figure>
-    <div class="split reveal" style="margin-top:56px">
+    <div class="split reveal">
       <p class="prose">The stems are not resolved individually. Their effect on the flow is applied through a drag force in the cells occupied by vegetation, proportional to the stem drag coefficient and the frontal area of the stems per unit volume, and through an additional dissipation of turbulence generated by the stem wakes. This representation captures the momentum loss and the shear layer at the top of the vegetation that control dispersion at the scale of the channel, at a cost that allows many configurations of vegetation and discharge to be simulated.</p>
       <p class="prose">The model predicts the dispersion from the computed flow field and the force balance on each particle, rather than from measured velocity profiles, so it can be applied to vegetation configurations and discharges for which no measurements are available.</p>
     </div>
+    <figure class="scene lab reveal" id="stations" style="margin-top:56px">
+      <div class="lab-bar">
+        <span class="hud-label">Channel</span>
+        <div class="seg seg3">
+          <button type="button" data-veg="0" aria-pressed="false">No vegetation</button>
+          <button type="button" data-veg="1" aria-pressed="false">Sparse stems</button>
+          <button type="button" data-veg="2" aria-pressed="true">Dense stems</button>
+        </div>
+        <button type="button" class="copy" id="st-release">Release again</button>
+      </div>
+      <div class="stage"><canvas class="gl" id="st-gl" aria-label="A pulse of neutrally buoyant microplastics passing three virtual stations"></canvas></div>
+      <canvas class="lab-chart wide" id="st-chart" aria-label="Response curves at the three stations"></canvas>
+      <figcaption><span>Illustration</span> A pulse of neutrally buoyant microplastics passes three virtual stations, and the crossings at each station build its response curve. Without vegetation the curves stay narrow; with stems, the particles in the slow layer fall behind those in the overflow, and the curves become lower, wider and skewed, which is the spreading measured by the longitudinal dispersion coefficient. The dashed curves keep the previous run for comparison.</figcaption>
+    </figure>
   </div>
 </section>
 
@@ -596,66 +621,11 @@
   </div>
 </section>
 
-<!-- ================= BUILD ================= -->
-<section class="sec" id="build">
-  <div class="wrap">
-    <header class="sec-head reveal">
-      <span class="numeral">IX</span>
-      <div>
-        <h2>Build a microplastic</h2>
-        <p class="lede">Choose the shape, size and density of a microplastic and the bed shear velocity of the flow. Its settling velocity is estimated from standard drag formulas, and a cloud of identical particles is released at the upstream end of the flume.</p>
-      </div>
-    </header>
-    <div class="build reveal">
-      <form class="build-controls" onsubmit="return false" aria-label="Properties of the microplastic and of the flow">
-        <fieldset>
-          <legend class="hud-label">Shape</legend>
-          <div class="seg">
-            <button type="button" data-shape="sphere" aria-pressed="false">Sphere</button>
-            <button type="button" data-shape="fragment" aria-pressed="true">Fragment</button>
-            <button type="button" data-shape="film" aria-pressed="false">Film</button>
-            <button type="button" data-shape="fibre" aria-pressed="false">Fibre</button>
-          </div>
-          <p class="dims" id="b-dims"></p>
-        </fieldset>
-        <label class="slider"><span class="hud-label">Size, largest dimension</span>
-          <input type="range" id="b-size" min="0" max="100" step="0.5"><output id="b-size-out"></output></label>
-        <label class="slider"><span class="hud-label">Density</span>
-          <input type="range" id="b-rho" min="900" max="1450" step="1"><output id="b-rho-out"></output>
-          <span class="scale"><span>lighter</span><span>water, 998</span><span>denser</span></span></label>
-        <label class="slider"><span class="hud-label">Bed shear velocity of the flow</span>
-          <input type="range" id="b-ustar" min="5" max="60" step="0.5"><output id="b-u-out"></output></label>
-        <button type="button" class="btn release" id="b-release">Release again <span aria-hidden="true">&rarr;</span></button>
-      </form>
-      <figure class="scene build-scene">
-        <canvas class="gl" id="build-gl" aria-label="Flume with a cloud of the chosen microplastics and the chosen particle enlarged in the corner"></canvas>
-        <div class="build-count" aria-live="polite">
-          <div><span class="hud-label">Deposited</span><strong id="b-dep">0</strong></div>
-          <div><span class="hud-label">Reached the surface</span><strong id="b-surf">0</strong></div>
-          <div><span class="hud-label">Passed in suspension</span><strong id="b-out">0</strong></div>
-        </div>
-        <div class="spec-frame" aria-hidden="true"><span class="hud-label">The chosen particle, enlarged</span></div>
-      </figure>
-    </div>
-    <dl class="build-results reveal">
-      <div><dt>Settling velocity</dt><dd id="r-ws"></dd></div>
-      <div><dt>Particle Reynolds number</dt><dd id="r-re"></dd></div>
-      <div><dt>Drag coefficient</dt><dd id="r-cd"></dd></div>
-      <div><dt>Sphericity</dt><dd id="r-phi"></dd></div>
-      <div><dt>Rouse number, w<sub>s</sub> / &kappa;u<sub>*</sub></dt><dd id="r-p"></dd></div>
-      <div><dt>Critical bed shear velocity</dt><dd id="r-uc"></dd></div>
-      <div class="fate"><dt>What happens to it</dt><dd id="r-fate"></dd></div>
-    </dl>
-    <p class="note-box reveal">The estimates use water at 20&nbsp;&deg;C, the drag correlation of Haider and Levenspiel (1989) with the diameter of the sphere of equal volume and the sphericity of the particle, and the Shields curve of Soulsby and Whitehouse (1997) for the critical bed shear velocity. The motion in the flume uses a parabolic eddy diffusivity in a flume 0.3&nbsp;m deep with a surface velocity of 0.3&nbsp;m/s. It illustrates how the properties of a particle control its fate; it is neither the closure of the model nor a result of the paper.</p>
-    <p class="refs-small reveal">Haider, A., &amp; Levenspiel, O. (1989). Drag coefficient and terminal velocity of spherical and nonspherical particles. <i>Powder Technology</i>, 58, 63&ndash;70. <a href="https://doi.org/10.1016/0032-5910(89)80008-7">doi:10.1016/0032-5910(89)80008-7</a>. Soulsby, R. L., &amp; Whitehouse, R. J. S. (1997). Threshold of sediment motion in coastal environments. <i>Pacific Coasts and Ports &rsquo;97</i>, 149&ndash;154.</p>
-  </div>
-</section>
-
 <!-- ================= TESTS ================= -->
 <section class="sec" id="tests">
   <div class="wrap">
     <header class="sec-head reveal">
-      <span class="numeral">X</span>
+      <span class="numeral">IX</span>
       <div>
         <h2>Tested against laboratory experiments</h2>
         <p class="lede">After verification of each sub-model against analytical solutions, the coupled model is compared without calibration with four groups of laboratory measurements.</p>
@@ -674,7 +644,7 @@
 <section class="sec" id="team">
   <div class="wrap">
     <header class="sec-head reveal">
-      <span class="numeral">XI</span>
+      <span class="numeral">X</span>
       <div><h2>Authors</h2></div>
     </header>
     <ul class="team">
@@ -690,7 +660,7 @@
 <section class="sec" id="code">
   <div class="wrap">
     <header class="sec-head reveal">
-      <span class="numeral">XII</span>
+      <span class="numeral">XI</span>
       <div>
         <h2>Source code</h2>
         <p class="lede">The model, its documentation and the scripts that accompany the paper are kept in the microplastic_modeling repository on GitHub.</p>
@@ -710,7 +680,7 @@
 <section class="sec" id="cite">
   <div class="wrap">
     <header class="sec-head reveal">
-      <span class="numeral">XIII</span>
+      <span class="numeral">XII</span>
       <div>
         <h2>How to cite</h2>
         <p class="lede">If you use the model or the material on this page, please cite the paper and the repository, together with the laboratory datasets against which the model was tested.</p>
@@ -862,6 +832,6 @@
 
 <noscript><style>.reveal{opacity:1!important;transform:none!important}</style></noscript>
 <script src="../js/site.js?v=20261017a"></script>
-<script type="module" src="main.js?v=20261105l"></script>
+<script type="module" src="main.js?v=20261106o"></script>
 </body>
 </html>

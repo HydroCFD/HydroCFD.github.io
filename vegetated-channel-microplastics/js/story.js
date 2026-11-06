@@ -3,8 +3,8 @@
 // The path is drawn by hand to show the processes; it is an illustration, not model output.
 import * as THREE from 'three';
 import { runWhenVisible, fitGL, isSmall, clamp, smooth, motion } from '../../js/3d/loop.js';
-import { COL, makeRenderer, addLights, makePoints, makeLabels } from './common.js?v=20261105a';
-import { makeFlume, uOf, H, HV, U } from './channel.js?v=20261105a';
+import { COL, makeRenderer, addLights, makePoints, makeLabels } from './common.js?v=20261106a';
+import { makeFlume, uOf, H, HV, U } from './channel.js?v=20261106a';
 
 const L = 16, W = 4.2, XS = 4.0;                 // flume length and width, station position
 

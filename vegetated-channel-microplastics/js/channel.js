@@ -4,7 +4,7 @@
 // Illustrative motion only, not model output.
 import * as THREE from 'three';
 import { runWhenVisible, fitGL, isSmall, gauss, makeNoise, motion } from '../../js/3d/loop.js';
-import { COL, makeRenderer, addLights, inkEdges, makeArrow, makePoints, makeLabels } from './common.js?v=20261105a';
+import { COL, makeRenderer, addLights, inkEdges, makeArrow, makePoints, makeLabels } from './common.js?v=20261106a';
 
 export const H = 3, HV = 1.3;     // water depth and vegetation height
 export const U = 3.4;                              // surface velocity (scene units per second)
@@ -13,10 +13,10 @@ export const uOf = y => {
   const s = 0.25 + 0.75 / (1 + Math.exp(-(y - HV - 0.12) / 0.22));
   return s * Math.min(1, Math.max(0, y) / 0.12) * (1 + 0.12 * Math.max(0, y - HV) / (H - HV));
 };
-const dOf = y => 0.006 + 0.05 * Math.exp(-(((y - HV) / 0.32) ** 2)) + (y > HV ? 0.012 : 0);
+export const dOf = y => 0.006 + 0.05 * Math.exp(-(((y - HV) / 0.32) ** 2)) + (y > HV ? 0.012 : 0);
 
 // Builds the flume (bed, walls, stems, water) into a scene; shared by the hero, section V and the story.
-export function makeFlume(scene, L, W, small) {
+export function makeFlume(scene, L, W, small, opts = {}) {
   const noise = makeNoise(11);
 
   // ---------- bed: a sand slab with a grained, slightly uneven surface ----------
@@ -71,7 +71,7 @@ export function makeFlume(scene, L, W, small) {
   const stemM = new THREE.InstancedMesh(stemG, new THREE.MeshStandardMaterial({ color: COL.olive, roughness: 0.7 }), stems.length);
   const m4 = new THREE.Matrix4();
   stems.forEach((s, i) => { m4.makeTranslation(s[0], 0, s[1]); stemM.setMatrixAt(i, m4); });
-  scene.add(stemM);
+  if (opts.stems !== false) scene.add(stemM);
   // dashed line at the top of the vegetation on the glass
   const topG = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-L / 2, HV, W / 2), new THREE.Vector3(L / 2, HV, W / 2)]);
   const topLine = new THREE.Line(topG, new THREE.LineDashedMaterial({ color: COL.ink2, dashSize: 0.18, gapSize: 0.14, transparent: true, opacity: 0.8 }));
@@ -106,7 +106,7 @@ export function makeFlume(scene, L, W, small) {
   surf.position.y = H;
   surf.renderOrder = 5;
   scene.add(surf);
-  return { surfMat, stems };
+  return { surfMat, stems, stemM, topLine };
 }
 
 export function initChannel(canvas, opts = {}) {
