@@ -39,21 +39,6 @@ figure.schem + figure.schem { margin-top: 40px; }
 .forces { margin-top: 56px; }
 .eq { font-family: var(--serif); font-style: italic; font-size: 1.12rem; color: var(--ink); margin-top: 10px; }
 
-/* ---------- integrator demo ---------- */
-.integ { border: 1px solid var(--ink); background: var(--paper); }
-.integ canvas { display: block; width: 100%; height: 380px; }
-.integ-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; padding: 14px 18px; border-bottom: 1px solid var(--ink); font-size: 0.92rem; color: var(--ink-2); }
-.integ-bar label { display: flex; align-items: center; gap: 12px; }
-.integ-bar input[type=range] { width: 220px; accent-color: var(--red); }
-.integ-bar output { font-family: var(--serif); font-style: italic; font-size: 1.15rem; color: var(--ink); min-width: 120px; }
-.integ-status { font-size: 0.85rem; color: var(--red); min-width: 190px; }
-.integ-key { display: flex; gap: 18px; margin-left: auto; font-size: 0.85rem; }
-.integ-key span::before { content: ""; display: inline-block; width: 18px; height: 0; margin-right: 6px; vertical-align: middle; border-top: 2px solid var(--ink-3); }
-.integ-key .k-exp::before { border-top-color: var(--cobalt); }
-.integ-key .k-exp2::before { width: 9px; height: 9px; border: 0; border-radius: 50%; background: var(--cobalt); }
-.integ-key .k-heun::before { width: 9px; height: 9px; border: 0; border-radius: 50%; background: var(--red); }
-.integ figcaption { padding: 14px 18px; border-top: 1px solid var(--ink); }
-
 /* ---------- team ---------- */
 .team { list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--ink); }
 .team li { padding: 26px 24px 30px 0; }
@@ -69,8 +54,6 @@ figure.schem + figure.schem { margin-top: 40px; }
 @media (max-width: 820px) {
   .schem { padding: 10px; overflow-x: auto; }
   .schem svg.wide { min-width: 760px; }
-  .integ canvas { height: 300px; }
-  .integ-key { margin-left: 0; }
   .team { grid-template-columns: 1fr; }
   .team li, .team li + li { padding-left: 0; border-left: 0; }
   .team li { border-bottom: 1px solid var(--rule); }
@@ -221,31 +204,8 @@ figure.schem + figure.schem { margin-top: 40px; }
 }
 @media (max-width: 820px) { .lab canvas.gl { height: 230px; } .lab-chart { height: 280px; } }
 
-/* ---------- exponential integrator, extended ---------- */
-.integ-key .k-btn { font: inherit; font-size: 0.85rem; background: none; border: 1px solid var(--rule); padding: 3px 9px; color: var(--ink-2); cursor: pointer; }
-.integ-key .k-btn::before { content: ""; display: inline-block; width: 9px; height: 9px; margin-right: 6px; vertical-align: middle; }
-.integ-key .k-euler::before { border-radius: 50%; background: var(--red); }
-.integ-key .k-heun2::before { background: var(--ochre); }
-.integ-key .k-btn[aria-pressed=false] { opacity: 0.4; text-decoration: line-through; }
-.integ canvas.integ-race { height: 170px; border-bottom: 1px solid var(--ink); background: var(--paper-3); }
-.integ-panels { display: grid; grid-template-columns: 1.25fr 1fr; border-bottom: 1px solid var(--ink); }
-.integ-panels canvas { display: block; width: 100%; height: 360px; }
-.integ-panels canvas + canvas { border-left: 1px solid var(--ink); }
-.integ-stats { display: grid; grid-template-columns: repeat(4, 1fr); margin: 0; }
-.integ-stats > div { padding: 14px 18px 16px; min-width: 0; }
-.integ-stats > div + div { border-left: 1px solid var(--rule); }
-.integ-stats dt { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 6px; }
-.integ-stats dd { margin: 0; font-family: var(--serif); font-style: italic; font-size: 1.35rem; color: var(--ink); }
-.integ-stats .s-note { display: block; margin-top: 4px; font-size: 0.78rem; color: var(--ink-3); }
-.integ .integ-stats + figcaption { border-top: 1px solid var(--ink); }
-@media (max-width: 1020px) {
-  .integ-panels { grid-template-columns: 1fr; }
-  .integ-panels canvas + canvas { border-left: 0; border-top: 1px solid var(--ink); }
-  .integ-stats { grid-template-columns: 1fr 1fr; }
-  .integ-stats > div:nth-child(3) { border-left: 0; }
-  .integ-stats > div:nth-child(n+3) { border-top: 1px solid var(--rule); }
-}
-@media (max-width: 820px) {
-  .integ-panels canvas { height: 300px; }
-  .integ canvas.integ-race { height: 140px; }
-}
+
+/* ---------- single text column (section III) ---------- */
+.prose.single { max-width: 760px; margin-left: 144px; }
+.prose.single p { color: var(--ink-2); }
+@media (max-width: 1020px) { .prose.single { margin-left: 0; } }

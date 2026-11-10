@@ -1,4 +1,4 @@
-// Microplastics in vegetated channels: page wiring, motion toggle, integrator illustration and 3D figures.
+// Microplastics in vegetated channels: page wiring, motion toggle and 3D figures.
 // The figures are illustrations of the processes, not model output.
 import { motion, setPaused } from '../js/3d/loop.js';
 
@@ -14,7 +14,6 @@ toggle.addEventListener('click', () => { setPaused(!motion.paused); showMotion()
 showMotion();
 
 // ---------- figures ----------
-import('./js/integrator.js?v=20261106f').then(m => m.initIntegrator(document.getElementById('integ')));
 import('./js/boundaries.js?v=20261106a').then(m => m.initBoundaries(document.getElementById('bnd-cv')));
 
 function noWebGL(err) {
