@@ -11,6 +11,7 @@
       });
       nav.querySelectorAll('nav a').forEach(function (a) {
         a.addEventListener('click', function () {
+          a.blur();   // closes an open dropdown after a jump on the same page
           nav.classList.remove('open');
           toggle.setAttribute('aria-expanded', 'false');
           toggle.textContent = 'Menu';

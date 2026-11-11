@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://hydrocfd.github.io/</loc>
-    <lastmod>2026-10-10</lastmod>
+    <lastmod>2026-11-11</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
@@ -24,6 +24,16 @@
     <loc>https://hydrocfd.github.io/dense-jet-simulator-classic/</loc>
     <lastmod>2026-10-10</lastmod>
     <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://hydrocfd.github.io/flood-modeling/</loc>
+    <lastmod>2026-11-11</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://hydrocfd.github.io/microplastics/</loc>
+    <lastmod>2026-11-11</lastmod>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://hydrocfd.github.io/microplastic-simulator/</loc>

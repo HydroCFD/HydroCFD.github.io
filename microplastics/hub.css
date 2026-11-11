@@ -1,0 +1,61 @@
+/* Microplastics hub: the two scales of the project. */
+.scale-actions { gap: 14px 16px; }
+.btn-ghost { background: var(--paper); color: var(--ink); }
+.btn-ghost:hover { color: var(--paper); }
+
+/* ---------- the two scale cards ---------- */
+.scales { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--ink); background: var(--paper); }
+.scale-card { display: grid; grid-template-rows: auto 1fr; text-decoration: none; color: var(--ink); transition: background .25s; }
+.scale-card + .scale-card { border-left: 1px solid var(--ink); }
+.scale-card:hover { background: var(--paper-2); color: var(--ink); }
+.scale-img { display: block; height: 300px; padding: 18px 24px 0; border-bottom: 1px solid var(--rule); overflow: hidden; }
+.scale-img img { width: 100%; height: 100%; object-fit: contain; transition: transform .7s var(--ease); }
+.scale-card:hover .scale-img img { transform: scale(1.04); }
+.scale-body { display: flex; flex-direction: column; padding: 26px 32px 32px; }
+.scale-tag { font-size: 0.76rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--red); }
+.scale-tag span { font-weight: 400; letter-spacing: 0.02em; text-transform: none; color: var(--ink-3); margin-left: 8px; font-size: 0.85rem; }
+.scale-card h3 { font-size: 2.3rem; font-weight: 300; margin: 8px 0 12px; }
+.scale-card p { color: var(--ink-2); }
+.scale-card ul { list-style: none; margin: 18px 0 0; border-top: 1px solid var(--rule); }
+.scale-card li { position: relative; padding: 9px 0 9px 20px; border-bottom: 1px solid var(--rule); font-size: 0.94rem; }
+.scale-card li::before { content: ""; position: absolute; left: 2px; top: 17px; width: 7px; height: 7px; border-radius: 50%; background: var(--red); }
+.scale-card .go { align-self: flex-start; margin-top: 22px; font-size: 0.95rem; font-weight: 500; text-decoration: underline; text-decoration-color: var(--red); text-underline-offset: 4px; }
+.scale-card .go::after { content: " \2192"; }
+
+/* ---------- range of length scales on a logarithmic axis ---------- */
+.range { margin: 0; }
+.range-plot { position: relative; height: 250px; margin: 0 10px; }
+.range-band { position: absolute; left: calc(var(--a) / 9 * 100%); width: calc((var(--b) - var(--a)) / 9 * 100%); height: 34px; display: flex; align-items: center; padding: 0 14px; font-size: 0.8rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--paper); }
+.range-band.small { top: 128px; background: var(--olive, #66772a); }
+.range-band.large { top: 128px; background: var(--cobalt, #2643b8); justify-content: flex-end; }
+.range-band span { white-space: nowrap; }
+.range-axis { position: absolute; left: 0; right: 0; top: 180px; border-top: 1.5px solid var(--ink); }
+.range-ticks { list-style: none; }
+.range-ticks li { position: absolute; top: 180px; left: calc(var(--x) / 9 * 100%); transform: translateX(-50%); padding-top: 12px; font-size: 0.8rem; color: var(--ink-2); white-space: nowrap; }
+.range-ticks li::before { content: ""; position: absolute; left: 50%; top: -6px; height: 12px; border-left: 1.5px solid var(--ink); }
+.range-marks { list-style: none; }
+.range-marks li { position: absolute; top: 0; left: calc(var(--x) / 9 * 100%); transform: translateX(-50%); width: 120px; text-align: center; font-family: var(--serif); font-style: italic; font-size: 0.98rem; line-height: 1.25; color: var(--ink); }
+.range-marks li b { display: block; font-family: var(--sans); font-style: normal; font-weight: 600; font-size: 0.8rem; color: var(--red); margin-bottom: 4px; }
+.range-marks li::after { content: ""; position: absolute; left: 50%; top: 62px; height: 60px; border-left: 1px dashed var(--ink-3); }
+.range-marks li::before { content: ""; position: absolute; left: calc(50% - 4px); top: 118px; width: 8px; height: 8px; border-radius: 50%; background: var(--ink); }
+.range figcaption { margin-top: 36px; max-width: 860px; }
+.range-marks li:last-child { transform: translateX(-80%); }
+.range-marks li:last-child::after, .range-marks li:last-child::before { left: 80%; }
+.range-marks li:last-child::before { left: calc(80% - 4px); }
+
+@media (max-width: 900px) {
+  .scales { grid-template-columns: 1fr; }
+  .scale-card + .scale-card { border-left: 0; border-top: 1px solid var(--ink); }
+  .scale-img { height: 240px; }
+  .scale-body { padding: 22px 20px 26px; }
+  /* the axis turns vertical on narrow screens */
+  .range-plot { height: 560px; margin: 24px 0; }
+  .range-axis { left: 92px; right: auto; top: 0; bottom: 0; border-top: 0; border-left: 1.5px solid var(--ink); }
+  .range-ticks li { top: calc(var(--x) / 9 * 100%); left: 0; width: 80px; transform: translateY(-50%); padding: 0; text-align: right; }
+  .range-ticks li::before { left: auto; right: -18px; top: 50%; height: 0; width: 12px; border-left: 0; border-top: 1.5px solid var(--ink); }
+  .range-band { left: 104px; top: calc(var(--a) / 9 * 100%) !important; width: 30px; height: calc((var(--b) - var(--a)) / 9 * 100%); padding: 10px 0; justify-content: center !important; align-items: flex-start; }
+  .range-band span { writing-mode: vertical-rl; }
+  .range-marks li, .range-marks li:last-child { top: calc(var(--x) / 9 * 100%); left: 150px; width: auto; transform: translateY(-50%); text-align: left; }
+  .range-marks li::after, .range-marks li::before, .range-marks li:last-child::after, .range-marks li:last-child::before { display: none; }
+}
+.scale-img img[src*="ariake"] { mix-blend-mode: multiply; }

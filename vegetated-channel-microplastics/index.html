@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/site.css?v=20261106a">
+<link rel="stylesheet" href="../css/site.css?v=20261111k">
 <link rel="stylesheet" href="page.css?v=20261109a">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
 </head>
@@ -26,13 +26,25 @@
     <a class="brand" href="../index.html">Danial Goodarzi</a>
     <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-links">Menu</button>
     <nav id="site-links" aria-label="Main navigation">
-      <a href="../index.html#research">Research</a>
+      <div class="nav-group">
+        <a class="nav-top" href="../index.html#research">Research</a>
+        <div class="nav-sub">
+          <a href="../index.html#research">Research areas</a>
+          <a href="../index.html#projects">All projects</a>
+          <a href="../constructed-wetland-surrogate/index.html">Constructed wetland surrogate</a>
+          <a href="../dense-jet-simulator/index.html">Dense jet simulator</a>
+        </div>
+      </div>
+      <div class="nav-group">
+        <a class="nav-top active" href="../microplastics/index.html">Microplastics</a>
+        <div class="nav-sub">
+          <a href="../microplastics/index.html">Overview of the two scales</a>
+          <a href="../microplastic-simulator/index.html"><b>Large scale</b>Ariake Sea</a>
+          <a href="../vegetated-channel-microplastics/index.html" class="active" aria-current="page"><b>Small scale</b>Vegetated channels</a>
+        </div>
+      </div>
+      <a href="../flood-modeling/index.html">Flood Modeling</a>
       <a href="../publications.html">Publications</a>
-      <a href="../index.html#software">Software</a>
-      <a href="../constructed-wetland-surrogate/index.html">Wetland AI</a>
-      <a href="../dense-jet-simulator/index.html">Dense Jet</a>
-      <a href="../microplastic-simulator/index.html">Microplastics</a>
-      <a href="../vegetated-channel-microplastics/index.html" class="active" aria-current="page">Vegetated Channels</a>
       <a href="../index.html#contact">Contact</a>
     </nav>
   </div>
@@ -46,7 +58,7 @@
   <canvas class="hero-gl" id="hero-gl" aria-hidden="true"></canvas>
   <div class="hero-veil" aria-hidden="true"></div>
   <div class="hero-content">
-    <p class="overline">Research project <span>on microplastics in vegetated channels</span></p>
+    <p class="overline crumb"><a href="../microplastics/index.html">Microplastics</a> <span>/ Small scale: vegetated channels</span></p>
     <h1>The forces on every <em>microplastic</em>, at the speed of a GPU.</h1>
     <hr>
     <p class="hero-title">A GPU accelerated Eulerian-Lagrangian model for microplastics transport in water systems</p>
@@ -783,8 +795,10 @@
     <div>
       <h4>Projects</h4>
       <ul>
-        <li><a href="../vegetated-channel-microplastics/index.html">Microplastics in vegetated channels</a></li>
-        <li><a href="../microplastic-simulator/index.html">GPU microplastic transport</a></li>
+        <li><a href="../microplastics/index.html">Microplastics</a></li>
+        <li><a href="../microplastic-simulator/index.html">Large scale: the Ariake Sea</a></li>
+        <li><a href="../vegetated-channel-microplastics/index.html">Small scale: vegetated channels</a></li>
+        <li><a href="../flood-modeling/index.html">Flood modeling</a></li>
         <li><a href="../constructed-wetland-surrogate/index.html">Constructed wetland surrogate</a></li>
         <li><a href="../dense-jet-simulator/index.html">Dense jet simulator</a></li>
         <li><a href="../ariake-instrument/index.html">Ariake survey instrument</a></li>
@@ -806,7 +820,7 @@
 </footer>
 
 <noscript><style>.reveal{opacity:1!important;transform:none!important}</style></noscript>
-<script src="../js/site.js?v=20261017a"></script>
+<script src="../js/site.js?v=20261111c"></script>
 <script type="module" src="main.js?v=20261109a"></script>
 </body>
 </html>

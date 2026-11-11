@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Microplastics | Danial Goodarzi</title>
+<meta name="description" content="A research project on the transport of microplastics at two scales: a GPU-accelerated three-dimensional Lagrangian model of the Ariake Sea, and an Eulerian-Lagrangian model of microplastics in vegetated channels.">
+<meta name="theme-color" content="#f2ede3">
+<link rel="canonical" href="https://hydrocfd.github.io/microplastics/index.html">
+<link rel="icon" href="../favicon.ico">
+<meta property="og:title" content="Microplastics at two scales: from a vegetated channel to a coastal sea">
+<meta property="og:description" content="Microplastics followed particle by particle on a GPU, in a laboratory channel with vegetation and in the whole Ariake Sea.">
+<meta property="og:image" content="https://hydrocfd.github.io/microplastic-simulator/assets/meander_3d_poster.webp">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/site.css?v=20261111k">
+<link rel="stylesheet" href="hub.css?v=20261111b">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="brand" href="../index.html">Danial Goodarzi</a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-links">Menu</button>
+    <nav id="site-links" aria-label="Main navigation">
+      <div class="nav-group">
+        <a class="nav-top" href="../index.html#research">Research</a>
+        <div class="nav-sub">
+          <a href="../index.html#research">Research areas</a>
+          <a href="../index.html#projects">All projects</a>
+          <a href="../constructed-wetland-surrogate/index.html">Constructed wetland surrogate</a>
+          <a href="../dense-jet-simulator/index.html">Dense jet simulator</a>
+        </div>
+      </div>
+      <div class="nav-group">
+        <a class="nav-top active" href="../microplastics/index.html">Microplastics</a>
+        <div class="nav-sub">
+          <a href="../microplastics/index.html" class="active" aria-current="page">Overview of the two scales</a>
+          <a href="../microplastic-simulator/index.html"><b>Large scale</b>Ariake Sea</a>
+          <a href="../vegetated-channel-microplastics/index.html"><b>Small scale</b>Vegetated channels</a>
+        </div>
+      </div>
+      <a href="../flood-modeling/index.html">Flood Modeling</a>
+      <a href="../publications.html">Publications</a>
+      <a href="../index.html#contact">Contact</a>
+    </nav>
+  </div>
+  <div class="nav-progress" aria-hidden="true"></div>
+</header>
+
+<main id="main">
+
+<!-- ================= HERO ================= -->
+<section class="hero" id="top">
+  <canvas class="hero-gl" id="hero-gl" aria-hidden="true"></canvas>
+  <div class="hero-veil" aria-hidden="true"></div>
+  <div class="hero-content">
+    <p class="overline">Research project <span>on microplastic transport</span></p>
+    <h1>Microplastics, from the <em>channel</em> to the sea.</h1>
+    <hr>
+    <p class="hero-title">One project at two scales: microplastics followed particle by particle on a GPU, in a laboratory channel with vegetation and in a whole coastal sea.</p>
+    <div class="actions scale-actions">
+      <a class="btn" href="../microplastic-simulator/index.html">Large scale: the Ariake Sea <span aria-hidden="true">&rarr;</span></a>
+      <a class="btn btn-ghost" href="../vegetated-channel-microplastics/index.html">Small scale: vegetated channels <span aria-hidden="true">&rarr;</span></a>
+    </div>
+  </div>
+  <figure class="hero-key" aria-hidden="true">
+    <span class="key-dot ink"></span> floating
+    <span class="key-dot red"></span> sinking
+    <span class="key-dot bed"></span> on the bed
+  </figure>
+  <p class="hero-caption">Microplastics drifting through a meandering river, drawn live.</p>
+  <button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">Pause motion</button>
+</section>
+
+<!-- ================= TWO SCALES ================= -->
+<section class="sec" id="scales">
+  <div class="wrap">
+    <header class="sec-head reveal">
+      <span class="numeral">I</span>
+      <div>
+        <h2>Two scales of one problem</h2>
+        <p class="lede">The fate of a microplastic is decided by processes that act on very different scales, from the drag on a particle among plant stems to the tides and currents of a bay. The project therefore has two models, each with its own page.</p>
+      </div>
+    </header>
+
+    <div class="scales reveal">
+      <a class="scale-card" href="../microplastic-simulator/index.html">
+        <span class="scale-img"><img src="assets/ariake-sea.webp" alt="Microplastics in the Ariake Sea calculated with the three-dimensional Lagrangian model" width="522" height="580"></span>
+        <span class="scale-body">
+          <span class="scale-tag">Large scale <span>about 100 km</span></span>
+          <h3>The Ariake Sea</h3>
+          <p>A GPU-accelerated three-dimensional Lagrangian model for microplastic transport on the unstructured prism meshes of coastal hydrodynamic models.</p>
+          <ul>
+            <li>Flow of the whole bay from TELEMAC-3D</li>
+            <li>Biofilm growth that changes the density of each particle</li>
+            <li>Fragmentation that conserves the mass</li>
+            <li>Particle transport calculated in parallel on a GPU</li>
+          </ul>
+          <span class="go">Open the large-scale page</span>
+        </span>
+      </a>
+      <a class="scale-card" href="../vegetated-channel-microplastics/index.html">
+        <span class="scale-img"><img src="assets/vegetated-flume.webp" alt="Illustration of microplastics transported through a channel with emergent vegetation" width="710" height="405"></span>
+        <span class="scale-body">
+          <span class="scale-tag">Small scale <span>about 10 m</span></span>
+          <h3>Vegetated channels</h3>
+          <p>A GPU-accelerated Eulerian-Lagrangian model that resolves the force balance on each microplastic in vegetated and non-vegetated channels.</p>
+          <ul>
+            <li>Flow through and above the vegetation from OpenFOAM</li>
+            <li>Drag, buoyancy, added mass, lift and turbulent dispersion</li>
+            <li>Deposition on the bed and trapping at the free surface</li>
+            <li>Tested against laboratory experiments</li>
+          </ul>
+          <span class="go">Open the small-scale page</span>
+        </span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= RANGE OF SCALES ================= -->
+<section class="sec tint" id="range">
+  <div class="wrap">
+    <header class="sec-head reveal">
+      <span class="numeral">II</span>
+      <div>
+        <h2>From the particle to the bay</h2>
+        <p class="lede">The two models together cover nine orders of magnitude in length, with the same microplastic followed in both.</p>
+      </div>
+    </header>
+    <figure class="range reveal" id="range-fig">
+      <div class="range-plot">
+        <div class="range-band small" style="--a:0;--b:5.4"><span>Small-scale model</span></div>
+        <div class="range-band large" style="--a:5.6;--b:9"><span>Large-scale model</span></div>
+        <div class="range-axis" aria-hidden="true"></div>
+        <ul class="range-marks">
+          <li style="--x:0.5"><b>0.1 to 5 mm</b>a microplastic</li>
+          <li style="--x:2"><b>1 cm</b>a plant stem</li>
+          <li style="--x:5"><b>10 m</b>a laboratory flume</li>
+          <li style="--x:7"><b>1 km</b>a river mouth</li>
+          <li style="--x:9"><b>100 km</b>the Ariake Sea</li>
+        </ul>
+        <ol class="range-ticks" aria-hidden="true">
+          <li style="--x:0">10<sup>&minus;4</sup> m</li><li style="--x:1">10<sup>&minus;3</sup></li><li style="--x:2">10<sup>&minus;2</sup></li><li style="--x:3">10<sup>&minus;1</sup></li><li style="--x:4">1 m</li><li style="--x:5">10</li><li style="--x:6">10<sup>2</sup></li><li style="--x:7">10<sup>3</sup></li><li style="--x:8">10<sup>4</sup></li><li style="--x:9">10<sup>5</sup> m</li>
+        </ol>
+      </div>
+      <figcaption><span>Scale</span> Length scales on a logarithmic axis. The small-scale model resolves the forces on each microplastic among the stems of a channel, and the large-scale model carries the particles through the currents of a whole bay.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ================= TOOLS ================= -->
+<section class="more" aria-labelledby="tools-title">
+  <div class="wrap">
+    <header class="sec-head"><span class="numeral">III</span><div><h2 id="tools-title">Related tools</h2></div></header>
+    <ul class="project-list">
+      <li><a href="../ariake-instrument/index.html"><span class="kind">Bayesian instrument</span><h3>Ariake survey instrument</h3><p>A few samples give the whole suspended field of the bay, with its uncertainty.</p><span class="go">Open the instrument</span></a></li>
+      <li><a href="../microplastic-simulator/journey.html"><span class="kind">Teaching demonstration</span><h3>Microplastic journey</h3><p>A schematic river-to-lake demonstration of how microplastics travel and settle.</p><span class="go">Open the demonstration</span></a></li>
+      <li><a href="https://github.com/HydroCFD/microplastic_modeling"><span class="kind">Source code</span><h3>Microplastic modeling</h3><p>The repository of the Eulerian-Lagrangian model, with the code to be released after publication.</p><span class="go">Open on GitHub</span></a></li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= CONTACT ================= -->
+<section class="contact" id="contact">
+  <div class="wrap contact-inner reveal">
+    <h2>Interested in the project?</h2>
+    <p>For questions about the models or collaboration on microplastic transport, get in touch.</p>
+    <div class="actions">
+      <a class="btn btn-light" href="mailto:dgood006@uottawa.ca">dgood006@uottawa.ca <span aria-hidden="true">&rarr;</span></a>
+      <a class="textlink" href="../index.html">Main site</a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-grid">
+    <div>
+      <p class="foot-name"><a href="../index.html">Danial Goodarzi, Ph.D.</a></p>
+      <p>Postdoctoral researcher, Department of Civil Engineering, University of Ottawa, Ottawa, Canada</p>
+      <p><a href="mailto:dgood006@uottawa.ca">dgood006@uottawa.ca</a></p>
+    </div>
+    <div>
+      <h4>Projects</h4>
+      <ul>
+        <li><a href="../microplastics/index.html">Microplastics</a></li>
+        <li><a href="../microplastic-simulator/index.html">Large scale: the Ariake Sea</a></li>
+        <li><a href="../vegetated-channel-microplastics/index.html">Small scale: vegetated channels</a></li>
+        <li><a href="../flood-modeling/index.html">Flood modeling</a></li>
+        <li><a href="../constructed-wetland-surrogate/index.html">Constructed wetland surrogate</a></li>
+        <li><a href="../dense-jet-simulator/index.html">Dense jet simulator</a></li>
+        <li><a href="../ariake-instrument/index.html">Ariake survey instrument</a></li>
+        <li><a href="../publications.html">Publications</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Elsewhere</h4>
+      <ul>
+        <li><a href="https://scholar.google.com/citations?user=inKDJywAAAAJ&amp;hl=en">Google Scholar</a></li>
+        <li><a href="https://orcid.org/0000-0002-1621-5052">ORCID</a></li>
+        <li><a href="https://www.researchgate.net/profile/Danial-Goodarzi">ResearchGate</a></li>
+        <li><a href="https://github.com/HydroCFD">GitHub</a></li>
+        <li><a href="https://www.linkedin.com/in/danial-goodarzi-59243a99">LinkedIn</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="wrap foot-base"><span>&copy; 2026 Danial Goodarzi</span><a href="https://github.com/HydroCFD/HydroCFD.github.io">Site source on GitHub</a></div>
+</footer>
+
+<noscript><style>.reveal{opacity:1!important;transform:none!important}</style></noscript>
+<script src="../js/site.js?v=20261111c"></script>
+<script type="module">
+  import { startHero } from '../js/3d/page.js';
+  startHero(() => import('../js/3d/river.js?v=20261017a').then(m => m.initRiver), 'hero-gl', { cx: 14 });
+</script>
+</body>
+</html>

@@ -56,8 +56,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,300;1,6..72,400&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/site.css?v=20261104a">
-<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
+<link rel="stylesheet" href="css/site.css?v=20261111k">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -67,14 +66,26 @@
     <a class="brand" href="index.html">Danial Goodarzi</a>
     <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-links">Menu</button>
     <nav id="site-links" aria-label="Main navigation">
-      <a href="#research">Research</a>
+      <div class="nav-group">
+        <a class="nav-top" href="index.html#research">Research</a>
+        <div class="nav-sub">
+          <a href="index.html#research">Research areas</a>
+          <a href="index.html#projects">All projects</a>
+          <a href="constructed-wetland-surrogate/index.html">Constructed wetland surrogate</a>
+          <a href="dense-jet-simulator/index.html">Dense jet simulator</a>
+        </div>
+      </div>
+      <div class="nav-group">
+        <a class="nav-top" href="microplastics/index.html">Microplastics</a>
+        <div class="nav-sub">
+          <a href="microplastics/index.html">Overview of the two scales</a>
+          <a href="microplastic-simulator/index.html"><b>Large scale</b>Ariake Sea</a>
+          <a href="vegetated-channel-microplastics/index.html"><b>Small scale</b>Vegetated channels</a>
+        </div>
+      </div>
+      <a href="flood-modeling/index.html">Flood Modeling</a>
       <a href="publications.html">Publications</a>
-      <a href="#software">Software</a>
-      <a href="constructed-wetland-surrogate/index.html">Wetland AI</a>
-      <a href="dense-jet-simulator/index.html">Dense Jet</a>
-      <a href="microplastic-simulator/index.html">Microplastics</a>
-      <a href="vegetated-channel-microplastics/index.html">Vegetated Channels</a>
-      <a href="#contact">Contact</a>
+      <a href="index.html#contact">Contact</a>
     </nav>
   </div>
   <div class="nav-progress" aria-hidden="true"></div>
@@ -84,8 +95,6 @@
 
   <!-- ============ hero ============ -->
   <section class="hero home-hero" id="top">
-    <canvas class="hero-gl" id="hero-gl" aria-hidden="true"></canvas>
-    <div class="hero-veil" aria-hidden="true"></div>
     <div class="hero-content">
       <div class="id-row">
         <img class="portrait" src="images/profile.png" alt="Portrait of Danial Goodarzi">
@@ -105,17 +114,10 @@
         <a href="https://www.linkedin.com/in/danial-goodarzi-59243a99">LinkedIn</a>
       </div>
       <div class="actions">
-        <a class="btn" href="#research">Research areas <span aria-hidden="true">→</span></a>
-        <a class="textlink" href="#software">Software and tools</a>
+        <a class="btn" href="#projects">See my projects <span aria-hidden="true">→</span></a>
+        <a class="textlink" href="#research">Research areas</a>
       </div>
     </div>
-    <figure class="hero-key" aria-hidden="true">
-      <span class="key-dot ink"></span> floating
-      <span class="key-dot red"></span> sinking
-      <span class="key-dot bed"></span> on the bed
-    </figure>
-    <p class="hero-caption">Microplastics drifting through a meandering river, drawn live.</p>
-    <button class="motion-toggle" id="motion-toggle" type="button" aria-pressed="false">Pause motion</button>
   </section>
 
   <!-- ============ about ============ -->
@@ -138,29 +140,76 @@
         shear, and aquatic vegetation to control where microplastics travel and where they
         accumulate in rivers, channels, and coastal waters.
       </p>
+    </div>
+  </section>
 
-      <div class="highlight reveal">
-        <span class="tag">Current research</span>
-        <h3>GPU-Accelerated Eulerian–Lagrangian Modeling of Microplastic Transport</h3>
-        <p>
-          A computational framework coupling vegetation-aware RANS hydrodynamics (OpenFOAM) with a
-          GPU-based Lagrangian particle solver (Python/CuPy) to simulate microplastic transport and
-          dispersion in vegetated open-channel flows, validated against laboratory experiments.
-          Manuscript in preparation with Prof. Majid Mohammadian.
-        </p>
-        <div class="links">
-          <a href="https://github.com/HydroCFD/microplastic_modeling">Code repository →</a>
-          <a href="vegetated-channel-microplastics/index.html">Project page →</a>
+  <!-- ============ projects ============ -->
+  <section class="sec tint" id="projects">
+    <span id="software" class="anchor-alias" aria-hidden="true"></span>
+    <div class="wrap">
+      <header class="sec-head reveal">
+        <span class="numeral">II</span>
+        <div>
+          <h2>Projects</h2>
+          <p class="lede">My work is organised into three projects, each with its own page. The largest of these follows microplastics at two scales, from a laboratory channel with vegetation to a whole coastal sea, and the other two develop fast prediction tools for treatment wetlands and for dense discharges.</p>
         </div>
+      </header>
+
+      <div class="pfeat reveal">
+        <div class="pfeat-head">
+          <span class="tag">Project 1</span>
+          <h3><a href="microplastics/index.html">Microplastics</a></h3>
+          <p>Where microplastics travel, where they settle and where they accumulate, calculated particle by particle on a GPU at two scales.</p>
+          <a class="go" href="microplastics/index.html">Open the microplastics project</a>
+          <ul class="pfeat-more">
+            <li><a href="ariake-instrument/index.html">Ariake survey instrument</a></li>
+            <li><a href="microplastic-simulator/journey.html">Microplastic journey, a teaching demonstration</a></li>
+            <li><a href="https://github.com/HydroCFD/microplastic_modeling">Code repository</a></li>
+          </ul>
+        </div>
+        <a class="pscale" href="microplastic-simulator/index.html">
+          <span class="pscale-img"><img src="microplastics/assets/ariake-sea.webp" alt="Microplastics in the Ariake Sea calculated with the three-dimensional Lagrangian model" loading="lazy" width="522" height="580"></span>
+          <span class="kind">Large scale <span>the Ariake Sea, about 100 km</span></span>
+          <h4>A GPU-accelerated three-dimensional Lagrangian model for microplastic transport</h4>
+          <p>Particles followed through a coastal hydrodynamic model of a whole bay, with biofilm growth and fragmentation along every trajectory.</p>
+          <span class="go">Open the large-scale page</span>
+        </a>
+        <a class="pscale" href="vegetated-channel-microplastics/index.html">
+          <span class="pscale-img"><img src="microplastics/assets/vegetated-flume.webp" alt="Illustration of microplastics transported through a channel with emergent vegetation" loading="lazy" width="710" height="405"></span>
+          <span class="kind">Small scale <span>vegetated channels, about 10 m</span></span>
+          <h4>An Eulerian-Lagrangian model of microplastics in vegetated channels</h4>
+          <p>The force balance on every microplastic, calculated in the flow through and above emergent vegetation and tested against laboratory experiments.</p>
+          <span class="go">Open the small-scale page</span>
+        </a>
       </div>
+
+      <ul class="pothers reveal">
+        <li>
+          <a href="constructed-wetland-surrogate/index.html">
+            <span class="tag">Project 2</span>
+            <h3>Constructed wetland surrogate</h3>
+            <p>A GPU-accelerated CFD and machine-learning framework for rapid prediction of hydraulic efficiency and full residence-time distributions in constructed wetlands and waste stabilization ponds.</p>
+            <span class="go">Open the project</span>
+          </a>
+        </li>
+        <li>
+          <a href="dense-jet-simulator/index.html">
+            <span class="tag">Project 3</span>
+            <h3>Dense jet simulator</h3>
+            <p>An interactive integral model of an inclined dense jet, from the terminal rise and the return point to the density current along the bed, with crossflow, stratification and depth effects.</p>
+            <span class="go">Open the simulator</span>
+          </a>
+          <p class="pothers-alt"><a href="dense-jet-simulator-classic/index.html">Classic version of the simulator</a></p>
+        </li>
+      </ul>
     </div>
   </section>
 
   <!-- ============ research ============ -->
-  <section class="sec tint" id="research">
+  <section class="sec" id="research">
     <div class="wrap">
       <header class="sec-head reveal">
-        <span class="numeral">II</span>
+        <span class="numeral">III</span>
         <div><h2>Research Areas</h2></div>
       </header>
       <ul class="entries reveal">
@@ -197,10 +246,10 @@
   </section>
 
   <!-- ============ selected publications ============ -->
-  <section class="sec" id="publications">
+  <section class="sec tint" id="publications">
     <div class="wrap">
       <header class="sec-head reveal">
-        <span class="numeral">III</span>
+        <span class="numeral">IV</span>
         <div><h2>Selected Publications</h2></div>
       </header>
       <ul class="pub-list reveal">
@@ -226,68 +275,6 @@
           <div class="venue">Journal of Water Process Engineering, 2020</div></div></li>
       </ul>
       <p class="more-link reveal"><a href="publications.html">Full publication list →</a></p>
-    </div>
-  </section>
-
-  <!-- ============ software ============ -->
-  <section class="sec tint" id="software">
-    <div class="wrap">
-      <header class="sec-head reveal">
-        <span class="numeral">IV</span>
-        <div><h2>Software &amp; Tools</h2></div>
-      </header>
-      <ul class="entries three reveal">
-        <li>
-          <span class="n">1</span>
-          <h3>GPU Microplastic Transport</h3>
-          <p>A GPU-accelerated three-dimensional Lagrangian model that follows every particle through
-            the water, with biofilm growth and mass-conserving fragmentation, shown in 3D animations.</p>
-          <div class="links"><a href="microplastic-simulator/index.html">Explore the project →</a></div>
-        </li>
-        <li>
-          <span class="n">2</span>
-          <h3>Constructed Wetland Surrogate Model</h3>
-          <p>A GPU-accelerated CFD and machine-learning framework for rapid prediction of
-            hydraulic efficiency and full residence-time distributions in free-water-surface
-            constructed wetlands and waste stabilization ponds.</p>
-          <div class="links"><a href="constructed-wetland-surrogate/index.html">Explore the project →</a></div>
-        </li>
-        <li>
-          <span class="n">3</span>
-          <h3>Dense Jet Simulator</h3>
-          <p>An interactive integral-model demonstration of an inclined dense jet: terminal
-            rise, return point, bed impact, and bottom density-current spreading, with
-            crossflow, stratification, and depth effects. Illustrative visualization only, not
-            based on real scientific data.</p>
-          <div class="links"><a href="dense-jet-simulator/index.html">Open the simulator →</a><a href="dense-jet-simulator-classic/index.html">Classic version →</a></div>
-        </li>
-        <li>
-          <span class="n">4</span>
-          <h3>Ariake Survey Instrument</h3>
-          <p>A Bayesian instrument for microplastic surveys of the Ariake Sea.
-            Place a few stations, enter the concentrations you measured, and
-            it reconstructs the whole suspended field with its uncertainty,
-            names the governing process, says where to sample next, and
-            traces the plastic back to the rivers it came from. Trained on
-            1,304 simulated years of the bay.</p>
-          <div class="links"><a href="ariake-instrument/index.html">Open the instrument →</a></div>
-        </li>
-        <li>
-          <span class="n">5</span>
-          <h3>Microplastic Modeling</h3>
-          <p>Open-source numerical tools for simulating microplastic transport in water systems:
-            a GPU-accelerated Eulerian–Lagrangian framework for turbulent open-channel flow with
-            and without vegetation.</p>
-          <div class="links"><a href="https://github.com/HydroCFD/microplastic_modeling">GitHub →</a><a href="vegetated-channel-microplastics/index.html">Project page →</a></div>
-        </li>
-        <li>
-          <span class="n">6</span>
-          <h3>Microplastic Journey</h3>
-          <p>A schematic teaching demonstration of how microplastics travel from a river into a
-            lake: advection, mixing, biofouling, vegetation trapping, settling and resuspension.</p>
-          <div class="links"><a href="microplastic-simulator/journey.html">Open the demonstration →</a></div>
-        </li>
-      </ul>
     </div>
   </section>
 
@@ -319,11 +306,13 @@
     <div>
       <h4>Projects</h4>
       <ul>
-        <li><a href="microplastic-simulator/index.html">GPU microplastic transport</a></li>
+        <li><a href="microplastics/index.html">Microplastics</a></li>
+        <li><a href="microplastic-simulator/index.html">Large scale: the Ariake Sea</a></li>
+        <li><a href="vegetated-channel-microplastics/index.html">Small scale: vegetated channels</a></li>
+        <li><a href="flood-modeling/index.html">Flood modeling</a></li>
         <li><a href="constructed-wetland-surrogate/index.html">Constructed wetland surrogate</a></li>
         <li><a href="dense-jet-simulator/index.html">Dense jet simulator</a></li>
         <li><a href="ariake-instrument/index.html">Ariake survey instrument</a></li>
-        <li><a href="microplastic-simulator/journey.html">Microplastic journey</a></li>
         <li><a href="publications.html">Publications</a></li>
       </ul>
     </div>
@@ -342,10 +331,6 @@
 </footer>
 
 <noscript><style>.reveal{opacity:1!important;transform:none!important}</style></noscript>
-<script src="js/site.js?v=20261017a"></script>
-<script type="module">
-  import { startHero } from './js/3d/page.js';
-  startHero(() => import('./js/3d/river.js?v=20261017a').then(m => m.initRiver), 'hero-gl', { cx: 14 });
-</script>
+<script src="js/site.js?v=20261111c"></script>
 </body>
 </html>
